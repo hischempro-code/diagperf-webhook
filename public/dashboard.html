@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DiagPerf — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#060611;--surface:#111827;--surface2:#1a1f35;
+      --border:#1f2937;--border2:#2d3748;
+      --accent:#ef4444;--accent-g:rgba(239,68,68,.25);
+      --green:#10b981;--green-bg:rgba(16,185,129,.1);
+      --blue:#3b82f6;--blue-bg:rgba(59,130,246,.1);
+      --amber:#f59e0b;--amber-bg:rgba(245,158,11,.1);
+      --purple:#8b5cf6;
+      --t1:#f9fafb;--t2:#d1d5db;--t3:#9ca3af;--t4:#6b7280;
+      --r:16px;
+    }
+    body{background:var(--bg);color:var(--t1);font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+    /* Login */
+    .login{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center}
+    .login.hide{display:none}
+    .lcard{width:380px;max-width:92vw;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:48px 36px;text-align:center;box-shadow:0 0 80px rgba(239,68,68,.08)}
+    .lcard .brand{font-size:32px;font-weight:900;letter-spacing:3px;margin-bottom:8px}
+    .lcard .brand em{font-style:normal;color:var(--accent)}
+    .lcard .sub{color:var(--t4);font-size:14px;margin-bottom:32px}
+    .lcard input{width:100%;padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--t1);font-size:14px;outline:none;transition:border .2s}
+    .lcard input:focus{border-color:var(--accent)}
+    .lcard input::placeholder{color:var(--t4)}
+    .lcard .btn{width:100%;padding:14px;margin-top:16px;background:linear-gradient(135deg,var(--accent),#dc2626);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .15s}
+    .lcard .btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px var(--accent-g)}
+    .lerr{color:var(--accent);font-size:13px;margin-top:14px;display:none}
+
+    /* Loader */
+    .loader{position:fixed;inset:0;z-index:9998;background:rgba(6,6,17,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;transition:opacity .3s}
+    .loader.hide{opacity:0;pointer-events:none}
+    .ld{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+    @keyframes sp{to{transform:rotate(360deg)}}
+
+    /* Shell */
+    .shell{display:flex;min-height:100vh}
+    .sidebar{width:260px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);padding:28px 20px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+    .sidebar .brand{font-size:22px;font-weight:900;letter-spacing:2px;margin-bottom:6px}
+    .sidebar .brand em{font-style:normal;color:var(--accent)}
+    .sidebar .role{font-size:11px;font-weight:600;color:var(--accent);background:rgba(239,68,68,.1);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:28px}
+    .sidebar nav{flex:1}
+    .sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:var(--t3);font-size:13px;font-weight:500;text-decoration:none;margin-bottom:4px;transition:all .15s;cursor:pointer}
+    .sidebar nav a:hover,.sidebar nav a.active{background:var(--surface2);color:var(--t1)}
+    .sidebar nav a.active{color:var(--accent)}
+    .sidebar nav a svg{width:18px;height:18px;opacity:.6;flex-shrink:0}
+    .sidebar .foot{font-size:11px;color:var(--t4);border-top:1px solid var(--border);padding-top:16px;margin-top:auto}
+    .sidebar .foot .dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:6px}
+
+    .main{flex:1;padding:28px 32px;overflow-y:auto;min-width:0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+    .topbar h1{font-size:22px;font-weight:800}
+    .topbar .meta{display:flex;align-items:center;gap:10px}
+    .topbar .time{font-size:12px;color:var(--t4)}
+    .btn-sm{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;font-family:inherit}
+    .btn-sm:hover{border-color:var(--accent);color:var(--t1)}
+    .btn-sm svg{width:16px;height:16px}
+    .btn-accent{background:linear-gradient(135deg,var(--accent),#dc2626);border:none;color:#fff;font-weight:600}
+    .btn-accent:hover{box-shadow:0 4px 16px var(--accent-g);border-color:transparent}
+
+    /* KPI */
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;position:relative;overflow:hidden;transition:border-color .2s,transform .15s}
+    .kpi:hover{border-color:var(--border2);transform:translateY(-2px)}
+    .kpi .ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .kpi .ico svg{width:18px;height:18px}
+    .kpi .ico.red{background:rgba(239,68,68,.1)}.kpi .ico.red svg{color:var(--accent)}
+    .kpi .ico.green{background:var(--green-bg)}.kpi .ico.green svg{color:var(--green)}
+    .kpi .ico.blue{background:var(--blue-bg)}.kpi .ico.blue svg{color:var(--blue)}
+    .kpi .ico.amber{background:var(--amber-bg)}.kpi .ico.amber svg{color:var(--amber)}
+    .kpi .ico.purple{background:rgba(139,92,246,.1)}.kpi .ico.purple svg{color:var(--purple)}
+    .kpi .lb{font-size:11px;color:var(--t4);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+    .kpi .vl{font-size:26px;font-weight:800;line-height:1;margin-bottom:5px}
+    .kpi .sb{font-size:11px;color:var(--t4)}
+    .kpi .gw{position:absolute;top:-30px;right:-30px;width:90px;height:90px;border-radius:50%;filter:blur(40px);opacity:.1;pointer-events:none}
+
+    /* Cards */
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px}
+    .card .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .card .hd h3{font-size:14px;font-weight:600;color:var(--t2)}
+    .tag{font-size:11px;color:var(--t4);background:var(--surface2);padding:3px 10px;border-radius:20px}
+    .ccont{position:relative;height:220px}
+
+    /* Reviews */
+    .rev-big{text-align:center;padding:16px 0 8px}
+    .rev-big .num{font-size:48px;font-weight:900;color:var(--amber);line-height:1}
+    .rev-big .stars{font-size:20px;margin:4px 0}
+    .rev-big .info{font-size:12px;color:var(--t4)}
+    .rev-bars{margin-top:14px}
+    .rev-bar{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+    .rev-bar .lb{width:16px;text-align:right;font-size:12px;color:var(--t3);font-weight:600}
+    .rev-bar .track{flex:1;height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+    .rev-bar .fill{height:100%;background:var(--amber);border-radius:3px;transition:width .6s}
+    .rev-bar .cnt{width:20px;font-size:11px;color:var(--t4)}
+
+    /* Table */
+    .tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;overflow-x:auto;margin-bottom:24px}
+    .tcard .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+    .tcard .hd h3{font-size:14px;font-weight:600;color:var(--t2)}
+    .tcard .hd .actions{display:flex;gap:8px}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;color:var(--t4);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+    td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(31,41,55,.5)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.015)}
+    .pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+    .pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+    .pill-draft{background:rgba(245,158,11,.1);color:var(--amber)}
+    .pill-confirmed{background:rgba(16,185,129,.1);color:var(--green)}
+    .pill-sent{background:rgba(59,130,246,.1);color:var(--blue)}
+    .plaque{font-family:'Courier New',monospace;font-weight:700;background:var(--surface2);padding:3px 8px;border-radius:6px;font-size:12px;letter-spacing:.5px}
+    .del-btn{background:none;border:none;color:var(--t4);cursor:pointer;padding:4px;border-radius:6px;transition:all .15s;display:inline-flex}
+    .del-btn:hover{color:var(--accent);background:rgba(239,68,68,.1)}
+    .del-btn svg{width:16px;height:16px}
+
+    /* Tabs for sections */
+    .section{display:none}.section.active{display:block}
+
+    /* Modal */
+    .modal-bg{position:fixed;inset:0;z-index:5000;background:rgba(6,6,17,.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+    .modal-bg.show{opacity:1;pointer-events:auto}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;width:440px;max-width:92vw;max-height:90vh;overflow-y:auto}
+    .modal h2{font-size:18px;font-weight:700;margin-bottom:20px}
+    .fg{margin-bottom:16px}
+    .fg label{display:block;font-size:12px;color:var(--t3);font-weight:500;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+    .fg input,.fg select,.fg textarea{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--t1);font-size:14px;outline:none;font-family:inherit;transition:border .2s}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
+    .fg select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+    .fg textarea{resize:vertical;min-height:60px}
+    .modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+
+    .cat-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+    .cat-materiel{background:rgba(59,130,246,.1);color:var(--blue)}
+    .cat-deplacement{background:rgba(139,92,246,.1);color:var(--purple)}
+    .cat-loyer{background:rgba(245,158,11,.1);color:var(--amber)}
+    .cat-autre{background:rgba(156,163,175,.1);color:var(--t3)}
+    .cat-outil{background:rgba(16,185,129,.1);color:var(--green)}
+    .cat-assurance{background:rgba(236,72,153,.1);color:#ec4899}
+
+    @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:1200px){.kanban-wrap{grid-template-columns:repeat(2,minmax(240px,1fr))}}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:900px){.kanban-wrap{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{display:none}.main{padding:20px 16px}}
+    @media(max-width:480px){.kpis{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginW">
+  <div class="lcard">
+    <div class="brand">DIAG<em>PERF</em></div>
+    <div class="sub">Espace administrateur</div>
+    <input type="password" id="pwdIn" placeholder="Mot de passe" autofocus>
+    <button class="btn" onclick="doLogin()">Se connecter</button>
+    <div class="lerr" id="lerr">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- LOADER -->
+<div class="loader hide" id="loader"><div class="ld"></div></div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="modalDevis">
+  <div class="modal">
+    <h2 id="modalDevisTitle">Nouveau devis</h2>
+    <div class="fg"><label>Plaque</label><input id="mdPlaque" placeholder="AA-123-BB"></div>
+    <div class="fg"><label>Prestation</label>
+      <select id="mdPresta">
+        <option value="reprogrammation">Reprog moteur</option>
+        <option value="conversion_e85">Conversion E85</option>
+        <option value="suppression_fap">Suppression FAP</option>
+        <option value="suppression_egr">Suppression EGR</option>
+        <option value="suppression_adblue">Suppression AdBlue</option>
+        <option value="diagnostic_complet">Diagnostic</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Montant TTC (en euros)</label><input id="mdMontant" type="number" step="0.01" placeholder="390.00"></div>
+    <div class="fg"><label>Statut</label>
+      <select id="mdStatut">
+        <option value="draft">Brouillon</option>
+        <option value="sent">Confirm&eacute;</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-sm" onclick="closeModal('modalDevis')">Annuler</button>
+      <button class="btn-sm btn-accent" onclick="submitDevis()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalDepense">
+  <div class="modal">
+    <h2>Nouvelle d&eacute;pense</h2>
+    <div class="fg"><label>Libell&eacute;</label><input id="mxLib" placeholder="Achat pi&egrave;ces, essence..."></div>
+    <div class="fg"><label>Montant (en euros)</label><input id="mxMontant" type="number" step="0.01" placeholder="50.00"></div>
+    <div class="fg"><label>Cat&eacute;gorie</label>
+      <select id="mxCat">
+        <option value="materiel">Mat&eacute;riel / Pi&egrave;ces</option>
+        <option value="deplacement">D&eacute;placement</option>
+        <option value="outil">Outil</option>
+        <option value="loyer">Loyer / Local</option>
+        <option value="assurance">Assurance</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="fg"><label>Date</label><input id="mxDate" type="date"></div>
+    <div class="fg"><label>Notes</label><textarea id="mxNotes" placeholder="Optionnel"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn-sm" onclick="closeModal('modalDepense')">Annuler</button>
+      <button class="btn-sm btn-accent" onclick="submitDepense()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalConfirm">
+  <div class="modal" style="text-align:center">
+    <h2 id="confirmTitle">Confirmer</h2>
+    <p style="color:var(--t3);margin-bottom:24px" id="confirmMsg"></p>
+    <div class="modal-btns" style="justify-content:center">
+      <button class="btn-sm" onclick="closeModal('modalConfirm')">Annuler</button>
+      <button class="btn-sm" style="background:rgba(239,68,68,.15);color:var(--accent);border-color:var(--accent)" id="confirmBtn">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="shell" id="app" style="display:none">
+  <aside class="sidebar">
+    <div class="brand">DIAG<em>PERF</em></div>
+    <span class="role">ADMIN</span>
+    <nav>
+      <a onclick="switchTab('overview')" class="active" id="nav-overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Vue d'ensemble
+      </a>
+      <a onclick="switchTab('devis')" id="nav-devis">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Devis
+      </a>
+      <a onclick="switchTab('pipeline')" id="nav-pipeline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h7v5H3z"/><path d="M14 6h7v5h-7z"/><path d="M8 11v3h8v-3"/><path d="M3 14h7v5H3z"/><path d="M14 14h7v5h-7z"/></svg>
+        Pipeline Kanban
+      </a>
+      <a onclick="switchTab('depenses')" id="nav-depenses">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        D&eacute;penses
+      </a>
+      <a onclick="switchTab('reviews')" id="nav-reviews">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Avis clients
+      </a>
+    </nav>
+    <div class="foot"><span class="dot"></span> Serveur en ligne<div style="margin-top:6px;opacity:.6" id="fTime"></div></div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="pageTitle">Vue d'ensemble</h1>
+      <div class="meta">
+        <span class="time" id="upTime"></span>
+        <button class="btn-sm" onclick="loadStats()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Rafra&icirc;chir
+        </button>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="sec-overview">
+      <div class="kpis" id="kpis"></div>
+      <div class="grid2">
+        <div class="card"><div class="hd"><h3>CA par mois</h3><span class="tag" id="tagCaMois"></span></div><div class="ccont"><canvas id="cMonth"></canvas></div></div>
+        <div class="card"><div class="hd"><h3>Activit&eacute; devis</h3><span class="tag">30 jours</span></div><div class="ccont"><canvas id="cDevis"></canvas></div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><div class="hd"><h3>R&eacute;partition prestations</h3><span class="tag" id="tagPresta"></span></div><div class="ccont"><canvas id="cPresta"></canvas></div></div>
+        <div class="card"><div class="hd"><h3>Avis clients</h3><span class="tag" id="tagRev"></span></div><div id="revZone"></div></div>
+      </div>
+    </div>
+
+    <!-- DEVIS -->
+    <div class="section" id="sec-devis">
+      <div class="tcard">
+        <div class="hd">
+          <h3>Tous les devis</h3>
+          <div class="actions">
+            <button class="btn-sm btn-accent" onclick="openModal('modalDevis')">+ Nouveau devis</button>
+          </div>
+        </div>
+        <table><thead><tr><th>R&eacute;f</th><th>Plaque</th><th>Prestation</th><th>Montant TTC</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+        <tbody id="tbDevis"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PIPELINE -->
+    <div class="section" id="sec-pipeline">
+      <div class="tcard">
+        <div class="hd">
+          <h3>Pipeline des devis</h3>
+          <div class="actions">
+            <button class="btn-sm btn-accent" onclick="openModal('modalDevis')">+ Nouveau devis</button>
+          </div>
+        </div>
+        <div class="kanban-wrap" id="kanbanWrap"></div>
+      </div>
+    </div>
+
+    <!-- DEPENSES -->
+    <div class="section" id="sec-depenses">
+      <div class="kpis" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px" id="kpiDep"></div>
+      <div class="tcard">
+        <div class="hd">
+          <h3>Toutes les d&eacute;penses</h3>
+          <div class="actions">
+            <button class="btn-sm btn-accent" onclick="openModalDepense()">+ Nouvelle d&eacute;pense</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Libell&eacute;</th><th>Montant</th><th>Cat&eacute;gorie</th><th>Date</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="tbDep"></tbody></table>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="section" id="sec-reviews">
+      <div class="card" style="max-width:500px" id="revDetail"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let tk=localStorage.getItem("dp_tk")||"",D=null,C1,C2,C3;
+const PL={reprogrammation:"Reprog moteur",conversion_e85:"Conversion E85",suppression_fap:"Suppression FAP",suppression_egr:"Suppression EGR",suppression_adblue:"Suppression AdBlue",diagnostic_complet:"Diagnostic",autre:"Autre"};
+const CATS={materiel:"Mat\u00e9riel",deplacement:"D\u00e9placement",outil:"Outil",loyer:"Loyer",assurance:"Assurance",autre:"Autre"};
+const PIPELINE_COLUMNS=[
+  { key:"draft", title:"Nouveaux devis" },
+  { key:"sent", title:"Confirm&eacute;s / Envoy&eacute;s" },
+  { key:"refused", title:"Perdus / refus&eacute;s" },
+];
+const fmt=c=>(c/100).toLocaleString("fr-FR",{minimumFractionDigits:2})+"\u00a0\u20ac";
+const fmtD=iso=>{if(!iso)return"\u2014";const d=new Date(iso);return d.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})};
+const fmtDShort=iso=>{if(!iso)return"\u2014";return new Date(iso+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"})};
+const MONTHS=["Jan","F\u00e9v","Mar","Avr","Mai","Jun","Jul","Ao\u00fb","Sep","Oct","Nov","D\u00e9c"];
+
+if(tk){show();loadStats()}
+document.getElementById("pwdIn").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin()});
+
+async function doLogin(){
+  const v=document.getElementById("pwdIn").value.trim();if(!v)return;tk=v;
+  try{
+    const r=await fetch("/api/dashboard/stats?token="+encodeURIComponent(tk));
+    if(r.status===401){document.getElementById("lerr").style.display="block";return}
+    localStorage.setItem("dp_tk",tk);show();render(await r.json());
+  }catch{document.getElementById("lerr").style.display="block"}
+}
+function show(){document.getElementById("loginW").classList.add("hide");document.getElementById("app").style.display="flex"}
+
+async function loadStats(){
+  const l=document.getElementById("loader");l.classList.remove("hide");
+  try{const r=await fetch("/api/dashboard/stats?token="+encodeURIComponent(tk));if(r.status===401){localStorage.removeItem("dp_tk");location.reload();return}render(await r.json())}
+  catch(e){console.error(e)}finally{setTimeout(()=>l.classList.add("hide"),250)}
+}
+
+async function apiCall(method,path,body){
+  const opts={method,headers:{"Content-Type":"application/json","x-dashboard-token":tk}};
+  if(body)opts.body=JSON.stringify(body);
+  const r=await fetch(path,opts);return r.json();
+}
+
+// Tabs
+function switchTab(tab){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".sidebar nav a").forEach(a=>a.classList.remove("active"));
+  document.getElementById("sec-"+tab).classList.add("active");
+  document.getElementById("nav-"+tab).classList.add("active");
+  const titles={overview:"Vue d'ensemble",devis:"Devis",pipeline:"Pipeline Kanban",depenses:"D\u00e9penses",reviews:"Avis clients"};
+  document.getElementById("pageTitle").textContent=titles[tab]||tab;
+}
+
+// Modals
+function openModal(id){document.getElementById(id).classList.add("show")}
+function closeModal(id){document.getElementById(id).classList.remove("show")}
+function openModalDepense(){document.getElementById("mxDate").value=new Date().toISOString().substring(0,10);openModal("modalDepense")}
+
+async function submitDevis(){
+  const plaque=document.getElementById("mdPlaque").value.trim();
+  const montant=parseFloat(document.getElementById("mdMontant").value);
+  if(!plaque||!montant){alert("Plaque et montant requis");return}
+  await apiCall("POST","/api/dashboard/devis",{
+    plaque,prestation_code:document.getElementById("mdPresta").value,
+    total_ttc_centimes:Math.round(montant*100),statut:document.getElementById("mdStatut").value
+  });
+  closeModal("modalDevis");document.getElementById("mdPlaque").value="";document.getElementById("mdMontant").value="";
+  loadStats();
+}
+
+async function submitDepense(){
+  const lib=document.getElementById("mxLib").value.trim();
+  const montant=parseFloat(document.getElementById("mxMontant").value);
+  if(!lib||!montant){alert("Libell\u00e9 et montant requis");return}
+  await apiCall("POST","/api/dashboard/depenses",{
+    libelle:lib,montant_centimes:Math.round(montant*100),
+    categorie:document.getElementById("mxCat").value,
+    date_depense:document.getElementById("mxDate").value,
+    notes:document.getElementById("mxNotes").value.trim()||null
+  });
+  closeModal("modalDepense");document.getElementById("mxLib").value="";document.getElementById("mxMontant").value="";document.getElementById("mxNotes").value="";
+  loadStats();
+}
+
+function confirmDelete(title,msg,onConfirm){
+  document.getElementById("confirmTitle").textContent=title;
+  document.getElementById("confirmMsg").textContent=msg;
+  const btn=document.getElementById("confirmBtn");
+  btn.onclick=()=>{closeModal("modalConfirm");onConfirm()};
+  openModal("modalConfirm");
+}
+
+async function deleteDevis(id){
+  confirmDelete("Supprimer le devis","Voulez-vous vraiment supprimer le devis DEV-"+id+" ?",async()=>{await apiCall("DELETE","/api/dashboard/devis/"+id);loadStats()});
+}
+async function deleteDepense(id){
+  confirmDelete("Supprimer la d\u00e9pense","Voulez-vous vraiment supprimer cette d\u00e9pense ?",async()=>{await apiCall("DELETE","/api/dashboard/depenses/"+id);loadStats()});
+}
+async function patchStatut(id,statut){await apiCall("PATCH","/api/dashboard/devis/"+id,{statut});loadStats()}
+
+// ── RENDER ──
+function render(d){
+  D=d;
+  const now=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("upTime").textContent="Mis \u00e0 jour \u00e0 "+now;
+  document.getElementById("fTime").textContent=now;
+
+  // KPIs
+  const benColor=d.benefice.month>=0?"var(--green)":"var(--accent)";
+  document.getElementById("kpis").innerHTML=`
+    <div class="kpi"><div class="gw" style="background:var(--accent)"></div><div class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="lb">Devis</div><div class="vl">${d.devis.total}</div><div class="sb">Auj. ${d.devis.today} \u00b7 Sem. ${d.devis.week} \u00b7 Mois ${d.devis.month}</div></div>
+    <div class="kpi"><div class="gw" style="background:var(--green)"></div><div class="ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="lb">CA du mois</div><div class="vl" style="color:var(--green)">${fmt(d.revenue.month)}</div><div class="sb">Total ${fmt(d.revenue.total)}</div></div>
+    <div class="kpi"><div class="gw" style="background:var(--accent)"></div><div class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lb">D\u00e9penses mois</div><div class="vl" style="color:var(--accent)">${fmt(d.depenses.month)}</div><div class="sb">Total ${fmt(d.depenses.total)}</div></div>
+    <div class="kpi"><div class="gw" style="background:${benColor}"></div><div class="ico ${d.benefice.month>=0?'green':'red'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div><div class="lb">B\u00e9n\u00e9fice mois</div><div class="vl" style="color:${benColor}">${fmt(d.benefice.month)}</div><div class="sb">Total ${fmt(d.benefice.total)}</div></div>
+    <div class="kpi"><div class="gw" style="background:var(--blue)"></div><div class="ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="lb">Conversations</div><div class="vl" style="color:var(--blue)">${d.conversations}</div><div class="sb">${d.todayMessages} msg aujourd'hui</div></div>`;
+
+  renderMonthlyChart(d.monthlyRevenue,d.monthlyDepenses);
+  renderDevisChart(d.dailyDevisCount);
+  renderPrestaChart(d.prestationBreakdown,d.devis.total);
+  renderReviews(d.reviews);
+  renderDevisTable(d.recentDevis);
+  renderKanban(d.recentDevis);
+  renderDepenses(d);
+}
+
+function getLast12Months(){
+  const ms=[];const now=new Date();
+  for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);ms.push(d.toISOString().substring(0,7))}return ms;
+}
+
+function renderMonthlyChart(mr,md){
+  const months=getLast12Months();
+  const revVals=months.map(m=>(mr[m]||0)/100);
+  const depVals=months.map(m=>(md[m]||0)/100);
+  const benVals=months.map((m,i)=>revVals[i]-depVals[i]);
+  const lbls=months.map(m=>{const[y,mo]=m.split("-");return MONTHS[parseInt(mo)-1]+" "+y.slice(2)});
+  const totalYr=revVals.reduce((a,b)=>a+b,0);
+  document.getElementById("tagCaMois").textContent=totalYr.toFixed(0)+"\u00a0\u20ac total";
+  if(C1)C1.destroy();
+  C1=new Chart(document.getElementById("cMonth"),{
+    type:"bar",
+    data:{labels:lbls,datasets:[
+      {label:"CA",data:revVals,backgroundColor:"rgba(16,185,129,.7)",borderRadius:6,borderSkipped:false,order:2},
+      {label:"D\u00e9penses",data:depVals,backgroundColor:"rgba(239,68,68,.5)",borderRadius:6,borderSkipped:false,order:3},
+      {label:"B\u00e9n\u00e9fice",data:benVals,type:"line",borderColor:"#f59e0b",backgroundColor:"transparent",tension:.3,pointRadius:3,pointBackgroundColor:"#f59e0b",borderWidth:2,order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:"#d1d5db",font:{size:11},usePointStyle:true,padding:12}},tooltip:{backgroundColor:"#1f2937",titleColor:"#f9fafb",bodyColor:"#d1d5db",borderColor:"#374151",borderWidth:1,cornerRadius:8,padding:10,callbacks:{label:ctx=>ctx.dataset.label+": "+ctx.parsed.y.toFixed(2)+"\u00a0\u20ac"}}},
+      scales:{x:{ticks:{color:"#4b5563",font:{size:10}},grid:{display:false},border:{display:false}},y:{ticks:{color:"#4b5563",font:{size:10},callback:v=>v+"\u20ac",padding:8},grid:{color:"rgba(31,41,55,.5)"},border:{display:false}}}
+    }
+  });
+}
+
+function renderDevisChart(dd){
+  const ds=[];for(let i=29;i>=0;i--){const d=new Date(Date.now()-i*864e5);ds.push(d.toISOString().slice(0,10))}
+  const vals=ds.map(d=>dd[d]||0),lbls=ds.map(d=>{const[,m,dy]=d.split("-");return dy+"/"+m});
+  if(C2)C2.destroy();
+  C2=new Chart(document.getElementById("cDevis"),{
+    type:"bar",data:{labels:lbls,datasets:[{data:vals,backgroundColor:"rgba(59,130,246,.6)",hoverBackgroundColor:"rgba(59,130,246,1)",borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1f2937",titleColor:"#f9fafb",bodyColor:"#d1d5db",borderColor:"#374151",borderWidth:1,cornerRadius:8,padding:10}},
+      scales:{x:{ticks:{color:"#4b5563",font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:10},grid:{display:false},border:{display:false}},y:{beginAtZero:true,ticks:{color:"#4b5563",font:{size:10},stepSize:1,padding:8},grid:{color:"rgba(31,41,55,.5)"},border:{display:false}}}}
+  });
+}
+
+function renderPrestaChart(br,total){
+  document.getElementById("tagPresta").textContent=total+" devis";
+  const ent=Object.entries(br).sort((a,b)=>b[1]-a[1]);
+  const lbls=ent.map(([k])=>PL[k]||k),vals=ent.map(([,v])=>v);
+  const cols=["#ef4444","#3b82f6","#10b981","#f59e0b","#8b5cf6","#f97316","#06b6d4"];
+  if(C3)C3.destroy();
+  C3=new Chart(document.getElementById("cPresta"),{
+    type:"doughnut",data:{labels:lbls,datasets:[{data:vals,backgroundColor:cols.slice(0,ent.length),borderWidth:0,hoverOffset:8}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{position:"right",labels:{color:"#d1d5db",font:{size:12,family:"Inter"},padding:14,usePointStyle:true,pointStyleWidth:10}},tooltip:{backgroundColor:"#1f2937",titleColor:"#f9fafb",bodyColor:"#d1d5db",borderColor:"#374151",borderWidth:1,cornerRadius:8,padding:10}}}
+  });
+}
+
+function renderReviews(rv){
+  const z=document.getElementById("revZone");
+  document.getElementById("tagRev").textContent=rv.responded+" avis";
+  if(!rv.total){z.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--t4)">Aucun avis pour le moment</div>';return}
+  const mx=Math.max(...Object.values(rv.ratings||{}),1);
+  let bars="";for(let i=5;i>=1;i--){const c=rv.ratings[i]||0;bars+=`<div class="rev-bar"><span class="lb">${i}</span><div class="track"><div class="fill" style="width:${Math.round(c/mx*100)}%"></div></div><span class="cnt">${c}</span></div>`}
+  z.innerHTML=`<div class="rev-big"><div class="num">${rv.avgRating}</div><div class="stars">${"\u2b50".repeat(Math.round(rv.avgRating))}</div><div class="info">${rv.responded} avis \u00b7 ${rv.sent} envoy\u00e9s</div></div>${bars}`;
+  // Same for full review page
+  document.getElementById("revDetail").innerHTML=`<div class="hd"><h3>D\u00e9tail des avis</h3></div><div class="rev-big"><div class="num">${rv.avgRating}</div><div class="stars">${"\u2b50".repeat(Math.round(rv.avgRating))}</div><div class="info">${rv.responded} avis re\u00e7us \u00b7 ${rv.sent} demandes envoy\u00e9es \u00b7 ${rv.total} total</div></div>${bars}`;
+}
+
+function renderDevisTable(list){
+  const tb=document.getElementById("tbDevis");
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:24px">Aucun devis</td></tr>';return}
+  tb.innerHTML=list.map(d=>{
+    const sc=d.statut==="draft"?"pill-draft":d.statut==="sent"?"pill-confirmed":d.statut==="refused"?"pill-sent":"pill-draft";
+    const sl=d.statut==="draft"?"Brouillon":d.statut==="sent"?"Confirm\u00e9":d.statut==="refused"?"Refus\u00e9":d.statut||"\u2014";
+    const toggleStatut=d.statut==="draft"?"sent":"draft";
+    const toggleLabel=d.statut==="draft"?"Confirmer":"Brouillon";
+    return`<tr>
+      <td><strong>DEV-${d.id}</strong></td>
+      <td><span class="plaque">${d.plaque||"\u2014"}</span></td>
+      <td>${PL[d.prestation_code]||d.prestation_code||"\u2014"}</td>
+      <td><strong style="color:var(--green)">${fmt(d.total_ttc_centimes||0)}</strong></td>
+      <td><span class="pill ${sc}" style="cursor:pointer" onclick="patchStatut(${d.id},'${toggleStatut}')" title="Cliquer pour: ${toggleLabel}">${sl}</span></td>
+      <td style="color:var(--t3)">${fmtD(d.created_at)}</td>
+      <td><button class="del-btn" onclick="deleteDevis(${d.id})" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></td>
+    </tr>`}).join("");
+}
+
+function getPipelineNextActions(statut){
+  if(statut==="draft") return [
+    { label:"Confirmer", value:"sent" },
+    { label:"Refus&eacute;", value:"refused" },
+  ];
+  if(statut==="sent") return [
+    { label:"Brouillon", value:"draft" },
+    { label:"Refus&eacute;", value:"refused" },
+  ];
+  if(statut==="refused") return [
+    { label:"R&eacute;activer", value:"draft" },
+  ];
+  return [];
+}
+
+function renderKanban(list){
+  const wrap=document.getElementById("kanbanWrap");
+  if(!wrap) return;
+  const grouped={ draft:[], sent:[], refused:[] };
+  for(const d of (list||[])){
+    const key=grouped[d.statut] ? d.statut : "draft";
+    grouped[key].push(d);
+  }
+  wrap.innerHTML=PIPELINE_COLUMNS.map(col=>{
+    const items=grouped[col.key]||[];
+    const cards=items.length ? items.map(d=>{
+      const actions=getPipelineNextActions(d.statut).map(a=>`<button class="kanban-btn" onclick="patchStatut(${d.id},'${a.value}')">${a.label}</button>`).join("");
+      return `<div class="kanban-card">
+        <div class="kanban-card-top">
+          <div class="kanban-ref">DEV-${d.id}</div>
+          <div class="kanban-price">${fmt(d.total_ttc_centimes||0)}</div>
+        </div>
+        <div class="kanban-meta">
+          <div class="kanban-line"><span class="plaque">${d.plaque||"\u2014"}</span></div>
+          <div class="kanban-line">${PL[d.prestation_code]||d.prestation_code||"Autre"}</div>
+          <div class="kanban-line">${fmtD(d.created_at)}</div>
+        </div>
+        <div class="kanban-actions">${actions}</div>
+      </div>`;
+    }).join("") : `<div class="kanban-empty">Aucun devis dans cette &eacute;tape.</div>`;
+    return `<div class="kanban-col">
+      <div class="kanban-head">
+        <h3>${col.title}</h3>
+        <span class="kanban-count">${items.length}</span>
+      </div>
+      <div class="kanban-list">${cards}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderDepenses(d){
+  // KPIs
+  document.getElementById("kpiDep").innerHTML=`
+    <div class="kpi"><div class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lb">D\u00e9penses totales</div><div class="vl" style="color:var(--accent)">${fmt(d.depenses.total)}</div></div>
+    <div class="kpi"><div class="ico amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="lb">D\u00e9penses ce mois</div><div class="vl" style="color:var(--amber)">${fmt(d.depenses.month)}</div></div>
+    <div class="kpi"><div class="ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="lb">B\u00e9n\u00e9fice net (mois)</div><div class="vl" style="color:${d.benefice.month>=0?'var(--green)':'var(--accent)'}">${fmt(d.benefice.month)}</div></div>`;
+
+  const tb=document.getElementById("tbDep");
+  const deps=d.recentDepenses||[];
+  if(!deps.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--t4);padding:24px">Aucune d\u00e9pense enregistr\u00e9e</td></tr>';return}
+  tb.innerHTML=deps.map(x=>{
+    const catCls="cat-"+(x.categorie||"autre");
+    return`<tr>
+      <td><strong>${x.libelle}</strong></td>
+      <td><strong style="color:var(--accent)">${fmt(x.montant_centimes)}</strong></td>
+      <td><span class="cat-badge ${catCls}">${CATS[x.categorie]||x.categorie||"Autre"}</span></td>
+      <td style="color:var(--t3)">${fmtDShort(x.date_depense)}</td>
+      <td style="color:var(--t4);font-size:12px">${x.notes||"\u2014"}</td>
+      <td><button class="del-btn" onclick="deleteDepense(${x.id})" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></td>
+    </tr>`}).join("");
+}
+
+setInterval(()=>{if(tk)loadStats()},60000);
+</script>
+</body>
+</html>
