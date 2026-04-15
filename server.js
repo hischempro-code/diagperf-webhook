@@ -88,8 +88,7 @@ app.use(
 );
 
 // ====== Static files ======
-app.use(express.static(path.join(__dirname, "public"), { index: false }));
-app.get("/", (_req, res) => res.redirect("/app.html"));
+app.use(express.static(path.join(__dirname, "public"), { index: "index.html" }));
 
 // ====== GET verification (Meta challenge) ======
 app.get("/webhook", (req, res) => {
