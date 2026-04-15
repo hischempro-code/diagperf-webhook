@@ -88,7 +88,7 @@ app.use(
 );
 
 // ====== Static files (3D car viewer, etc.) ======
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), { index: "index.html" }));
 
 // ====== GET verification (Meta challenge) ======
 app.get("/webhook", (req, res) => {
