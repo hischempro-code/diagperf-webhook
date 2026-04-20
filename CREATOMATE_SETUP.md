@@ -61,7 +61,7 @@
 
 ### ⚠️ IMPORTANT : nommer les placeholders EXACTEMENT
 
-Dans l'éditeur Creatomate, chaque élément texte doit avoir son **Element Name** défini (colonne droite). Les noms DOIVENT correspondre **exactement** à ces placeholders (case-sensitive) :
+Dans l'éditeur Creatomate, chaque élément texte doit avoir son **Element Name** défini (dans le panneau de droite, champ "Name"). Les noms DOIVENT correspondre **exactement** à ces placeholders (case-sensitive). Le code les référencera via `name.text`, mais toi tu n'as qu'à donner le nom de base :
 
 | Element Name | Exemple de valeur |
 |---|---|
