@@ -1497,6 +1497,106 @@ function buildSingleStageChartUrl(stage, vehicleName) {
   );
 }
 
+// ====== Premium prestation card (E85, FAP, ADBLUE, DIAG) ======
+// Displays vehicle info + prestation-specific visual gauge (savings, pollution reduction, etc.)
+function buildPrestationCardUrl({ vehicle, intent, prestationLabel, priceTtc, extra = {} }) {
+  if (!vehicle?.make) return null;
+  const vName = `${vehicle.make} ${vehicle.model || ""}`.trim();
+  const yearTxt = vehicle.year ? `${vehicle.year}` : "";
+  const fuelTxt = vehicle.fuel ? vehicle.fuel.toUpperCase() : "";
+  const ccTxt = vehicle.engine_cc ? `${vehicle.engine_cc}cc` : "";
+  const hpTxt = vehicle.power_hp ? `${vehicle.power_hp}ch` : "";
+  const engineTxt = [fuelTxt, ccTxt, hpTxt].filter(Boolean).join(" • ");
+  const plateTxt = vehicle.plate || "";
+
+  // Configure chart data and titles per intent
+  let labels = [];
+  let datasets = [];
+  let subtitleLines = [];
+  let unit = "";
+
+  if (intent === "E85") {
+    labels = ["Économie carburant", "Réduction CO₂"];
+    datasets = [
+      { label: "Jusqu'à (%)", data: [40, 70], backgroundColor: ["#22c55e", "#16a34a"], barThickness: 32 },
+    ];
+    subtitleLines = ["🌿 Conversion Bioéthanol E85", "Compatible essence uniquement"];
+    unit = "%";
+  } else if (intent === "FAP") {
+    labels = ["Risque colmatage", "Pertes de puissance", "Consommation"];
+    datasets = [
+      { label: "Réduction (%)", data: [100, 15, 5], backgroundColor: ["#3b82f6", "#2563eb", "#1d4ed8"], barThickness: 32 },
+    ];
+    subtitleLines = ["🔧 Suppression FAP", "Fin des problèmes de colmatage"];
+    unit = "%";
+  } else if (intent === "ADBLUE") {
+    labels = ["Pannes SCR", "Entretien AdBlue", "Voyants moteur"];
+    datasets = [
+      { label: "Réduction (%)", data: [100, 100, 100], backgroundColor: ["#8b5cf6", "#7c3aed", "#6d28d9"], barThickness: 32 },
+    ];
+    subtitleLines = ["💧 Suppression AdBlue", "Fin des coûts d'entretien SCR"];
+    unit = "%";
+  } else if (intent === "DIAG") {
+    labels = ["Défauts lus", "Codes effacés", "Précision diag"];
+    datasets = [
+      { label: "Couverture (%)", data: [100, 100, 100], backgroundColor: ["#f59e0b", "#d97706", "#b45309"], barThickness: 32 },
+    ];
+    subtitleLines = ["🔍 Diagnostic électronique complet"];
+    unit = "%";
+  } else {
+    return null;
+  }
+
+  const chart = {
+    type: "bar",
+    data: { labels, datasets },
+    options: {
+      indexAxis: "y",
+      layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } },
+      plugins: {
+        title: {
+          display: true,
+          text: [
+            `🏁 ${vName}${yearTxt ? ` (${yearTxt})` : ""}`,
+            engineTxt,
+            plateTxt ? `Plaque : ${plateTxt}` : "",
+            "",
+            prestationLabel ? `Prestation : ${prestationLabel}` : "",
+            ...subtitleLines,
+            priceTtc ? `💰 ${priceTtc}` : "",
+          ].filter(Boolean),
+          font: { size: 14, weight: "bold" },
+          color: "#1a1a2e",
+          padding: { bottom: 16 },
+        },
+        subtitle: {
+          display: true,
+          text: "DIAGPERF — Reprogrammation & Diagnostic",
+          font: { size: 11, weight: "bold" },
+          color: "#3b82f6",
+          padding: { bottom: 8 },
+        },
+        legend: { display: false },
+        datalabels: {
+          display: true,
+          anchor: "end",
+          align: "right",
+          font: { weight: "bold", size: 13 },
+          color: "#1a1a2e",
+          formatter: (v) => v + unit,
+        },
+      },
+      scales: {
+        x: { display: true, grid: { display: false }, ticks: { font: { size: 11 } }, max: 100 },
+        y: { grid: { display: false }, ticks: { font: { size: 12, weight: "bold" }, color: "#1a1a2e" } },
+      },
+    },
+  };
+
+  const encoded = encodeURIComponent(JSON.stringify(chart));
+  return `https://quickchart.io/chart?c=${encoded}&w=600&h=400&bkg=%23f8f9fa&v=4&f=png`;
+}
+
 const DIAGPERF_LOGO_URL = `${process.env.SUPABASE_URL}/storage/v1/object/public/assets/logo.png`;
 
 async function sendMenuList(to, { showLogo = false } = {}) {
@@ -3531,6 +3631,16 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         // Add STAGE 1 for REPROG
         const displayLabel = intent === "REPROG" ? `${label} — STAGE 1` : label;
 
+        // Send premium prestation card (best effort, non-blocking) for E85/FAP/ADBLUE
+        if (intent === "E85" || intent === "FAP" || intent === "ADBLUE") {
+          const cardUrl = buildPrestationCardUrl({ vehicle, intent, prestationLabel: displayLabel, priceTtc: ttcTxt });
+          if (cardUrl) {
+            sendWhatsAppImage(fromWa, cardUrl, `📋 Fiche technique — ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}`).catch(cardErr => {
+              log.debug("Prestation card send failed (non-blocking)", { error: String(cardErr?.message || cardErr) });
+            });
+          }
+        }
+
         await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\n` +
           `Référence : DEV-${devisId}\n` +
           `Prestation : ${displayLabel}\n` +
@@ -4308,6 +4418,19 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         });
       }
     }).catch(e => log.debug("DIAG vehicle image URL lookup failed", { error: String(e?.message || e) }));
+
+    // Send premium DIAG prestation card (best effort, non-blocking)
+    const diagCardUrl = buildPrestationCardUrl({
+      vehicle: { ...vehicle, plate },
+      intent: "DIAG",
+      prestationLabel: data.diagTitle,
+      priceTtc: priceTxt,
+    });
+    if (diagCardUrl) {
+      sendWhatsAppImage(fromWa, diagCardUrl, `📋 Fiche technique — ${vehicleName}`).catch(cardErr => {
+        log.debug("DIAG prestation card send failed (non-blocking)", { error: String(cardErr?.message || cardErr) });
+      });
+    }
 
     await sendWhatsAppInteractiveButtons(
       fromWa,
