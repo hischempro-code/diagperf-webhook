@@ -3131,7 +3131,9 @@ async function createDevis({ prestationCode, plate, waId, vehicleYear, priceCent
 
   const libelle = await getPrestationLibelle(prestationCode);
 
-  const idempotencyKey = `${prestationCode}:${normalizePlate(plate)}:${totalHt}`;
+  // Idempotency key includes wa_id so different users don't share a devis,
+  // and totalTtc so price changes trigger a new devis (instead of returning a stale one)
+  const idempotencyKey = `${prestationCode}:${normalizePlate(plate)}:${waId || "anon"}:${totalTtc}`;
 
   // 1) Insert devis
   const { data: devis, error: devisErr } = await supabase
@@ -3152,6 +3154,7 @@ async function createDevis({ prestationCode, plate, waId, vehicleYear, priceCent
     .single();
 
   // 2) Si doublon (unique violation 23505), retourner le devis existant
+  //    et mettre à jour les totaux si stale (edge case: ancien devis avec prix différent)
   if (devisErr) {
     const code = devisErr.code || devisErr.details || String(devisErr.message || "");
     if (String(code).includes("23505") || String(devisErr.message || "").includes("duplicate")) {
@@ -3162,6 +3165,21 @@ async function createDevis({ prestationCode, plate, waId, vehicleYear, priceCent
         .eq("idempotency_key", idempotencyKey)
         .single();
       if (selErr) throw selErr;
+      // Si les totaux de l'existant divergent du calcul actuel, on les corrige
+      if (existing.total_ht_centimes !== totalHt || existing.total_ttc_centimes !== totalTtc) {
+        log.warn("createDevis: totaux stale détectés, correction", {
+          devisId: existing.id,
+          oldHt: existing.total_ht_centimes, newHt: totalHt,
+          oldTtc: existing.total_ttc_centimes, newTtc: totalTtc,
+        });
+        const { data: updated } = await supabase
+          .from("devis")
+          .update({ total_ht_centimes: totalHt, total_tva_centimes: totalTva, total_ttc_centimes: totalTtc })
+          .eq("id", existing.id)
+          .select("id, total_ht_centimes, total_ttc_centimes")
+          .single();
+        if (updated) return { ...updated, isNew: false };
+      }
       return { ...existing, isNew: false };
     }
     throw devisErr;
