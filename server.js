@@ -2720,7 +2720,7 @@ function computeFapPrice(vehicle) {
 }
 
 // ====== FIX #1 : Intents dont le prix calculé est déjà TTC ======
-const TTC_INTENTS = new Set(["REPROG", "E85", "FAP", "ADBLUE"]);
+const TTC_INTENTS = new Set(["REPROG", "E85", "FAP", "ADBLUE", "DIAG"]);
 
 // ====== Stage 1 fixed price constant ======
 const STAGE1_FIXED_PRICE_CENTS = 39000; // 390€ TTC
@@ -4521,10 +4521,37 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     const vehicleTxt = `${v.make || ""} ${v.model || ""}`.trim();
     const vehicleDetails = [v.trim, v.fuel, v.year ? `${v.year}` : ""].filter(Boolean).join(" | ");
 
+    // Create devis in Supabase so DIAG appears in the dashboard pipeline like other prestations
+    let devisId = "N/A";
+    let devisRow = null;
+    let htTxt = priceTxt;
+    let ttcTxt = priceTxt;
+    try {
+      devisRow = await createDevis({
+        prestationCode: "diagnostic_complet",
+        plate: data.plate,
+        waId: fromWa,
+        vehicleYear: v?.year || null,
+        priceCentsOverride: data.diagPriceTtcCents,
+        priceIsTtc: true,
+      });
+      devisId = devisRow?.id ?? "N/A";
+      htTxt = typeof devisRow?.total_ht_centimes === "number"
+        ? `${(devisRow.total_ht_centimes / 100).toFixed(2)}€`
+        : priceTxt;
+      ttcTxt = typeof devisRow?.total_ttc_centimes === "number"
+        ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}€`
+        : priceTxt;
+      log.info("DIAG devis created", { wa_id: fromWa, devisId, option: data.diagOption });
+    } catch (devisErr) {
+      log.error("DIAG createDevis failed (non-blocking)", { wa_id: fromWa, error: String(devisErr?.message || devisErr) });
+    }
+
     await sendWhatsAppInteractiveButtons(
       fromWa,
       `✅ Demande de diagnostic enregistrée !\n\n` +
       `📋 *Récapitulatif :*\n` +
+      (devisId !== "N/A" ? `• Référence : DEV-${devisId}\n` : "") +
       `• Prestation : ${data.diagTitle}\n` +
       `• Détail : ${data.diagDetail}\n` +
       `• Prix : ${priceTxt}\n` +
@@ -4540,6 +4567,14 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         { id: "btn_back_menu", title: "🏠 Menu" },
       ]
     );
+
+    // Broadcast SSE + send PDF if devis was created
+    if (devisRow?.isNew) {
+      broadcastDashboardEvent("new_devis", { devisId, plate: data.plate || "", wa_id: fromWa, prestation: data.diagTitle, ttc: ttcTxt });
+    }
+    if (devisId !== "N/A") {
+      sendQuotePdf(fromWa, { devisId, plate: data.plate, vehicle: v, prestationLabel: data.diagTitle, devisRow }).catch(() => {});
+    }
 
     // Notification email équipe
     try {
