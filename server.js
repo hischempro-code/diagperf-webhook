@@ -3449,6 +3449,39 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
   const prestationCode = intentToPrestationCode(intent);
   const label = intentToLabel(intent);
 
+  // --- Cas spécial : E85_DIESEL_REFUSED (le client a un diesel et ne peut pas faire E85) ---
+  if (convState.state === "E85_DIESEL_REFUSED") {
+    if (buttonId === "e85_diesel_reprog") {
+      // Basculer vers le flow REPROG avec le même véhicule déjà identifié
+      const stateData = convState.data || {};
+      await clearConversationState(fromWa);
+      log.info("E85 diesel → bascule vers REPROG", { wa_id: fromWa });
+      return handlePrestationFlow(fromWa, "1", rawMsg);
+    }
+    if (buttonId === "e85_diesel_menu" || buttonId === "btn_back_menu") {
+      await clearConversationState(fromWa);
+      await sendMenuList(fromWa);
+      return true;
+    }
+    // Sinon, tenter la détection d'intent (si l'utilisateur tape autre chose)
+    const detected = detectIntent(text);
+    if (detected) {
+      await clearConversationState(fromWa);
+      const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+      return handlePrestationFlow(fromWa, menuMap[detected] || text, rawMsg);
+    }
+    // Réafficher les boutons
+    await sendWhatsAppInteractiveButtons(
+      fromWa,
+      `Souhaitez-vous basculer sur une reprogrammation moteur ou revenir au menu principal ?`,
+      [
+        { id: "e85_diesel_reprog", title: "🏎️ Reprog moteur" },
+        { id: "e85_diesel_menu", title: "🏠 Menu principal" },
+      ]
+    );
+    return true;
+  }
+
   // --- Cas 2 : WAITING_PLATE ---
   if (convState.state === "WAITING_PLATE") {
     const { valid, plate } = validatePlate(text);
