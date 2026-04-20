@@ -944,7 +944,7 @@ async function sendWhatsAppDocument(to, mediaId, filename, caption) {
 }
 
 // ====== PDF Quote Generator (branded DiagPerf) ======
-async function generateQuotePdf({ devisRef, date, vehicleDesc, plate, prestationLabel, stageLabel, gainTxt, htTxt, ttcTxt, tvaTxt }) {
+async function generateQuotePdf({ devisRef, date, vehicleDesc, plate, prestationLabel, stageLabel, gainTxt, htTxt, ttcTxt, tvaTxt, customerName, customerEmail, customerPhone }) {
   const PDFDocument = require("pdfkit");
 
   return new Promise((resolve, reject) => {
@@ -985,8 +985,23 @@ async function generateQuotePdf({ devisRef, date, vehicleDesc, plate, prestation
     doc.text(`Référence : ${devisRef}`, 370, 140);
     doc.text(`Date : ${date}`, 370, 158);
 
-    // ── Vehicule section ──
     let y = 190;
+
+    // ── Client section (displayed only if customerName provided) ──
+    if (customerName) {
+      doc.moveTo(marginL, y).lineTo(marginR, y).strokeColor("#e0e0e0").lineWidth(1).stroke();
+      y += 12;
+      doc.fontSize(13).font("Helvetica-Bold").fillColor(navy).text("CLIENT", marginL, y);
+      y += 22;
+      doc.fontSize(11).font("Helvetica").fillColor(dark);
+      doc.text(customerName, marginL, y);
+      y += 18;
+      if (customerEmail) { doc.text(customerEmail, marginL, y); y += 18; }
+      if (customerPhone) { doc.text(customerPhone, marginL, y); y += 18; }
+      y += 10;
+    }
+
+    // ── Vehicule section ──
     doc.moveTo(marginL, y).lineTo(marginR, y).strokeColor("#e0e0e0").lineWidth(1).stroke();
     y += 12;
     doc.fontSize(13).font("Helvetica-Bold").fillColor(navy).text("VÉHICULE", marginL, y);
@@ -1076,7 +1091,7 @@ async function generateQuotePdf({ devisRef, date, vehicleDesc, plate, prestation
 }
 
 // ====== Send PDF quote via WhatsApp (best-effort) ======
-async function sendQuotePdf(fromWa, { devisId, plate, vehicle, prestationLabel, stageLabel, gainTxt, devisRow }) {
+async function sendQuotePdf(fromWa, { devisId, plate, vehicle, prestationLabel, stageLabel, gainTxt, devisRow, customerName, customerEmail, customerPhone }) {
   try {
     const vehicleDesc = vehicle
       ? [vehicle.make, vehicle.model, vehicle.version].filter(Boolean).join(" ")
@@ -1094,6 +1109,7 @@ async function sendQuotePdf(fromWa, { devisId, plate, vehicle, prestationLabel, 
       devisRef, date, vehicleDesc, plate: plate || "N/A",
       prestationLabel: prestationLabel || "N/A", stageLabel, gainTxt,
       htTxt, ttcTxt, tvaTxt,
+      customerName, customerEmail, customerPhone,
     });
 
     const mediaId = await uploadWhatsAppMedia(pdfBuffer, `${devisRef}.pdf`, "application/pdf");
@@ -3675,12 +3691,12 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
           ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}€`
           : "(non dispo)";
 
-        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, {
-          plate, vehicle, priceCents, devisId, htTxt, ttcTxt,
-        });
-
         // Add STAGE 1 for REPROG
         const displayLabel = intent === "REPROG" ? `${label} — STAGE 1` : label;
+
+        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, {
+          plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel,
+        });
 
         // Send premium prestation card (best effort, non-blocking) for E85/FAP/ADBLUE
         if (intent === "E85" || intent === "FAP" || intent === "ADBLUE") {
@@ -3718,9 +3734,7 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
           );
         }
 
-        // Send PDF quote (best-effort, non-blocking)
-        sendQuotePdf(fromWa, { devisId, plate, vehicle, prestationLabel: displayLabel, devisRow }).catch(() => {});
-
+        // PDF sent later, after collecting customer info (see WAITING_DEVIS_CONTACT)
         log.info("Devis créé après confirmation véhicule", { wa_id: fromWa, intent, devisId });
       } catch (err) {
         const emsg = String(err?.message || err || "");
@@ -3831,13 +3845,16 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}\u20AC`
         : "(non dispo)";
 
-      await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, {
-        plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel,
-      });
-
       const gainTxt = (!isE85Stage && selectedStage.gain_puissance)
         ? `\n\u26A1 +${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm`
         : "";
+      const stageGainTxtShort = (!isE85Stage && selectedStage.gain_puissance) ? `+${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm` : null;
+
+      await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, {
+        plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel,
+        prestationLabel: `Reprogrammation ${stageLabel}`,
+        gainTxt: stageGainTxtShort,
+      });
 
       // Send premium vehicle spec card (best effort, non-blocking)
       const cardUrl = buildVehicleCardUrl({ vehicle, stage: selectedStage, stageLabel, priceTtc: ttcTxt });
@@ -3880,10 +3897,7 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         );
       }
 
-      // Send PDF quote (best-effort, non-blocking)
-      const stageGainTxt = (!isE85Stage && selectedStage.gain_puissance) ? `+${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm` : null;
-      sendQuotePdf(fromWa, { devisId, plate, vehicle, prestationLabel: `Reprogrammation ${stageLabel}`, stageLabel, gainTxt: stageGainTxt, devisRow }).catch(() => {});
-
+      // PDF sent later, after collecting customer info (see WAITING_DEVIS_CONTACT)
       log.info("Devis créé (stage choice)", { wa_id: fromWa, intent, devisId, stage: selectedStage.stage });
     } catch (err) {
       const emsg = String(err?.message || err || "");
@@ -3950,18 +3964,14 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         return true;
       }
 
-      // No upsell → go to post-quote choice
-      await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, stateData);
+      // No upsell → ask for customer contact info, then send PDF, then post-quote choice
+      await setConversationState(fromWa, "WAITING_DEVIS_CONTACT", intent, stateData);
       await sendWhatsAppInteractiveButtons(
         fromWa,
-        "Parfait ! \uD83C\uDF89 Que souhaitez-vous faire ?",
-        [
-          { id: "post_quote_rdv", title: "Prendre RDV" },
-          { id: "post_quote_technicien", title: "Question technicien" },
-          { id: "post_quote_accueil", title: "Retour accueil" },
-        ]
+        `Parfait ! \uD83C\uDF89\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`,
+        [{ id: "btn_back_menu", title: "\uD83C\uDFE0 Menu" }]
       );
-      log.info("Quote confirmed → post-quote choice", { wa_id: fromWa, intent });
+      log.info("Quote confirmed → asking for customer contact info", { wa_id: fromWa, intent });
       return true;
     }
 
@@ -4093,6 +4103,89 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     return true;
   }
 
+  // --- WAITING_DEVIS_CONTACT (collecte coordonnées client pour PDF du devis) ---
+  if (convState.state === "WAITING_DEVIS_CONTACT") {
+    const stateData = convState.data || {};
+
+    if (buttonId === "btn_back_menu") {
+      await clearConversationState(fromWa);
+      await sendMenuList(fromWa);
+      return true;
+    }
+
+    // Parse "Nom Prénom email@domaine.com"
+    const raw = String(text || "").trim();
+    const words = raw.split(/[\s\n]+/);
+    const emailWord = words.find(w => w.includes("@"));
+    const nameParts = words.filter(w => !w.includes("@"));
+    const customerName = nameParts.join(" ").trim();
+    const customerEmail = (emailWord || "").trim().toLowerCase();
+
+    if (!customerName || customerName.length < 2) {
+      await sendWhatsAppInteractiveButtons(
+        fromWa,
+        "Je n'ai pas pu identifier votre nom 😅\nMerci d'envoyer vos coordonnées au format :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com",
+        [{ id: "btn_back_menu", title: "🏠 Menu" }]
+      );
+      return true;
+    }
+
+    if (!customerEmail || !validateEmail(customerEmail)) {
+      await sendWhatsAppInteractiveButtons(
+        fromWa,
+        "L'adresse email ne semble pas valide 😕\nMerci de réessayer au format :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com",
+        [{ id: "btn_back_menu", title: "🏠 Menu" }]
+      );
+      return true;
+    }
+
+    // Fetch latest devis row (in case upsell options updated the totals)
+    let devisRow = null;
+    if (stateData.devisId) {
+      try {
+        const { data } = await supabase
+          .from("devis")
+          .select("id, total_ht_centimes, total_ttc_centimes")
+          .eq("id", stateData.devisId)
+          .single();
+        devisRow = data;
+      } catch (e) {
+        log.warn("WAITING_DEVIS_CONTACT: devis fetch failed", { error: String(e?.message || e) });
+      }
+    }
+
+    // Send PDF with customer info (best effort)
+    if (stateData.devisId) {
+      sendQuotePdf(fromWa, {
+        devisId: stateData.devisId,
+        plate: stateData.plate,
+        vehicle: stateData.vehicle,
+        prestationLabel: stateData.prestationLabel || intentToLabel(intent),
+        stageLabel: stateData.stageLabel,
+        gainTxt: stateData.gainTxt,
+        devisRow,
+        customerName,
+        customerEmail,
+        customerPhone: fromWa,
+      }).catch(() => {});
+    }
+
+    // Transition to post-quote choice, passing customer info so RDV/technicien steps can reuse them
+    const nextData = { ...stateData, customerName, customerEmail };
+    await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, nextData);
+    await sendWhatsAppInteractiveButtons(
+      fromWa,
+      `Merci ${customerName} ! 🙏\n\nVotre devis PDF a été envoyé. Que souhaitez-vous faire ensuite ?`,
+      [
+        { id: "post_quote_rdv", title: "Prendre RDV" },
+        { id: "post_quote_technicien", title: "Question technicien" },
+        { id: "post_quote_accueil", title: "Retour accueil" },
+      ]
+    );
+    log.info("Customer contact collected → PDF sent → post-quote choice", { wa_id: fromWa, intent, customerName });
+    return true;
+  }
+
   // --- WAITING_UPSELL_CONFIRM (confirmation récapitulatif upsell) ---
   if (convState.state === "WAITING_UPSELL_CONFIRM") {
     const t = String(text || "").trim().toLowerCase();
@@ -4122,30 +4215,24 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         ttcTxt: stateData.newTtcTxt || stateData.ttcTxt,
       };
 
-      // Go to post-quote choice (RDV / technicien / accueil)
-      await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, updatedData);
+      // Ask for customer contact info before sending PDF + going to post-quote choice
+      await setConversationState(fromWa, "WAITING_DEVIS_CONTACT", intent, updatedData);
       await sendWhatsAppInteractiveButtons(
         fromWa,
-        "Parfait ! 🎉 Que souhaitez-vous faire ?",
-        [
-          { id: "post_quote_rdv", title: "Prendre RDV" },
-          { id: "post_quote_technicien", title: "Question technicien" },
-          { id: "post_quote_accueil", title: "Retour accueil" },
-        ]
+        `Parfait ! 🎉\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`,
+        [{ id: "btn_back_menu", title: "🏠 Menu" }]
       );
-      log.info("Upsell confirmed", { wa_id: fromWa, intent, addedOptions: stateData.addedOptions });
+      log.info("Upsell confirmed → asking for customer contact info", { wa_id: fromWa, intent, addedOptions: stateData.addedOptions });
       return true;
     }
 
     if (t === "non" || t === "annuler" || buttonId === "upsell_confirm_no") {
-      await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, stateData);
+      // Même sans upsell, on demande les coordonnées pour envoyer le PDF du devis de base
+      await setConversationState(fromWa, "WAITING_DEVIS_CONTACT", intent, stateData);
       await sendWhatsAppInteractiveButtons(
         fromWa,
-        "Nous comprenons. Comment pouvons-nous vous aider ?",
-        [
-          { id: "post_quote_technicien", title: "Contacter technicien" },
-          { id: "post_quote_accueil", title: "Retour accueil" },
-        ]
+        `Pas de souci ! 🙂\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`,
+        [{ id: "btn_back_menu", title: "🏠 Menu" }]
       );
       return true;
     }
@@ -4624,7 +4711,10 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       broadcastDashboardEvent("new_devis", { devisId, plate: data.plate || "", wa_id: fromWa, prestation: data.diagTitle, ttc: ttcTxt });
     }
     if (devisId !== "N/A") {
-      sendQuotePdf(fromWa, { devisId, plate: data.plate, vehicle: v, prestationLabel: data.diagTitle, devisRow }).catch(() => {});
+      sendQuotePdf(fromWa, {
+        devisId, plate: data.plate, vehicle: v, prestationLabel: data.diagTitle, devisRow,
+        customerName, customerEmail, customerPhone: fromWa,
+      }).catch(() => {});
     }
 
     // Notification email équipe
