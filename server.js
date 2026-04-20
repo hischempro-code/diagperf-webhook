@@ -3784,13 +3784,28 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    // Parse stage selection from button or text
+    // Parse stage selection from button/list ID or text
     let selectedIdx = -1;
+    const txtLower = String(text || "").trim().toLowerCase();
+
     if (buttonId && buttonId.startsWith("stage_choice_")) {
+      // Interactive list/button with ID like "stage_choice_1"
       selectedIdx = parseInt(buttonId.replace("stage_choice_", ""), 10) - 1;
     } else {
-      const num = parseInt(String(text || "").trim(), 10);
-      if (num >= 1 && num <= stages.length) selectedIdx = num - 1;
+      // Try parsing a plain number (1, 2, 3...)
+      const num = parseInt(txtLower, 10);
+      if (num >= 1 && num <= stages.length) {
+        selectedIdx = num - 1;
+      } else {
+        // Try matching "stage 1", "Stage 2", "STAGE1", etc.
+        const stageMatch = txtLower.match(/stage\s*(\d+)/i);
+        if (stageMatch) {
+          const stageNum = parseInt(stageMatch[1], 10);
+          if (stageNum >= 1 && stageNum <= stages.length) {
+            selectedIdx = stageNum - 1;
+          }
+        }
+      }
     }
 
     if (selectedIdx < 0 || selectedIdx >= stages.length) {
