@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
 const sgMail = require("@sendgrid/mail");
 const { retrieveContext, formatContextForPrompt, preloadEmbedder } = require("./rag");
+const { renderStageGainsVideo } = require("./lib/creatomateVideo");
 
 // Node 18+ => fetch global. Node <18 => fallback node-fetch
 const fetchFn = global.fetch || require("node-fetch");
@@ -3877,6 +3878,33 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         sendWhatsAppImage(fromWa, cardUrl, `📋 Fiche technique — ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}`).catch(cardErr => {
           log.debug("Vehicle card send failed (non-blocking)", { error: String(cardErr?.message || cardErr) });
         });
+      }
+
+      // ====== WOW FACTOR: Personalized gains video (Creatomate) ======
+      // Skip video for E85 stages (no power gains to show)
+      if (!isE85Stage && process.env.CREATOMATE_API_KEY && process.env.CREATOMATE_TEMPLATE_ID) {
+        // Teaser while rendering (Creatomate takes 5-30s)
+        sendWhatsAppText(fromWa, `🎬 Préparation de votre animation personnalisée...`).catch(() => {});
+
+        // Render + send in background (don't block the Devis généré message flow)
+        (async () => {
+          try {
+            const videoUrl = await renderStageGainsVideo({
+              vehicle, stage: selectedStage, stageLabel, priceTtc: ttcTxt,
+            });
+            if (videoUrl) {
+              await sendWhatsAppVideo(
+                fromWa, videoUrl,
+                `🏎️ Voilà à quoi ressemblera votre ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")} après le ${stageLabel} !`
+              );
+              log.info("Stage gains video sent", { wa_id: fromWa, stage: selectedStage.stage });
+            } else {
+              log.warn("Stage gains video rendering failed (non-blocking)", { wa_id: fromWa });
+            }
+          } catch (err) {
+            log.error("Stage gains video error (non-blocking)", { wa_id: fromWa, error: String(err?.message || err) });
+          }
+        })();
       }
 
       await sendWhatsAppInteractiveButtons(fromWa, `\u2705 Devis généré\n` +
