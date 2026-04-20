@@ -4154,35 +4154,99 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       }
     }
 
-    // Send PDF with customer info (best effort)
+    // Send PDF FIRST (awaited, so it arrives before the thank-you message)
     if (stateData.devisId) {
-      sendQuotePdf(fromWa, {
-        devisId: stateData.devisId,
-        plate: stateData.plate,
-        vehicle: stateData.vehicle,
-        prestationLabel: stateData.prestationLabel || intentToLabel(intent),
-        stageLabel: stateData.stageLabel,
-        gainTxt: stateData.gainTxt,
-        devisRow,
-        customerName,
-        customerEmail,
-        customerPhone: fromWa,
-      }).catch(() => {});
+      try {
+        await sendQuotePdf(fromWa, {
+          devisId: stateData.devisId,
+          plate: stateData.plate,
+          vehicle: stateData.vehicle,
+          prestationLabel: stateData.prestationLabel || intentToLabel(intent),
+          stageLabel: stateData.stageLabel,
+          gainTxt: stateData.gainTxt,
+          devisRow,
+          customerName,
+          customerEmail,
+          customerPhone: fromWa,
+        });
+      } catch (err) {
+        log.error("sendQuotePdf error (non-blocking)", { wa_id: fromWa, error: String(err?.message || err) });
+      }
     }
 
+    // Build email payloads
+    const vehicle = stateData.vehicle || {};
+    const plate = stateData.plate || "N/A";
+    const devisId = stateData.devisId || "N/A";
+    const devisRef = `DEV-${devisId}`;
+    const htTxt = typeof devisRow?.total_ht_centimes === "number"
+      ? `${(devisRow.total_ht_centimes / 100).toFixed(2)}€`
+      : (stateData.htTxt || "N/A");
+    const ttcTxt = typeof devisRow?.total_ttc_centimes === "number"
+      ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}€`
+      : (stateData.ttcTxt || "N/A");
+    const vNameParts = [vehicle.make, vehicle.model].filter(Boolean);
+    const motorisation = [vehicle.fuel, vehicle.engine_cc ? `${vehicle.engine_cc}cc` : null, vehicle.power_hp ? `${vehicle.power_hp}ch` : null].filter(Boolean).join(" ");
+    const yearTxt = vehicle.year ? `${vehicle.year}` : "";
+    const vehicleDesc = [vNameParts.join(" "), motorisation, yearTxt].filter(Boolean).join(" — ");
+    const engineCode = vehicle.engine_code || "Non disponible";
+    const emailPrestationLabel = stateData.prestationLabel || stateData.stageLabel
+      ? (stateData.stageLabel ? `Reprogrammation moteur — ${stateData.stageLabel}` : stateData.prestationLabel)
+      : (label || intentToLabel(intent));
+
+    // customerName parsed as "NOM Prénom" — split for email templates
+    const nameTokens = customerName.split(/\s+/);
+    const lastName = nameTokens[0] || "";
+    const firstName = nameTokens.slice(1).join(" ") || "";
+
+    // Send both emails in parallel (best effort)
+    try {
+      await Promise.all([
+        sendRdvClientEmail({
+          to: customerEmail, firstName, lastName,
+          vehicleDesc, prestationLabel: emailPrestationLabel,
+          devisRef, htTxt, ttcTxt, contactReason: "devis",
+        }),
+        sendRdvDiagperfEmail({
+          firstName, lastName, clientEmail: customerEmail, waId: fromWa,
+          vehicleDesc, engineCode, plate,
+          prestationLabel: emailPrestationLabel,
+          devisRef, htTxt, ttcTxt, contactReason: "devis",
+        }),
+      ]);
+    } catch (err) {
+      log.error("Erreur envoi emails devis", { wa_id: fromWa, error: String(err?.message || err) });
+    }
+
+    // Notify garage (best effort)
+    notifyGarage(
+      `👤 COORDONNÉES CLIENT REÇUES\n` +
+      `Devis : ${devisRef}\n` +
+      `Client : ${customerName}\n` +
+      `Email : ${customerEmail}\n` +
+      `WhatsApp : ${fromWa}\n` +
+      `Véhicule : ${vehicleDesc}\n` +
+      `Plaque : ${plate}\n` +
+      `Prestation : ${emailPrestationLabel}\n` +
+      `HT : ${htTxt} | TTC : ${ttcTxt}`
+    ).catch(() => {});
+
     // Transition to post-quote choice, passing customer info so RDV/technicien steps can reuse them
-    const nextData = { ...stateData, customerName, customerEmail };
+    const nextData = { ...stateData, customerName, customerEmail, firstName, lastName };
     await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, nextData);
     await sendWhatsAppInteractiveButtons(
       fromWa,
-      `Merci ${customerName} ! 🙏\n\nVotre devis PDF a été envoyé. Que souhaitez-vous faire ensuite ?`,
+      `Merci pour votre confiance ${customerName} ! ✅\n\n` +
+      `📄 Votre devis PDF vient de vous être envoyé.\n` +
+      `📧 Un récapitulatif a également été envoyé à ${customerEmail}.\n\n` +
+      `Que souhaitez-vous faire ensuite ?`,
       [
         { id: "post_quote_rdv", title: "Prendre RDV" },
         { id: "post_quote_technicien", title: "Question technicien" },
         { id: "post_quote_accueil", title: "Retour accueil" },
       ]
     );
-    log.info("Customer contact collected → PDF sent → post-quote choice", { wa_id: fromWa, intent, customerName });
+    log.info("Customer contact collected → PDF + emails sent → post-quote choice", { wa_id: fromWa, intent, customerName, customerEmail });
     return true;
   }
 
@@ -4253,6 +4317,26 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
 
     if (btnId === "post_quote_rdv" || t === "prendre rdv" || t === "rendez-vous" || t === "rdv") {
       const stateData = convState.data || {};
+      // If we already collected coordinates in WAITING_DEVIS_CONTACT, skip re-asking
+      if (stateData.customerEmail && stateData.customerName) {
+        notifyGarage(
+          `📅 DEMANDE RDV\n` +
+          `Client : ${stateData.customerName} (${stateData.customerEmail})\n` +
+          `Devis : DEV-${stateData.devisId || "N/A"}\n` +
+          `WhatsApp : ${fromWa}`
+        ).catch(() => {});
+        await setConversationState(fromWa, "AWAITING_CITY_FOR_TRAVEL", intent, { ...stateData, contactReason: "rdv" });
+        await sendWhatsAppInteractiveButtons(
+          fromWa,
+          `Excellent choix ${stateData.customerName} ! 🎉\n\nNotre équipe vous recontactera dans les 24h pour fixer un créneau.\n\n🗺️ En attendant, indiquez votre *ville ou code postal* et je vous donnerai le temps de trajet estimé jusqu'à DiagPerf !`,
+          [
+            { id: "skip_travel", title: "⏭️ Passer" },
+            { id: "btn_back_menu", title: "🏠 Menu" },
+          ]
+        );
+        log.info("Post-quote RDV (coords already known) → travel estimate", { wa_id: fromWa, intent });
+        return true;
+      }
       await setConversationState(fromWa, "AWAITING_RDV_COORDINATES", intent, { ...stateData, contactReason: "rdv" });
       await sendWhatsAppInteractiveButtons(
         fromWa,
@@ -4265,6 +4349,23 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
 
     if (btnId === "post_quote_technicien" || t === "question technicien" || t === "contacter technicien" || t === "technicien") {
       const stateData = convState.data || {};
+      // If we already collected coordinates in WAITING_DEVIS_CONTACT, skip re-asking
+      if (stateData.customerEmail && stateData.customerName) {
+        notifyGarage(
+          `🔧 DEMANDE TECHNICIEN\n` +
+          `Client : ${stateData.customerName} (${stateData.customerEmail})\n` +
+          `Devis : DEV-${stateData.devisId || "N/A"}\n` +
+          `WhatsApp : ${fromWa}`
+        ).catch(() => {});
+        await clearConversationState(fromWa);
+        await sendWhatsAppInteractiveButtons(
+          fromWa,
+          `Très bien ${stateData.customerName} ! 👨‍🔧\n\nNotre technicien vous recontactera dans les 24h pour répondre à vos questions.`,
+          [{ id: "btn_back_menu", title: "🏠 Menu" }]
+        );
+        log.info("Post-quote technicien (coords already known) → notified", { wa_id: fromWa, intent });
+        return true;
+      }
       await setConversationState(fromWa, "AWAITING_RDV_COORDINATES", intent, { ...stateData, contactReason: "technicien" });
       await sendWhatsAppInteractiveButtons(
         fromWa,
