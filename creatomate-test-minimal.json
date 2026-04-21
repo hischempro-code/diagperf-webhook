@@ -1,0 +1,49 @@
+{
+  "output_format": "mp4",
+  "width": 1080,
+  "height": 1920,
+  "frame_rate": 30,
+  "duration": 5,
+  "elements": [
+    {
+      "name": "background",
+      "type": "shape",
+      "track": 1,
+      "width": "100%",
+      "height": "100%",
+      "fill_color": "#0A0A0A"
+    },
+    {
+      "name": "vehicle_name",
+      "type": "text",
+      "track": 2,
+      "text": "CITROEN C3",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "10 vmin",
+      "fill_color": "#FFFFFF",
+      "x": "50%",
+      "y": "50%",
+      "width": "90%",
+      "height": "20%",
+      "x_alignment": "50%",
+      "y_alignment": "50%"
+    },
+    {
+      "name": "stage_label",
+      "type": "text",
+      "track": 3,
+      "text": "STAGE 1",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "5 vmin",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "65%",
+      "width": "90%",
+      "height": "10%",
+      "x_alignment": "50%",
+      "y_alignment": "50%"
+    }
+  ]
+}
