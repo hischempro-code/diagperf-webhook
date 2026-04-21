@@ -1,0 +1,628 @@
+{
+  "output_format": "mp4",
+  "width": 1080,
+  "height": 1920,
+  "frame_rate": 30,
+  "duration": 15,
+  "elements": [
+    {
+      "name": "background",
+      "type": "shape",
+      "track": 1,
+      "width": "100%",
+      "height": "100%",
+      "fill_color": "#0A0A0A",
+      "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z"
+    },
+    {
+      "name": "accent_vignette",
+      "type": "shape",
+      "track": 2,
+      "width": "100%",
+      "height": "100%",
+      "fill_color": "linear-gradient(180deg, rgba(201,169,97,0) 0%, rgba(201,169,97,0.08) 60%, rgba(201,169,97,0.18) 100%)",
+      "path": "M 0 0 L 100 0 L 100 100 L 0 100 Z"
+    },
+
+    {
+      "name": "brand_line_top",
+      "type": "shape",
+      "track": 3,
+      "x": "50%",
+      "y": "38%",
+      "width": "45%",
+      "height": "2 px",
+      "fill_color": "#C9A961",
+      "x_anchor": "50%",
+      "y_anchor": "50%",
+      "time": 0,
+      "duration": 2.6,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "fade": false, "x_anchor": "50%", "start_scale": "0% 100%", "end_scale": "100% 100%", "time": 0, "duration": 0.7 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.4 }
+      ]
+    },
+    {
+      "name": "brand_logo_text",
+      "type": "text",
+      "track": 4,
+      "text": "DIAGPERF",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "9 vmin",
+      "letter_spacing": "0.15 em",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "43%",
+      "x_alignment": "50%",
+      "time": 0.2,
+      "duration": 2.4,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.6 },
+        { "easing": "cubic-out", "type": "slide", "direction": "180°", "distance": "3%", "duration": 0.7 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.4 }
+      ]
+    },
+    {
+      "name": "brand_tagline",
+      "type": "text",
+      "track": 5,
+      "text": "REPROGRAMMATION MOTEUR PREMIUM",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.6 vmin",
+      "letter_spacing": "0.35 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "49%",
+      "x_alignment": "50%",
+      "time": 0.6,
+      "duration": 2,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.8 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.4 }
+      ]
+    },
+
+    {
+      "name": "scene2_intro",
+      "type": "text",
+      "track": 4,
+      "text": "VOUS ROULEZ EN",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3 vmin",
+      "letter_spacing": "0.3 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "38%",
+      "x_alignment": "50%",
+      "time": 2.7,
+      "duration": 2.3,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "vehicle_name",
+      "type": "text",
+      "track": 5,
+      "text": "CITROEN C3",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "11 vmin",
+      "letter_spacing": "0.05 em",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 2.9,
+      "duration": 2.1,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "start_scale": "90%", "end_scale": "100%", "duration": 0.6 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "vehicle_engine",
+      "type": "text",
+      "track": 6,
+      "text": "1.4 HDi 68ch",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3.2 vmin",
+      "letter_spacing": "0.15 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "57%",
+      "x_alignment": "50%",
+      "time": 3.2,
+      "duration": 1.8,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+
+    {
+      "name": "scene3_intro",
+      "type": "text",
+      "track": 4,
+      "text": "NOUS VOUS PROPOSONS",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3 vmin",
+      "letter_spacing": "0.3 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "38%",
+      "x_alignment": "50%",
+      "time": 5.1,
+      "duration": 1.9,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "stage_label",
+      "type": "text",
+      "track": 5,
+      "text": "STAGE 1",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "16 vmin",
+      "letter_spacing": "0.08 em",
+      "fill_color": "#C9A961",
+      "shadow_color": "rgba(201,169,97,0.4)",
+      "shadow_blur": "20 px",
+      "x": "50%",
+      "y": "50%",
+      "x_alignment": "50%",
+      "time": 5.3,
+      "duration": 1.7,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "start_scale": "85%", "end_scale": "100%", "duration": 0.5 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+
+    {
+      "name": "scene4_label",
+      "type": "text",
+      "track": 4,
+      "text": "PUISSANCE",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3.2 vmin",
+      "letter_spacing": "0.5 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "30%",
+      "x_alignment": "50%",
+      "time": 7.1,
+      "duration": 3,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_before_label",
+      "type": "text",
+      "track": 5,
+      "text": "AVANT",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.4 vmin",
+      "letter_spacing": "0.3 em",
+      "fill_color": "rgba(245,245,240,0.5)",
+      "x": "28%",
+      "y": "40%",
+      "x_alignment": "50%",
+      "time": 7.3,
+      "duration": 2.8,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_before",
+      "type": "text",
+      "track": 6,
+      "text": "68",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "9 vmin",
+      "fill_color": "rgba(245,245,240,0.6)",
+      "x": "28%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 7.4,
+      "duration": 2.7,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_unit_before",
+      "type": "text",
+      "track": 7,
+      "text": "ch",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "rgba(245,245,240,0.5)",
+      "x": "28%",
+      "y": "55%",
+      "x_alignment": "50%",
+      "time": 7.4,
+      "duration": 2.7,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_arrow",
+      "type": "text",
+      "track": 8,
+      "text": "→",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "7 vmin",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 7.8,
+      "duration": 2.3,
+      "animations": [
+        { "easing": "cubic-out", "type": "slide", "direction": "270°", "distance": "3%", "duration": 0.5 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_after_label",
+      "type": "text",
+      "track": 5,
+      "text": "APRÈS",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.4 vmin",
+      "letter_spacing": "0.3 em",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "40%",
+      "x_alignment": "50%",
+      "time": 8.1,
+      "duration": 2,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_after",
+      "type": "text",
+      "track": 6,
+      "text": "100",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "11 vmin",
+      "fill_color": "#C9A961",
+      "shadow_color": "rgba(201,169,97,0.4)",
+      "shadow_blur": "15 px",
+      "x": "72%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 8.2,
+      "duration": 1.9,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "start_scale": "70%", "end_scale": "100%", "duration": 0.6 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_unit_after",
+      "type": "text",
+      "track": 7,
+      "text": "ch",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "55%",
+      "x_alignment": "50%",
+      "time": 8.2,
+      "duration": 1.9,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "hp_gain",
+      "type": "text",
+      "track": 8,
+      "text": "+32 CHEVAUX",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "4 vmin",
+      "letter_spacing": "0.2 em",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "64%",
+      "x_alignment": "50%",
+      "time": 8.8,
+      "duration": 1.3,
+      "animations": [
+        { "easing": "cubic-out", "type": "slide", "direction": "0°", "distance": "3%", "duration": 0.5 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+
+    {
+      "name": "scene5_label",
+      "type": "text",
+      "track": 4,
+      "text": "COUPLE",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3.2 vmin",
+      "letter_spacing": "0.5 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "30%",
+      "x_alignment": "50%",
+      "time": 10.2,
+      "duration": 2.5,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "torque_before",
+      "type": "text",
+      "track": 5,
+      "text": "160",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "9 vmin",
+      "fill_color": "rgba(245,245,240,0.6)",
+      "x": "28%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 10.4,
+      "duration": 2.3,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "torque_unit_before",
+      "type": "text",
+      "track": 6,
+      "text": "Nm",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "rgba(245,245,240,0.5)",
+      "x": "28%",
+      "y": "55%",
+      "x_alignment": "50%",
+      "time": 10.4,
+      "duration": 2.3,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "torque_arrow",
+      "type": "text",
+      "track": 7,
+      "text": "→",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "7 vmin",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 10.8,
+      "duration": 1.9,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "torque_after",
+      "type": "text",
+      "track": 8,
+      "text": "230",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "11 vmin",
+      "fill_color": "#C9A961",
+      "shadow_color": "rgba(201,169,97,0.4)",
+      "shadow_blur": "15 px",
+      "x": "72%",
+      "y": "48%",
+      "x_alignment": "50%",
+      "time": 11.1,
+      "duration": 1.6,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "start_scale": "70%", "end_scale": "100%", "duration": 0.6 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "torque_unit_after",
+      "type": "text",
+      "track": 9,
+      "text": "Nm",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "55%",
+      "x_alignment": "50%",
+      "time": 11.1,
+      "duration": 1.6,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.4 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+    {
+      "name": "torque_gain",
+      "type": "text",
+      "track": 10,
+      "text": "+70 NM",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "4 vmin",
+      "letter_spacing": "0.2 em",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "64%",
+      "x_alignment": "50%",
+      "time": 11.6,
+      "duration": 1.1,
+      "animations": [
+        { "easing": "cubic-out", "type": "slide", "direction": "0°", "distance": "3%", "duration": 0.5 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.3 }
+      ]
+    },
+
+    {
+      "name": "final_line_top",
+      "type": "shape",
+      "track": 3,
+      "x": "50%",
+      "y": "36%",
+      "width": "40%",
+      "height": "1 px",
+      "fill_color": "#C9A961",
+      "x_anchor": "50%",
+      "time": 12.8,
+      "duration": 2.2,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "fade": false, "x_anchor": "50%", "start_scale": "0% 100%", "end_scale": "100% 100%", "time": 0, "duration": 0.7 },
+        { "easing": "cubic-in", "reversed": true, "type": "fade", "duration": 0.4 }
+      ]
+    },
+    {
+      "name": "price_label",
+      "type": "text",
+      "track": 4,
+      "text": "TARIF INTERVENTION",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "2.8 vmin",
+      "letter_spacing": "0.4 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "40%",
+      "x_alignment": "50%",
+      "time": 12.9,
+      "duration": 2.1,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 }
+      ]
+    },
+    {
+      "name": "price_ttc",
+      "type": "text",
+      "track": 5,
+      "text": "390€ TTC",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "13 vmin",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "50%",
+      "x_alignment": "50%",
+      "time": 13.1,
+      "duration": 1.9,
+      "animations": [
+        { "easing": "cubic-out", "type": "scale", "start_scale": "80%", "end_scale": "100%", "duration": 0.6 },
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 }
+      ]
+    },
+    {
+      "name": "final_cta",
+      "type": "text",
+      "track": 6,
+      "text": "RÉSERVEZ VOTRE INTERVENTION",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.8 vmin",
+      "letter_spacing": "0.4 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "62%",
+      "x_alignment": "50%",
+      "time": 13.5,
+      "duration": 1.5,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 }
+      ]
+    },
+    {
+      "name": "final_brand",
+      "type": "text",
+      "track": 7,
+      "text": "DIAGPERF",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "4 vmin",
+      "letter_spacing": "0.2 em",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "68%",
+      "x_alignment": "50%",
+      "time": 13.7,
+      "duration": 1.3,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.5 }
+      ]
+    },
+
+    {
+      "name": "zero_to_hundred",
+      "type": "text",
+      "track": 11,
+      "text": "",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.4 vmin",
+      "letter_spacing": "0.3 em",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "75%",
+      "x_alignment": "50%",
+      "time": 7.3,
+      "duration": 7.7,
+      "animations": [
+        { "easing": "cubic-out", "type": "fade", "duration": 0.6 }
+      ]
+    }
+  ]
+}
