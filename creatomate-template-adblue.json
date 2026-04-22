@@ -109,7 +109,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "brand_tagline",
@@ -142,7 +146,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "scene2_intro",
@@ -175,7 +183,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "vehicle_name",
@@ -215,7 +227,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "vehicle_engine",
@@ -248,7 +264,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "scene3_intro",
@@ -281,7 +301,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "stage_label",
@@ -321,7 +345,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "scene4_label",
@@ -354,7 +382,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_before_label",
@@ -387,7 +419,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_before",
@@ -419,7 +455,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_unit_before",
@@ -451,7 +491,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_arrow",
@@ -483,7 +527,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_after_label",
@@ -516,7 +564,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_after",
@@ -555,7 +607,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_unit_after",
@@ -587,7 +643,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "hp_gain",
@@ -620,7 +680,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "scene5_label",
@@ -653,7 +717,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "torque_before",
@@ -685,7 +753,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "torque_unit_before",
@@ -717,7 +789,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "torque_arrow",
@@ -749,7 +825,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "torque_after",
@@ -788,7 +868,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "torque_unit_after",
@@ -820,7 +904,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "torque_gain",
@@ -853,7 +941,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "final_line_top",
@@ -918,7 +1010,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "price_ttc",
@@ -957,7 +1053,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "final_cta",
@@ -990,7 +1090,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "final_brand",
@@ -1023,7 +1127,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "zero_to_hundred",
@@ -1056,7 +1164,11 @@
           "type": "fade",
           "reversed": true
         }
-      ]
+      ],
+      "shadow_color": "rgba(0,0,0,0.85)",
+      "shadow_blur": "1.2 vmin",
+      "shadow_x": "0.3 vmin",
+      "shadow_y": "0.3 vmin"
     },
     {
       "name": "glow_hp_after",

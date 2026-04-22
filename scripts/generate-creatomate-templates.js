@@ -176,6 +176,21 @@ function buildTemplate(config) {
   tpl.elements.unshift(scrimCenter);
   tpl.elements.unshift(scrimOverlay);
 
+  // ===== Text shadow (lisibilité garantie sur tout fond) =====
+  // On applique une ombre noire floutée à TOUS les textes.
+  // Fonctionne indépendamment des tracks/layers (garantie sur vidéo de fond claire).
+  const applyTextShadow = (el) => {
+    if (el.type !== "text") return;
+    el.shadow_color = "rgba(0,0,0,0.85)";
+    el.shadow_blur = "1.2 vmin";
+    el.shadow_x = "0.3 vmin";
+    el.shadow_y = "0.3 vmin";
+  };
+
+  for (const el of tpl.elements) {
+    applyTextShadow(el);
+  }
+
   for (const el of tpl.elements) {
     switch (el.name) {
       case "brand_tagline":
