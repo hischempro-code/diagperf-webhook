@@ -3630,15 +3630,15 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       const menuMapFap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
       return handlePrestationFlow(fromWa, menuMapFap[detectedFap] || text, rawMsg);
     }
-    await sendWhatsAppInteractiveButtons(
-      fromWa,
-      `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`,
-      [
-        { id: "fap_essence_reprog", title: "🏎️ Reprog moteur" },
-        { id: "fap_essence_e85", title: "🌿 Conversion E85" },
-        { id: "btn_back_menu", title: "🏠 Menu" },
-      ]
-    );
+    const fapRefusedButtons = [
+      { id: "fap_essence_reprog", title: "🏎️ Reprog moteur" },
+      { id: "fap_essence_e85", title: "🌿 Conversion E85" },
+      { id: "btn_back_menu", title: "🏠 Menu" },
+    ];
+    const fapRefusedRetryMsg = `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`;
+    const handledFR = await tryOffTopicAnswer({ fromWa, text, retryMessage: fapRefusedRetryMsg, retryButtons: fapRefusedButtons });
+    if (handledFR) return true;
+    await sendWhatsAppInteractiveButtons(fromWa, fapRefusedRetryMsg, fapRefusedButtons);
     return true;
   }
 
@@ -3666,16 +3666,17 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       const menuMapEgr = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
       return handlePrestationFlow(fromWa, menuMapEgr[detectedEgr] || text, rawMsg);
     }
+    // Question off-topic → LLM + re-propose
+    const egrRefusedButtons = [
+      { id: "egr_essence_reprog", title: "🏎️ Reprog moteur" },
+      { id: "egr_essence_e85", title: "🌿 Conversion E85" },
+      { id: "btn_back_menu", title: "🏠 Menu" },
+    ];
+    const egrRefusedRetryMsg = `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`;
+    const handledER = await tryOffTopicAnswer({ fromWa, text, retryMessage: egrRefusedRetryMsg, retryButtons: egrRefusedButtons });
+    if (handledER) return true;
     // Réafficher les boutons
-    await sendWhatsAppInteractiveButtons(
-      fromWa,
-      `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`,
-      [
-        { id: "egr_essence_reprog", title: "🏎️ Reprog moteur" },
-        { id: "egr_essence_e85", title: "🌿 Conversion E85" },
-        { id: "btn_back_menu", title: "🏠 Menu" },
-      ]
-    );
+    await sendWhatsAppInteractiveButtons(fromWa, egrRefusedRetryMsg, egrRefusedButtons);
     return true;
   }
 
@@ -3700,15 +3701,16 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
       return handlePrestationFlow(fromWa, menuMap[detected] || text, rawMsg);
     }
+    // Question off-topic → LLM + re-propose
+    const e85DieselButtons = [
+      { id: "e85_diesel_reprog", title: "🏎️ Reprog moteur" },
+      { id: "e85_diesel_menu", title: "🏠 Menu principal" },
+    ];
+    const e85DieselRetryMsg = `Souhaitez-vous basculer sur une reprogrammation moteur ou revenir au menu principal ?`;
+    const handledED = await tryOffTopicAnswer({ fromWa, text, retryMessage: e85DieselRetryMsg, retryButtons: e85DieselButtons });
+    if (handledED) return true;
     // Réafficher les boutons
-    await sendWhatsAppInteractiveButtons(
-      fromWa,
-      `Souhaitez-vous basculer sur une reprogrammation moteur ou revenir au menu principal ?`,
-      [
-        { id: "e85_diesel_reprog", title: "🏎️ Reprog moteur" },
-        { id: "e85_diesel_menu", title: "🏠 Menu principal" },
-      ]
-    );
+    await sendWhatsAppInteractiveButtons(fromWa, e85DieselRetryMsg, e85DieselButtons);
     return true;
   }
 
