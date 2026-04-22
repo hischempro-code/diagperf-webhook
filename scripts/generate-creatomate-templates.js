@@ -52,6 +52,8 @@ const PRESTATIONS = {
       gain_text: "-70% ÉMISSIONS CO₂",
     },
     accent_color: "#22c55e", // vert bio
+    // E85 : 490€ fixe si année < 2020 ; sinon sur devis (pas de rendu vidéo)
+    default_price: "490€ TTC",
   },
   fap: {
     tagline: "SUPPRESSION FAP PREMIUM",
@@ -77,6 +79,9 @@ const PRESTATIONS = {
       gain_text: "+15% DE RÉPONSE MOTEUR",
     },
     accent_color: "#3b82f6", // bleu
+    // Défaut = tarif le plus bas (marketing) ; le backend override avec le vrai prix calculé
+    // par computeFapPrice (260€ si année < 2019, sinon 300€)
+    default_price: "À PARTIR DE 260€ TTC",
   },
   adblue: {
     tagline: "SUPPRESSION ADBLUE PREMIUM",
@@ -102,6 +107,9 @@ const PRESTATIONS = {
       gain_text: "ÉCONOMIES ~300€/AN",
     },
     accent_color: "#8b5cf6", // violet
+    // Défaut = tarif le plus bas (marketing) ; le backend override avec le vrai prix calculé
+    // par computeAdbluePrice (260€ si BlueHDi, sinon 300€)
+    default_price: "À PARTIR DE 260€ TTC",
   },
 };
 
@@ -281,8 +289,11 @@ function buildTemplate(config) {
         break;
 
       // ===== Scène finale =====
-      // price_label, price_ttc, final_cta, final_brand restent identiques
-      // (price_ttc est overridé dynamiquement par le backend via modifications)
+      // price_label, final_cta, final_brand restent identiques
+      // price_ttc : on pose un défaut cohérent par prestation (overridé au runtime par le backend)
+      case "price_ttc":
+        if (config.default_price) el.text = config.default_price;
+        break;
 
       // ===== Couleur d'accent =====
       // On NE change PAS la couleur or principale (C9A961) qui fait l'identité premium,

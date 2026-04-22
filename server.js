@@ -2759,12 +2759,30 @@ const TTC_INTENTS = new Set(["REPROG", "E85", "FAP", "ADBLUE", "EGR", "DIAG"]);
 // ====== Stage 1 fixed price constant ======
 const STAGE1_FIXED_PRICE_CENTS = 39000; // 390€ TTC
 
+// ====== Helpers compatibilité véhicule pour filtrer upsells ======
+function _vehicleFuelText(vehicle) {
+  return String(vehicle?.fuel || "").toLowerCase();
+}
+function _isDieselVehicle(vehicle) {
+  return /diesel|gazole|hdi|tdi|dci|cdi|bluehdi|d4d|crdi|go\b/i.test(_vehicleFuelText(vehicle));
+}
+function _isEssenceVehicle(vehicle) {
+  return /essence|gazoline|petrol|super|sp95|sp98|flex|hybride|gpl/i.test(_vehicleFuelText(vehicle));
+}
+function _hasAdBlueSystem(vehicle) {
+  // BlueHDi PSA / SCR / diesel Euro 6+ (approx. année >= 2015)
+  const fields = [vehicle?.engine, vehicle?.model, vehicle?.fuel, vehicle?.trim, vehicle?.version]
+    .filter(Boolean).join(" ").toLowerCase();
+  if (/blue[\s-]?hdi|\bscr\b|ad[\s-]?blue/i.test(fields)) return true;
+  if (_isDieselVehicle(vehicle) && (vehicle?.year || 0) >= 2015) return true;
+  return false;
+}
+
 const UPSELL_OPTIONS = {
   FAP: [
     {
       id: "fap_meca", label: "Suppression mécanique FAP", priceCents: 25000, prestationCode: "suppression_mecanique_fap",
       message:
-        `Excellente décision ! 🎉\n\n` +
         `💡 Nous vous recommandons la *suppression mécanique du FAP*.\n\n` +
         `En plus de la suppression logicielle, le retrait physique du filtre à particules permet d'éliminer tout risque de colmatage futur et d'améliorer le flux d'échappement.\n\n` +
         `➕ Suppression mécanique FAP : +250€ TTC\n\n` +
@@ -2774,8 +2792,9 @@ const UPSELL_OPTIONS = {
     },
     {
       id: "egr", label: "Suppression EGR", priceCents: 9000, prestationCode: "suppression_egr",
+      // EGR : diesel only (sécurité, FAP implique déjà diesel mais on double-check)
+      condition: _isDieselVehicle,
       message:
-        `Excellente décision ! 🎉\n\n` +
         `💡 Nous vous recommandons également la *suppression EGR* pour optimiser pleinement votre moteur.\n\n` +
         `La vanne EGR encrassée peut réduire les performances et augmenter la consommation. En la combinant avec la suppression FAP, vous obtenez un résultat optimal.\n\n` +
         `➕ Suppression EGR : +90€ TTC\n\n` +
@@ -2785,10 +2804,20 @@ const UPSELL_OPTIONS = {
     },
     {
       id: "adblue", label: "Suppression AdBlue", priceCents: 9000, prestationCode: "suppression_adblue",
-      message:
-        `💡 Votre véhicule est peut-être équipé du système *AdBlue*. Sa suppression permet d'éviter les pannes liées au système SCR et les coûts d'entretien associés.\n\n` +
-        `➕ Suppression AdBlue : +90€ TTC\n\n` +
-        `Souhaitez-vous ajouter cette option ?`,
+      // AdBlue : uniquement si le véhicule est effectivement équipé (BlueHDi, SCR, diesel Euro 6+)
+      condition: _hasAdBlueSystem,
+      // Wording dynamique selon détection véhicule (plus pro que "peut-être équipé")
+      message: (vehicle) => {
+        const fields = [vehicle?.engine, vehicle?.model, vehicle?.trim, vehicle?.version]
+          .filter(Boolean).join(" ").toLowerCase();
+        const isBlueHdi = /blue[\s-]?hdi/i.test(fields);
+        const intro = isBlueHdi
+          ? `💡 Votre *BlueHDi* est équipé du système *AdBlue (SCR)*.`
+          : `💡 Votre véhicule diesel est équipé du système *AdBlue (SCR)*.`;
+        return `${intro} Sa suppression permet d'éviter les pannes liées au SCR et les coûts d'entretien associés (recharges AdBlue, capteurs NOx).\n\n` +
+          `➕ Suppression AdBlue : +90€ TTC\n\n` +
+          `Souhaitez-vous ajouter cette option ?`;
+      },
       addBtnLabel: "✅ Ajouter (+90€)",
       skipBtnLabel: "⏭️ Suivant",
     },
@@ -2806,8 +2835,9 @@ const UPSELL_OPTIONS = {
   ADBLUE: [
     {
       id: "fap", label: "Suppression FAP", priceCents: 9000, prestationCode: "suppression_fap",
+      // FAP : diesel only (ADBlue implique déjà diesel mais on double-check)
+      condition: _isDieselVehicle,
       message:
-        `Excellente décision ! 🎉\n\n` +
         `💡 Nous vous recommandons également la *suppression FAP* pour un fonctionnement optimal de votre moteur.\n\n` +
         `En combinant la suppression AdBlue et FAP, vous éliminez les deux principales sources de problèmes sur les moteurs diesel modernes.\n\n` +
         `➕ Suppression FAP : +90€ TTC\n\n` +
@@ -2817,6 +2847,7 @@ const UPSELL_OPTIONS = {
     },
     {
       id: "egr", label: "Suppression EGR", priceCents: 9000, prestationCode: "suppression_egr",
+      condition: _isDieselVehicle,
       message:
         `💡 Pour compléter le traitement, nous proposons la *suppression EGR*.\n\n` +
         `La vanne EGR est souvent responsable de l'encrassement du moteur. Sa suppression améliore la fiabilité et les performances.\n\n` +
@@ -2840,8 +2871,9 @@ const UPSELL_OPTIONS = {
       id: "e85_bougies",
       label: "Bougies d'allumage éthanol",
       priceCents: 17000,
+      // Essence uniquement (E85 implique déjà essence, double-check)
+      condition: _isEssenceVehicle,
       message:
-        `Excellente décision ! 🎉\n\n` +
         `💡 Nous préconisons fortement le changement des *bougies d'allumage classiques* par des *bougies d'allumage adaptées à l'éthanol*.\n\n` +
         `Les bougies standard ne sont pas optimisées pour le bioéthanol. Des bougies adaptées garantissent un meilleur démarrage, une combustion optimale et une durée de vie prolongée du moteur.\n\n` +
         `➕ Bougies d'allumage éthanol : +170€ TTC\n\n` +
@@ -2857,12 +2889,8 @@ const UPSELL_OPTIONS = {
       priceCents: 17000,
       prestationCode: "bougies_performance",
       // Essence uniquement (diesel n'utilise pas de bougies d'allumage)
-      condition: (vehicle) => {
-        const fuel = String(vehicle?.fuel || "").toLowerCase();
-        return /essence|gazoline|petrol|super|sp95|sp98|flex|hybride|gpl/i.test(fuel);
-      },
+      condition: _isEssenceVehicle,
       message:
-        `Excellente décision ! 🎉\n\n` +
         `💡 Pour accompagner votre reprogrammation, nous préconisons le remplacement des *bougies d'allumage* par des *bougies haute performance*.\n\n` +
         `Après une reprog, la combustion est plus intense. Des bougies adaptées garantissent une combustion optimale, un meilleur démarrage et prolongent la durée de vie de votre moteur.\n\n` +
         `➕ Bougies d'allumage haute performance : +170€ TTC\n\n` +
@@ -2877,6 +2905,25 @@ const UPSELL_OPTIONS = {
 function getUpsellOptionsForVehicle(intent, vehicle) {
   const options = UPSELL_OPTIONS[intent] || [];
   return options.filter((opt) => typeof opt.condition !== "function" || opt.condition(vehicle));
+}
+
+// ====== Build upsell message body (message peut être string ou fonction (vehicle) => string) ======
+function _upsellMessageBody(opt, vehicle) {
+  return typeof opt.message === "function" ? opt.message(vehicle) : opt.message;
+}
+
+// ====== Greeting contextuel pour upsell (selon action précédente) ======
+// prevAction : "confirm" (user vient de confirmer le devis) | "add" (user a ajouté l'upsell précédent)
+//             | "skip" (user a refusé l'upsell précédent)
+function _upsellGreeting(prevAction) {
+  if (prevAction === "confirm") return `Excellente décision ! 🎉\n\n`;
+  if (prevAction === "add") return `Parfait ! 🎉\n\n`;
+  if (prevAction === "skip") return `Pas de souci 👍\n\n`;
+  return "";
+}
+
+function buildUpsellMessage(opt, vehicle, prevAction) {
+  return _upsellGreeting(prevAction) + _upsellMessageBody(opt, vehicle);
 }
 
 // ====== Intents that have upsells ======
@@ -3050,6 +3097,38 @@ RÈGLES ABSOLUES :
 - Un intent (Cas 1) nécessite une demande EXPLICITE dans le message actuel
 - SALUTATIONS ("bonjour", "salut", "hello", "ça va") → Cas 2 : accueil chaleureux + propose tes services. JAMAIS un intent.
 - Si un client demande un service qu'on ne fait pas → oriente vers ce qu'on sait faire ou propose de contacter l'équipe`;
+
+// ====== Helper : détecter si le texte ressemble à une question off-topic ======
+// (pendant un état interactif type WAITING_QUOTE_CONFIRM / WAITING_UPSELL)
+function isLikelyQuestion(text) {
+  const t = String(text || "").trim();
+  if (t.length < 6) return false;
+  // réponses courtes attendues → pas une question
+  if (/^(oui|non|yes|no|ok|okay|d(?:'|’)?accord|confirmer|annuler|suivant|passer|skip|ajouter|menu|\d+)\.?$/i.test(t)) return false;
+  if (/\?/.test(t)) return true;
+  // tournures interrogatives courantes
+  if (/\b(est[\s-]?ce|qu(?:'|’)?est|comment|pourquoi|quand|où|ou\b|combien|quel|quelle|quels|quelles|peut[\s-]?on|puis[\s-]?je|peux[\s-]?je|y[\s-]?a[\s-]?t[\s-]?il|c(?:'|’)?est[\s-]?quoi|c(?:'|’)?est[\s-]?pour)\b/i.test(t)) return true;
+  return false;
+}
+
+// ====== Helper : répondre à une question off-topic via LLM puis re-proposer les boutons ======
+// Retourne true si pris en charge (réponse envoyée + re-proposition), false sinon.
+async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons }) {
+  if (!isLikelyQuestion(text)) return false;
+  try {
+    const llmResult = await askLLM(text, fromWa);
+    if (!llmResult || llmResult.type !== "answer" || !llmResult.message) return false;
+    await sendWhatsAppText(fromWa, llmResult.message);
+    if (retryMessage && retryButtons) {
+      await sendWhatsAppInteractiveButtons(fromWa, retryMessage, retryButtons);
+    }
+    log.info("Off-topic question answered via LLM + retry buttons", { wa_id: fromWa });
+    return true;
+  } catch (err) {
+    log.warn("Off-topic LLM answer failed", { wa_id: fromWa, error: String(err?.message || err) });
+    return false;
+  }
+}
 
 async function askLLM(userMessage, waId) {
   if (!ANTHROPIC_API_KEY) return null;
@@ -3528,6 +3607,41 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
   const prestationCode = intentToPrestationCode(intent);
   const label = intentToLabel(intent);
 
+  // --- Cas spécial : FAP_ESSENCE_REFUSED (le client a une essence, pas de FAP) ---
+  if (convState.state === "FAP_ESSENCE_REFUSED") {
+    if (buttonId === "fap_essence_reprog") {
+      await clearConversationState(fromWa);
+      log.info("FAP essence → bascule vers REPROG", { wa_id: fromWa });
+      return handlePrestationFlow(fromWa, "1", rawMsg);
+    }
+    if (buttonId === "fap_essence_e85") {
+      await clearConversationState(fromWa);
+      log.info("FAP essence → bascule vers E85", { wa_id: fromWa });
+      return handlePrestationFlow(fromWa, "2", rawMsg);
+    }
+    if (buttonId === "btn_back_menu") {
+      await clearConversationState(fromWa);
+      await sendMenuList(fromWa);
+      return true;
+    }
+    const detectedFap = detectIntent(text);
+    if (detectedFap) {
+      await clearConversationState(fromWa);
+      const menuMapFap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+      return handlePrestationFlow(fromWa, menuMapFap[detectedFap] || text, rawMsg);
+    }
+    await sendWhatsAppInteractiveButtons(
+      fromWa,
+      `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`,
+      [
+        { id: "fap_essence_reprog", title: "🏎️ Reprog moteur" },
+        { id: "fap_essence_e85", title: "🌿 Conversion E85" },
+        { id: "btn_back_menu", title: "🏠 Menu" },
+      ]
+    );
+    return true;
+  }
+
   // --- Cas spécial : EGR_ESSENCE_REFUSED (le client a une essence et la suppression EGR n'est pas pertinente) ---
   if (convState.state === "EGR_ESSENCE_REFUSED") {
     if (buttonId === "egr_essence_reprog") {
@@ -3709,6 +3823,27 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         }
       }
 
+      // --- FAP: bloquer si véhicule non-diesel (les moteurs essence n'ont pas de FAP) ---
+      if (intent === "FAP") {
+        if (!_isDieselVehicle(vehicle)) {
+          await setConversationState(fromWa, "FAP_ESSENCE_REFUSED", "FAP", { plate, vehicle });
+          await sendWhatsAppInteractiveButtons(
+            fromWa,
+            `❌ Suppression FAP non applicable\n\n` +
+            `Votre véhicule est un *${vehicle.make} ${vehicle.model}* motorisation *${vehicle.fuel || "non diesel"}*.\n\n` +
+            `Les moteurs *essence* n'ont pas de filtre à particules (FAP). Cette prestation est réservée aux véhicules *diesel*.\n\n` +
+            `💡 Pour un véhicule essence, je peux vous proposer une *reprogrammation moteur* (plus de puissance) ou une *conversion E85* (économies carburant) !`,
+            [
+              { id: "fap_essence_reprog", title: "🏎️ Reprog moteur" },
+              { id: "fap_essence_e85", title: "🌿 Conversion E85" },
+              { id: "btn_back_menu", title: "🏠 Menu" },
+            ]
+          );
+          log.info("FAP refusé: véhicule non-diesel", { wa_id: fromWa, fuel: vehicle.fuel, plate });
+          return true;
+        }
+      }
+
       // --- EGR: bloquer si véhicule non-diesel ---
       if (intent === "EGR") {
         const fuelLower = (vehicle.fuel || "").toLowerCase();
@@ -3829,7 +3964,11 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
           sendWhatsAppText(fromWa, `🎬 Préparation de votre animation personnalisée...`).catch(() => {});
           (async () => {
             try {
-              const videoUrl = await renderPrestationVideo({ intent, vehicle, priceTtc: ttcTxt });
+              // Format clean pour la vidéo : "260€ TTC" (sans les centimes)
+              const videoPriceTtc = typeof priceCents === "number"
+                ? `${Math.round(priceCents / 100)}€ TTC`
+                : ttcTxt;
+              const videoUrl = await renderPrestationVideo({ intent, vehicle, priceTtc: videoPriceTtc });
               if (videoUrl) {
                 const vName = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
                 await sendWhatsAppVideo(
@@ -3901,10 +4040,18 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    await sendWhatsAppInteractiveButtons(fromWa, "Est-ce bien votre véhicule ? Répondez *oui* ou *non*.", [
+    const vehicleConfirmRetryButtons = [
       { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
       { id: "confirm_vehicle_no", title: "❌ Non" },
-    ]);
+      { id: "btn_back_menu", title: "🏠 Menu" },
+    ];
+    const handledVC = await tryOffTopicAnswer({
+      fromWa, text,
+      retryMessage: "Est-ce bien votre véhicule ?",
+      retryButtons: vehicleConfirmRetryButtons,
+    });
+    if (handledVC) return true;
+    await sendWhatsAppInteractiveButtons(fromWa, "Est-ce bien votre véhicule ? Répondez *oui* ou *non*.", vehicleConfirmRetryButtons);
     return true;
   }
 
@@ -3958,6 +4105,12 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       if (retryButtons.length < 3) {
         retryButtons.push({ id: "btn_back_menu", title: "🏠 Menu" });
       }
+      const handledSC = await tryOffTopicAnswer({
+        fromWa, text,
+        retryMessage: "Quel stage souhaitez-vous ?",
+        retryButtons,
+      });
+      if (handledSC) return true;
       await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir un des stages proposés 👇", retryButtons);
       return true;
     }
@@ -4145,8 +4298,9 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
           addedOptions: [],
           baseTtcCents: stateData.priceCents,
           devisRef: `DEV-${stateData.devisId}`,
+          lastUpsellAction: "confirm",
         });
-        await sendWhatsAppInteractiveButtons(fromWa, firstOpt.message, [
+        await sendWhatsAppInteractiveButtons(fromWa, buildUpsellMessage(firstOpt, vehicle, "confirm"), [
           { id: "upsell_add", title: firstOpt.addBtnLabel },
           { id: "upsell_skip", title: firstOpt.skipBtnLabel },
           { id: "btn_back_menu", title: "\uD83C\uDFE0 Menu" },
@@ -4190,11 +4344,20 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    await sendWhatsAppInteractiveButtons(fromWa, "Répondez par *oui* si le devis vous convient, ou *non* dans le cas contraire.", [
+    // Avant le fallback générique, tenter de répondre à une question off-topic via LLM
+    const quoteConfirmRetryButtons = [
       { id: "confirm_quote_yes", title: "\u2705 Oui" },
       { id: "confirm_quote_no", title: "\u274C Non" },
       { id: "btn_back_menu", title: "\uD83C\uDFE0 Menu" },
-    ]);
+    ];
+    const handledQ = await tryOffTopicAnswer({
+      fromWa, text,
+      retryMessage: "Est-ce que ce devis vous convient ?",
+      retryButtons: quoteConfirmRetryButtons,
+    });
+    if (handledQ) return true;
+
+    await sendWhatsAppInteractiveButtons(fromWa, "Répondez par *oui* si le devis vous convient, ou *non* dans le cas contraire.", quoteConfirmRetryButtons);
     return true;
   }
 
@@ -4219,14 +4382,22 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     } else if (buttonId === "upsell_skip") {
       log.info("Upsell skipped", { wa_id: fromWa, option: options[step]?.id, step });
     } else {
-      // Unknown response → resend current proposal
+      // Unknown response → si c'est une question, répondre via LLM puis re-proposer
       const currentOpt = options[step];
       if (currentOpt) {
-        await sendWhatsAppInteractiveButtons(fromWa, currentOpt.message, [
+        const upsellRetryButtons = [
           { id: "upsell_add", title: currentOpt.addBtnLabel },
           { id: "upsell_skip", title: currentOpt.skipBtnLabel },
           { id: "btn_back_menu", title: "🏠 Menu" },
-        ]);
+        ];
+        const handledQ = await tryOffTopicAnswer({
+          fromWa, text,
+          retryMessage: buildUpsellMessage(currentOpt, stateData.vehicle, null),
+          retryButtons: upsellRetryButtons,
+        });
+        if (handledQ) return true;
+        // Sinon : retry bête (re-proposer l'upsell)
+        await sendWhatsAppInteractiveButtons(fromWa, buildUpsellMessage(currentOpt, stateData.vehicle, null), upsellRetryButtons);
       }
       return true;
     }
@@ -4236,9 +4407,10 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     if (nextStep < options.length) {
       // Send next upsell proposal
       const nextOpt = options[nextStep];
-      const newStateData = { ...stateData, upsellStep: nextStep, addedOptions };
+      const prevAction = buttonId === "upsell_add" ? "add" : "skip";
+      const newStateData = { ...stateData, upsellStep: nextStep, addedOptions, lastUpsellAction: prevAction };
       await setConversationState(fromWa, "WAITING_UPSELL", intent, newStateData);
-      await sendWhatsAppInteractiveButtons(fromWa, nextOpt.message, [
+      await sendWhatsAppInteractiveButtons(fromWa, buildUpsellMessage(nextOpt, stateData.vehicle, prevAction), [
         { id: "upsell_add", title: nextOpt.addBtnLabel },
         { id: "upsell_skip", title: nextOpt.skipBtnLabel },
         { id: "btn_back_menu", title: "🏠 Menu" },
@@ -4493,11 +4665,18 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     }
 
     // Fallback
-    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées.", [
+    const upsellConfirmRetryButtons = [
       { id: "upsell_confirm_yes", title: "✅ Confirmer" },
       { id: "upsell_confirm_no", title: "❌ Annuler" },
       { id: "btn_back_menu", title: "🏠 Menu" },
-    ]);
+    ];
+    const handledUC = await tryOffTopicAnswer({
+      fromWa, text,
+      retryMessage: "Confirmez-vous votre devis avec les options retenues ?",
+      retryButtons: upsellConfirmRetryButtons,
+    });
+    if (handledUC) return true;
+    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées.", upsellConfirmRetryButtons);
     return true;
   }
 
@@ -4575,11 +4754,18 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     }
 
     // Fallback si le bouton n'est pas reconnu → re-propose les options d'origine
-    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées 👇", [
+    const postQuoteRetryButtons = [
       { id: "post_quote_rdv", title: "Prendre RDV" },
       { id: "post_quote_technicien", title: "Question technicien" },
       { id: "post_quote_accueil", title: "Retour accueil" },
-    ]);
+    ];
+    const handledPQ = await tryOffTopicAnswer({
+      fromWa, text,
+      retryMessage: "Comment souhaitez-vous continuer ?",
+      retryButtons: postQuoteRetryButtons,
+    });
+    if (handledPQ) return true;
+    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées 👇", postQuoteRetryButtons);
     return true;
   }
 
