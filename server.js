@@ -4437,8 +4437,12 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    // Fallback si le bouton n'est pas reconnu
-    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées.", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+    // Fallback si le bouton n'est pas reconnu → re-propose les options d'origine
+    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées 👇", [
+      { id: "post_quote_rdv", title: "Prendre RDV" },
+      { id: "post_quote_technicien", title: "Question technicien" },
+      { id: "post_quote_accueil", title: "Retour accueil" },
+    ]);
     return true;
   }
 
