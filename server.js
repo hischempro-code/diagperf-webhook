@@ -3810,7 +3810,18 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     }
 
     if (selectedIdx < 0 || selectedIdx >= stages.length) {
-      await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir un des stages proposés.", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+      // Rebuild stage buttons so user can retry their choice (instead of being stuck)
+      const retryButtons = stages.slice(0, 3).map((s, i) => {
+        const btnLabel = formatStageLabel(s.stage);
+        const btnPrix = CUSTOM_QUOTE_STAGES.has(s.stage)
+          ? "Devis"
+          : (s.stage === "stage1" ? STAGE1_PRICE_LABEL : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€` : "Devis"));
+        return { id: `stage_choice_${i + 1}`, title: `${btnLabel} — ${btnPrix}`.slice(0, 20) };
+      });
+      if (retryButtons.length < 3) {
+        retryButtons.push({ id: "btn_back_menu", title: "🏠 Menu" });
+      }
+      await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir un des stages proposés 👇", retryButtons);
       return true;
     }
 
