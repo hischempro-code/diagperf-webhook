@@ -6,7 +6,7 @@ const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
 const sgMail = require("@sendgrid/mail");
 const { retrieveContext, formatContextForPrompt, preloadEmbedder } = require("./rag");
-const { renderStageGainsVideo } = require("./lib/creatomateVideo");
+const { renderStageGainsVideo, renderPrestationVideo } = require("./lib/creatomateVideo");
 
 // Node 18+ => fetch global. Node <18 => fallback node-fetch
 const fetchFn = global.fetch || require("node-fetch");
@@ -3815,6 +3815,35 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
               log.debug("Prestation card send failed (non-blocking)", { error: String(cardErr?.message || cardErr) });
             });
           }
+        }
+
+        // ====== Premium prestation video (Creatomate) — E85/FAP/ADBlue ======
+        // Uses dedicated template IDs via env CREATOMATE_TEMPLATE_ID_<INTENT>
+        const prestationVideoIntents = new Set(["E85", "FAP", "ADBLUE"]);
+        const prestationTemplateEnv = {
+          E85: process.env.CREATOMATE_TEMPLATE_ID_E85,
+          FAP: process.env.CREATOMATE_TEMPLATE_ID_FAP,
+          ADBLUE: process.env.CREATOMATE_TEMPLATE_ID_ADBLUE,
+        };
+        if (prestationVideoIntents.has(intent) && process.env.CREATOMATE_API_KEY && prestationTemplateEnv[intent]) {
+          sendWhatsAppText(fromWa, `🎬 Préparation de votre animation personnalisée...`).catch(() => {});
+          (async () => {
+            try {
+              const videoUrl = await renderPrestationVideo({ intent, vehicle, priceTtc: ttcTxt });
+              if (videoUrl) {
+                const vName = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
+                await sendWhatsAppVideo(
+                  fromWa, videoUrl,
+                  `🏎️ Voilà à quoi ressemblera votre ${vName} après la ${displayLabel.toLowerCase()} !`
+                );
+                log.info("Prestation video sent", { wa_id: fromWa, intent });
+              } else {
+                log.warn("Prestation video rendering failed (non-blocking)", { wa_id: fromWa, intent });
+              }
+            } catch (err) {
+              log.error("Prestation video error (non-blocking)", { wa_id: fromWa, intent, error: String(err?.message || err) });
+            }
+          })();
         }
 
         await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\n` +

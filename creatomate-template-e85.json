@@ -1,0 +1,1122 @@
+{
+  "output_format": "mp4",
+  "width": 1080,
+  "height": 1920,
+  "frame_rate": 30,
+  "duration": 15,
+  "elements": [
+    {
+      "name": "background",
+      "type": "shape",
+      "track": 1,
+      "width": "100%",
+      "height": "100%",
+      "fill_color": "#0A0A0A"
+    },
+    {
+      "name": "accent_vignette",
+      "type": "shape",
+      "track": 2,
+      "width": "100%",
+      "height": "100%",
+      "fill_color": "rgba(201,169,97,0.08)"
+    },
+    {
+      "name": "brand_line_top",
+      "type": "shape",
+      "track": 3,
+      "x": "50%",
+      "y": "38%",
+      "width": "45%",
+      "height": "0.2 vmin",
+      "fill_color": "#C9A961",
+      "x_anchor": "50%",
+      "y_anchor": "50%",
+      "time": 0,
+      "duration": 2.6,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "scale",
+          "fade": false,
+          "x_anchor": "50%",
+          "start_scale": "0% 100%",
+          "end_scale": "100% 100%",
+          "time": 0,
+          "duration": 0.7
+        },
+        {
+          "time": 2.25,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "brand_logo_text",
+      "type": "text",
+      "track": 4,
+      "text": "DIAGPERF",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "9 vmin",
+      "letter_spacing": "15%",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "43%",
+      "width": "90%",
+      "height": "15%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 0.2,
+      "duration": 2.4,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.6
+        },
+        {
+          "time": 2.05,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "brand_tagline",
+      "type": "text",
+      "track": 5,
+      "text": "CONVERSION E85 BIOÉTHANOL",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.6 vmin",
+      "letter_spacing": "35%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "49%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 0.6,
+      "duration": 2,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.8
+        },
+        {
+          "time": 1.65,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "scene2_intro",
+      "type": "text",
+      "track": 4,
+      "text": "VOUS ROULEZ EN",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3 vmin",
+      "letter_spacing": "30%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "38%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 2.7,
+      "duration": 2.3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.9499999999999997,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "vehicle_name",
+      "type": "text",
+      "track": 5,
+      "text": "CITROEN C3",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "11 vmin",
+      "letter_spacing": "5%",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "48%",
+      "width": "95%",
+      "height": "18%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 2.9,
+      "duration": 2.1,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "scale",
+          "start_scale": "90%",
+          "end_scale": "100%",
+          "duration": 0.6
+        },
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.75,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "vehicle_engine",
+      "type": "text",
+      "track": 6,
+      "text": "1.4 HDi 68ch",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3.2 vmin",
+      "letter_spacing": "15%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "57%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 3.2,
+      "duration": 1.8,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.4500000000000002,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "scene3_intro",
+      "type": "text",
+      "track": 4,
+      "text": "NOUS VOUS PROPOSONS",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3 vmin",
+      "letter_spacing": "30%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "38%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 5.1,
+      "duration": 1.9,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "stage_label",
+      "type": "text",
+      "track": 5,
+      "text": "CONVERSION E85",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "11 vmin",
+      "letter_spacing": "8%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "50%",
+      "width": "95%",
+      "height": "25%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 5.3,
+      "duration": 1.7,
+      "animations": [
+        {
+          "easing": "elastic-out",
+          "type": "scale",
+          "start_scale": "115%",
+          "end_scale": "100%",
+          "duration": 0.7
+        },
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.35,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "scene4_label",
+      "type": "text",
+      "track": 4,
+      "text": "ÉCONOMIE CARBURANT",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3.2 vmin",
+      "letter_spacing": "50%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "30%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 7.1,
+      "duration": 3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 2.65,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_before_label",
+      "type": "text",
+      "track": 5,
+      "text": "SP95",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.4 vmin",
+      "letter_spacing": "30%",
+      "fill_color": "rgba(245,245,240,0.5)",
+      "x": "28%",
+      "y": "40%",
+      "width": "30%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 7.3,
+      "duration": 2.8,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 2.4499999999999997,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_before",
+      "type": "text",
+      "track": 6,
+      "text": "1,80€",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "7 vmin",
+      "fill_color": "rgba(245,245,240,0.6)",
+      "x": "28%",
+      "y": "48%",
+      "width": "30%",
+      "height": "14%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 7.4,
+      "duration": 2.7,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 2.35,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_unit_before",
+      "type": "text",
+      "track": 7,
+      "text": "/L",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "rgba(245,245,240,0.5)",
+      "x": "28%",
+      "y": "57%",
+      "width": "30%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 7.4,
+      "duration": 2.7,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 2.35,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_arrow",
+      "type": "text",
+      "track": 8,
+      "text": "→",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "7 vmin",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "48%",
+      "width": "15%",
+      "height": "12%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 7.8,
+      "duration": 2.3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.9499999999999997,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_after_label",
+      "type": "text",
+      "track": 5,
+      "text": "E85",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.4 vmin",
+      "letter_spacing": "30%",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "40%",
+      "width": "30%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 8.1,
+      "duration": 2,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.65,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_after",
+      "type": "text",
+      "track": 6,
+      "text": "1,00€",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "9 vmin",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "48%",
+      "width": "30%",
+      "height": "16%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 8.2,
+      "duration": 1.9,
+      "animations": [
+        {
+          "easing": "elastic-out",
+          "type": "scale",
+          "start_scale": "140%",
+          "end_scale": "100%",
+          "duration": 0.7
+        },
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_unit_after",
+      "type": "text",
+      "track": 7,
+      "text": "/L",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "57%",
+      "width": "30%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 8.2,
+      "duration": 1.9,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "hp_gain",
+      "type": "text",
+      "track": 8,
+      "text": "JUSQU'À -40% À LA POMPE",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "4 vmin",
+      "letter_spacing": "20%",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "65%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 8.8,
+      "duration": 1.3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 0.9500000000000001,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "scene5_label",
+      "type": "text",
+      "track": 4,
+      "text": "RÉDUCTION CO₂",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "3.2 vmin",
+      "letter_spacing": "50%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "30%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 10.2,
+      "duration": 2.5,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 2.15,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "torque_before",
+      "type": "text",
+      "track": 5,
+      "text": "100",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "9 vmin",
+      "fill_color": "rgba(245,245,240,0.6)",
+      "x": "28%",
+      "y": "48%",
+      "width": "30%",
+      "height": "14%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 10.4,
+      "duration": 2.3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.9499999999999997,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "torque_unit_before",
+      "type": "text",
+      "track": 6,
+      "text": "%",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "rgba(245,245,240,0.5)",
+      "x": "28%",
+      "y": "57%",
+      "width": "30%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 10.4,
+      "duration": 2.3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.9499999999999997,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "torque_arrow",
+      "type": "text",
+      "track": 7,
+      "text": "→",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "7 vmin",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "48%",
+      "width": "15%",
+      "height": "12%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 10.8,
+      "duration": 1.9,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "torque_after",
+      "type": "text",
+      "track": 8,
+      "text": "30",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "11 vmin",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "48%",
+      "width": "30%",
+      "height": "16%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 11.1,
+      "duration": 1.6,
+      "animations": [
+        {
+          "easing": "elastic-out",
+          "type": "scale",
+          "start_scale": "140%",
+          "end_scale": "100%",
+          "duration": 0.7
+        },
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.25,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "torque_unit_after",
+      "type": "text",
+      "track": 9,
+      "text": "%",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "3 vmin",
+      "fill_color": "#C9A961",
+      "x": "72%",
+      "y": "57%",
+      "width": "30%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 11.1,
+      "duration": 1.6,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.4
+        },
+        {
+          "time": 1.25,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "torque_gain",
+      "type": "text",
+      "track": 10,
+      "text": "-70% ÉMISSIONS CO₂",
+      "font_family": "Montserrat",
+      "font_weight": "700",
+      "font_size": "4 vmin",
+      "letter_spacing": "20%",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "65%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 11.6,
+      "duration": 1.1,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 0.7500000000000001,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "final_line_top",
+      "type": "shape",
+      "track": 3,
+      "x": "50%",
+      "y": "36%",
+      "width": "40%",
+      "height": "0.1 vmin",
+      "fill_color": "#C9A961",
+      "x_anchor": "50%",
+      "time": 12.8,
+      "duration": 2.2,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "scale",
+          "fade": false,
+          "x_anchor": "50%",
+          "start_scale": "0% 100%",
+          "end_scale": "100% 100%",
+          "time": 0,
+          "duration": 0.7
+        },
+        {
+          "time": 1.85,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "price_label",
+      "type": "text",
+      "track": 4,
+      "text": "TARIF INTERVENTION",
+      "font_family": "Montserrat",
+      "font_weight": "300",
+      "font_size": "2.8 vmin",
+      "letter_spacing": "40%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "40%",
+      "width": "90%",
+      "height": "7%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 12.9,
+      "duration": 2.1,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.75,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "price_ttc",
+      "type": "text",
+      "track": 5,
+      "text": "390€ TTC",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "13 vmin",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "50%",
+      "width": "95%",
+      "height": "20%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 13.1,
+      "duration": 1.9,
+      "animations": [
+        {
+          "easing": "elastic-out",
+          "type": "scale",
+          "start_scale": "130%",
+          "end_scale": "100%",
+          "duration": 0.7
+        },
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "final_cta",
+      "type": "text",
+      "track": 6,
+      "text": "RÉSERVEZ VOTRE INTERVENTION",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.8 vmin",
+      "letter_spacing": "40%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "62%",
+      "width": "95%",
+      "height": "7%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 13.5,
+      "duration": 1.5,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 1.15,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "final_brand",
+      "type": "text",
+      "track": 7,
+      "text": "DIAGPERF",
+      "font_family": "Montserrat",
+      "font_weight": "900",
+      "font_size": "4 vmin",
+      "letter_spacing": "20%",
+      "fill_color": "#F5F5F0",
+      "x": "50%",
+      "y": "68%",
+      "width": "90%",
+      "height": "8%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 13.7,
+      "duration": 1.3,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.5
+        },
+        {
+          "time": 0.9500000000000001,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "zero_to_hundred",
+      "type": "text",
+      "track": 11,
+      "text": "",
+      "font_family": "Montserrat",
+      "font_weight": "400",
+      "font_size": "2.4 vmin",
+      "letter_spacing": "30%",
+      "fill_color": "#C9A961",
+      "x": "50%",
+      "y": "75%",
+      "width": "90%",
+      "height": "6%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "time": 7.3,
+      "duration": 7.7,
+      "animations": [
+        {
+          "easing": "cubic-out",
+          "type": "fade",
+          "duration": 0.6
+        },
+        {
+          "time": 7.3500000000000005,
+          "duration": 0.35,
+          "easing": "cubic-in",
+          "type": "fade",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "glow_hp_after",
+      "type": "shape",
+      "track": 2,
+      "x": "72%",
+      "y": "48%",
+      "width": "40%",
+      "height": "25%",
+      "x_anchor": "50%",
+      "y_anchor": "50%",
+      "fill_color": "rgba(34,197,94,0.2)",
+      "time": 8.2,
+      "duration": 1.9,
+      "animations": [
+        {
+          "type": "fade",
+          "easing": "cubic-out",
+          "duration": 0.4
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "type": "fade",
+          "easing": "cubic-in",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "glow_torque_after",
+      "type": "shape",
+      "track": 2,
+      "x": "72%",
+      "y": "48%",
+      "width": "40%",
+      "height": "25%",
+      "x_anchor": "50%",
+      "y_anchor": "50%",
+      "fill_color": "rgba(34,197,94,0.2)",
+      "time": 11.1,
+      "duration": 1.6,
+      "animations": [
+        {
+          "type": "fade",
+          "easing": "cubic-out",
+          "duration": 0.4
+        },
+        {
+          "time": 1.25,
+          "duration": 0.35,
+          "type": "fade",
+          "easing": "cubic-in",
+          "reversed": true
+        }
+      ]
+    },
+    {
+      "name": "glow_price_ttc",
+      "type": "shape",
+      "track": 2,
+      "x": "50%",
+      "y": "50%",
+      "width": "60%",
+      "height": "30%",
+      "x_anchor": "50%",
+      "y_anchor": "50%",
+      "fill_color": "rgba(34,197,94,0.2)",
+      "time": 13.1,
+      "duration": 1.9,
+      "animations": [
+        {
+          "type": "fade",
+          "easing": "cubic-out",
+          "duration": 0.4
+        },
+        {
+          "time": 1.5499999999999998,
+          "duration": 0.35,
+          "type": "fade",
+          "easing": "cubic-in",
+          "reversed": true
+        }
+      ]
+    }
+  ]
+}
