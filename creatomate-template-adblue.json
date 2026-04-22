@@ -121,8 +121,8 @@
       "track": 5,
       "text": "SUPPRESSION ADBLUE PREMIUM",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "2.6 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "35%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -150,7 +150,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "scene2_intro",
@@ -158,8 +159,8 @@
       "track": 4,
       "text": "VOUS ROULEZ EN",
       "font_family": "Montserrat",
-      "font_weight": "300",
-      "font_size": "3 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "30%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -187,7 +188,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "vehicle_name",
@@ -239,8 +241,8 @@
       "track": 6,
       "text": "1.4 HDi 68ch",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "3.2 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "15%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -268,7 +270,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "scene3_intro",
@@ -276,8 +279,8 @@
       "track": 4,
       "text": "NOUS VOUS PROPOSONS",
       "font_family": "Montserrat",
-      "font_weight": "300",
-      "font_size": "3 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "30%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -305,7 +308,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "stage_label",
@@ -349,7 +353,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "scene4_label",
@@ -357,8 +362,8 @@
       "track": 4,
       "text": "PANNES SCR",
       "font_family": "Montserrat",
-      "font_weight": "300",
-      "font_size": "3.2 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "50%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -386,7 +391,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "hp_before_label",
@@ -503,8 +509,8 @@
       "track": 8,
       "text": "→",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "7 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "fill_color": "#C9A961",
       "x": "50%",
       "y": "48%",
@@ -531,7 +537,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "hp_after_label",
@@ -539,8 +546,8 @@
       "track": 5,
       "text": "ZÉRO",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "2.4 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "30%",
       "fill_color": "#C9A961",
       "x": "72%",
@@ -568,7 +575,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "hp_after",
@@ -577,7 +585,7 @@
       "text": "0",
       "font_family": "Montserrat",
       "font_weight": "900",
-      "font_size": "11 vmin",
+      "font_size": "4 vmin",
       "fill_color": "#C9A961",
       "x": "72%",
       "y": "48%",
@@ -611,7 +619,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "hp_unit_after",
@@ -619,8 +628,8 @@
       "track": 7,
       "text": "%",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "3 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "fill_color": "#C9A961",
       "x": "72%",
       "y": "57%",
@@ -647,7 +656,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "hp_gain",
@@ -692,8 +702,8 @@
       "track": 4,
       "text": "ENTRETIEN ANNUEL",
       "font_family": "Montserrat",
-      "font_weight": "300",
-      "font_size": "3.2 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "50%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -721,7 +731,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "torque_before",
@@ -801,8 +812,8 @@
       "track": 7,
       "text": "→",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "7 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "fill_color": "#C9A961",
       "x": "50%",
       "y": "48%",
@@ -829,7 +840,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "torque_after",
@@ -838,7 +850,7 @@
       "text": "0",
       "font_family": "Montserrat",
       "font_weight": "900",
-      "font_size": "11 vmin",
+      "font_size": "4 vmin",
       "fill_color": "#C9A961",
       "x": "72%",
       "y": "48%",
@@ -872,7 +884,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "torque_unit_after",
@@ -880,8 +893,8 @@
       "track": 9,
       "text": "€",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "3 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "fill_color": "#C9A961",
       "x": "72%",
       "y": "57%",
@@ -908,7 +921,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "torque_gain",
@@ -985,8 +999,8 @@
       "track": 4,
       "text": "TARIF INTERVENTION",
       "font_family": "Montserrat",
-      "font_weight": "300",
-      "font_size": "2.8 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "40%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -1014,7 +1028,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "price_ttc",
@@ -1065,8 +1080,8 @@
       "track": 6,
       "text": "RÉSERVEZ VOTRE INTERVENTION",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "2.8 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "40%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -1094,7 +1109,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "final_brand",
@@ -1139,8 +1155,8 @@
       "track": 11,
       "text": "",
       "font_family": "Montserrat",
-      "font_weight": "400",
-      "font_size": "2.4 vmin",
+      "font_weight": "900",
+      "font_size": "4 vmin",
       "letter_spacing": "30%",
       "fill_color": "#C9A961",
       "x": "50%",
@@ -1168,7 +1184,8 @@
       "shadow_color": "rgba(0,0,0,0.85)",
       "shadow_blur": "1.2 vmin",
       "shadow_x": "0.3 vmin",
-      "shadow_y": "0.3 vmin"
+      "shadow_y": "0.3 vmin",
+      "font_style": "normal"
     },
     {
       "name": "glow_hp_after",

@@ -177,8 +177,6 @@ function buildTemplate(config) {
   tpl.elements.unshift(scrimOverlay);
 
   // ===== Text shadow (lisibilité garantie sur tout fond) =====
-  // On applique une ombre noire floutée à TOUS les textes.
-  // Fonctionne indépendamment des tracks/layers (garantie sur vidéo de fond claire).
   const applyTextShadow = (el) => {
     if (el.type !== "text") return;
     el.shadow_color = "rgba(0,0,0,0.85)";
@@ -187,8 +185,26 @@ function buildTemplate(config) {
     el.shadow_y = "0.3 vmin";
   };
 
+  // ===== Gold text override (Montserrat 900, 4 vmin) =====
+  // Appliqué à TOUS les textes en or pour garantir la lisibilité.
+  const isGoldFill = (fill) => {
+    if (!fill) return false;
+    const f = String(fill).toLowerCase().replace(/\s/g, "");
+    return f === "#c9a961" || f.includes("201,169,97");
+  };
+
+  const applyGoldStyle = (el) => {
+    if (el.type !== "text") return;
+    if (!isGoldFill(el.fill_color)) return;
+    el.font_family = "Montserrat";
+    el.font_weight = "900";
+    el.font_style = "normal";
+    el.font_size = "4 vmin";
+  };
+
   for (const el of tpl.elements) {
     applyTextShadow(el);
+    applyGoldStyle(el);
   }
 
   for (const el of tpl.elements) {
