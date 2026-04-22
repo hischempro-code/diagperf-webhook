@@ -2778,6 +2778,75 @@ function _hasAdBlueSystem(vehicle) {
   return false;
 }
 
+// ====== Table centrale des prérequis véhicule par intent ======
+// Chaque entrée définit :
+//  - check(vehicle) : prédicat de compatibilité (true = OK, false = incompatible)
+//  - title, explain : message d'erreur affiché au client si incompatible
+//  - alternatives : boutons de redirection (chaque id doit être géré dans le switch
+//    VEHICLE_INCOMPATIBLE ci-dessous)
+//  - refusedState : nom de l'état conversationnel à mémoriser
+// ⚠️ POUR AJOUTER UNE NOUVELLE PRESTATION : ajouter simplement une entrée ici.
+//    Les intents sans restriction véhicule (REPROG, DIAG, AUTRES) ne sont pas dans la table.
+const INTENT_VEHICLE_REQUIREMENTS = {
+  FAP: {
+    check: _isDieselVehicle,
+    title: "Suppression FAP non applicable",
+    explain: (v) => `Votre véhicule est un *${v.make} ${v.model}* motorisation *${v.fuel || "non diesel"}*.\n\n` +
+      `Les moteurs *essence* n'ont pas de filtre à particules (FAP). Cette prestation est réservée aux véhicules *diesel*.\n\n` +
+      `💡 Pour un véhicule essence, je peux vous proposer une *reprogrammation moteur* (plus de puissance) ou une *conversion E85* (économies carburant) !`,
+    alternatives: [
+      { id: "vehicle_incompat_reprog", title: "🏎️ Reprog moteur" },
+      { id: "vehicle_incompat_e85", title: "🌿 Conversion E85" },
+      { id: "btn_back_menu", title: "🏠 Menu" },
+    ],
+  },
+  EGR: {
+    check: _isDieselVehicle,
+    title: "Suppression EGR non recommandée",
+    explain: (v) => `Votre véhicule est un *${v.make} ${v.model}* motorisation *${v.fuel || "non diesel"}*.\n\n` +
+      `La suppression EGR est pertinente uniquement sur les moteurs *diesel* (vanne EGR encrassée par les particules). ` +
+      `Sur les motorisations essence/hybride, cette intervention n'apporte pas les mêmes bénéfices.\n\n` +
+      `💡 Nous pouvons vous proposer une *reprogrammation moteur* ou une *conversion E85* pour optimiser votre véhicule !`,
+    alternatives: [
+      { id: "vehicle_incompat_reprog", title: "🏎️ Reprog moteur" },
+      { id: "vehicle_incompat_e85", title: "🌿 Conversion E85" },
+      { id: "btn_back_menu", title: "🏠 Menu" },
+    ],
+  },
+  E85: {
+    check: (v) => !_isDieselVehicle(v),
+    title: "Conversion E85 non compatible",
+    explain: (v) => `Votre véhicule est un *${v.make} ${v.model}* motorisation *${v.fuel}*.\n\n` +
+      `La conversion E85 (bioéthanol) est réservée uniquement aux véhicules *essence*. ` +
+      `Les moteurs diesel ne sont pas compatibles avec le bioéthanol.\n\n` +
+      `💡 En revanche, nous pouvons vous proposer une *reprogrammation moteur* pour optimiser les performances de votre diesel !`,
+    alternatives: [
+      { id: "vehicle_incompat_reprog", title: "🏎️ Reprog moteur" },
+      { id: "btn_back_menu", title: "🏠 Menu principal" },
+    ],
+  },
+  ADBLUE: {
+    check: _hasAdBlueSystem,
+    title: "Suppression AdBlue non applicable",
+    explain: (v) => `Votre véhicule est un *${v.make} ${v.model}* motorisation *${v.fuel || "non diesel"}*.\n\n` +
+      `La suppression AdBlue concerne uniquement les véhicules *diesel équipés du système SCR* (BlueHDi PSA, diesel Euro 6+, etc.).\n\n` +
+      `💡 Pour votre véhicule, je peux vous proposer d'autres prestations.`,
+    alternatives: [
+      { id: "vehicle_incompat_reprog", title: "🏎️ Reprog moteur" },
+      { id: "vehicle_incompat_e85", title: "🌿 Conversion E85" },
+      { id: "btn_back_menu", title: "🏠 Menu" },
+    ],
+  },
+};
+
+// Retourne null si le véhicule est compatible avec l'intent, sinon l'objet de requirement.
+function validateIntentForVehicle(intent, vehicle) {
+  const req = INTENT_VEHICLE_REQUIREMENTS[intent];
+  if (!req) return null; // Intent sans restriction véhicule
+  if (req.check(vehicle)) return null; // Compatible
+  return req; // Incompatible → on retourne la config pour afficher le message
+}
+
 const UPSELL_OPTIONS = {
   FAP: [
     {
@@ -3128,6 +3197,22 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons }) {
     log.warn("Off-topic LLM answer failed", { wa_id: fromWa, error: String(err?.message || err) });
     return false;
   }
+}
+
+// ====== Helper unifié : fallback d'un état interactif ======
+// Combine tryOffTopicAnswer + re-proposition des boutons en une seule ligne.
+// À utiliser à la place du pattern manuel dans TOUS les états interactifs.
+//
+// Usage type :
+//   return respondOrAnswerQuestion(fromWa, text, "Est-ce bien votre véhicule ?", [...buttons]);
+//
+// Cela garantit que toute question off-topic est répondue via LLM avant de
+// re-proposer les boutons, sans avoir à dupliquer la logique dans chaque état.
+async function respondOrAnswerQuestion(fromWa, text, retryMessage, retryButtons) {
+  const handled = await tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons });
+  if (handled) return true;
+  await sendWhatsAppInteractiveButtons(fromWa, retryMessage, retryButtons);
+  return true;
 }
 
 async function askLLM(userMessage, waId) {
@@ -3607,16 +3692,22 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
   const prestationCode = intentToPrestationCode(intent);
   const label = intentToLabel(intent);
 
-  // --- Cas spécial : FAP_ESSENCE_REFUSED (le client a une essence, pas de FAP) ---
-  if (convState.state === "FAP_ESSENCE_REFUSED") {
-    if (buttonId === "fap_essence_reprog") {
+  // --- État générique : VEHICLE_INCOMPATIBLE (véhicule incompatible avec l'intent demandé) ---
+  // Remplace les anciens états FAP_ESSENCE_REFUSED / EGR_ESSENCE_REFUSED / E85_DIESEL_REFUSED.
+  // Les boutons génériques (vehicle_incompat_reprog / vehicle_incompat_e85) redirigent vers
+  // les flux REPROG / E85 en conservant le véhicule déjà identifié.
+  if (convState.state === "VEHICLE_INCOMPATIBLE") {
+    const stateData = convState.data || {};
+    const origIntent = stateData.originalIntent || intent;
+
+    if (buttonId === "vehicle_incompat_reprog") {
       await clearConversationState(fromWa);
-      log.info("FAP essence → bascule vers REPROG", { wa_id: fromWa });
+      log.info("Véhicule incompat → bascule vers REPROG", { wa_id: fromWa, from: origIntent });
       return handlePrestationFlow(fromWa, "1", rawMsg);
     }
-    if (buttonId === "fap_essence_e85") {
+    if (buttonId === "vehicle_incompat_e85") {
       await clearConversationState(fromWa);
-      log.info("FAP essence → bascule vers E85", { wa_id: fromWa });
+      log.info("Véhicule incompat → bascule vers E85", { wa_id: fromWa, from: origIntent });
       return handlePrestationFlow(fromWa, "2", rawMsg);
     }
     if (buttonId === "btn_back_menu") {
@@ -3624,94 +3715,24 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       await sendMenuList(fromWa);
       return true;
     }
-    const detectedFap = detectIntent(text);
-    if (detectedFap) {
-      await clearConversationState(fromWa);
-      const menuMapFap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
-      return handlePrestationFlow(fromWa, menuMapFap[detectedFap] || text, rawMsg);
-    }
-    const fapRefusedButtons = [
-      { id: "fap_essence_reprog", title: "🏎️ Reprog moteur" },
-      { id: "fap_essence_e85", title: "🌿 Conversion E85" },
-      { id: "btn_back_menu", title: "🏠 Menu" },
-    ];
-    const fapRefusedRetryMsg = `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`;
-    const handledFR = await tryOffTopicAnswer({ fromWa, text, retryMessage: fapRefusedRetryMsg, retryButtons: fapRefusedButtons });
-    if (handledFR) return true;
-    await sendWhatsAppInteractiveButtons(fromWa, fapRefusedRetryMsg, fapRefusedButtons);
-    return true;
-  }
-
-  // --- Cas spécial : EGR_ESSENCE_REFUSED (le client a une essence et la suppression EGR n'est pas pertinente) ---
-  if (convState.state === "EGR_ESSENCE_REFUSED") {
-    if (buttonId === "egr_essence_reprog") {
-      await clearConversationState(fromWa);
-      log.info("EGR essence → bascule vers REPROG", { wa_id: fromWa });
-      return handlePrestationFlow(fromWa, "1", rawMsg);
-    }
-    if (buttonId === "egr_essence_e85") {
-      await clearConversationState(fromWa);
-      log.info("EGR essence → bascule vers E85", { wa_id: fromWa });
-      return handlePrestationFlow(fromWa, "2", rawMsg);
-    }
-    if (buttonId === "btn_back_menu") {
-      await clearConversationState(fromWa);
-      await sendMenuList(fromWa);
-      return true;
-    }
-    // Sinon, tenter la détection d'intent
-    const detectedEgr = detectIntent(text);
-    if (detectedEgr) {
-      await clearConversationState(fromWa);
-      const menuMapEgr = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
-      return handlePrestationFlow(fromWa, menuMapEgr[detectedEgr] || text, rawMsg);
-    }
-    // Question off-topic → LLM + re-propose
-    const egrRefusedButtons = [
-      { id: "egr_essence_reprog", title: "🏎️ Reprog moteur" },
-      { id: "egr_essence_e85", title: "🌿 Conversion E85" },
-      { id: "btn_back_menu", title: "🏠 Menu" },
-    ];
-    const egrRefusedRetryMsg = `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`;
-    const handledER = await tryOffTopicAnswer({ fromWa, text, retryMessage: egrRefusedRetryMsg, retryButtons: egrRefusedButtons });
-    if (handledER) return true;
-    // Réafficher les boutons
-    await sendWhatsAppInteractiveButtons(fromWa, egrRefusedRetryMsg, egrRefusedButtons);
-    return true;
-  }
-
-  // --- Cas spécial : E85_DIESEL_REFUSED (le client a un diesel et ne peut pas faire E85) ---
-  if (convState.state === "E85_DIESEL_REFUSED") {
-    if (buttonId === "e85_diesel_reprog") {
-      // Basculer vers le flow REPROG avec le même véhicule déjà identifié
-      const stateData = convState.data || {};
-      await clearConversationState(fromWa);
-      log.info("E85 diesel → bascule vers REPROG", { wa_id: fromWa });
-      return handlePrestationFlow(fromWa, "1", rawMsg);
-    }
-    if (buttonId === "e85_diesel_menu" || buttonId === "btn_back_menu") {
-      await clearConversationState(fromWa);
-      await sendMenuList(fromWa);
-      return true;
-    }
-    // Sinon, tenter la détection d'intent (si l'utilisateur tape autre chose)
+    // Permettre à l'utilisateur de basculer vers une autre prestation via texte libre
     const detected = detectIntent(text);
     if (detected) {
       await clearConversationState(fromWa);
       const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
       return handlePrestationFlow(fromWa, menuMap[detected] || text, rawMsg);
     }
-    // Question off-topic → LLM + re-propose
-    const e85DieselButtons = [
-      { id: "e85_diesel_reprog", title: "🏎️ Reprog moteur" },
-      { id: "e85_diesel_menu", title: "🏠 Menu principal" },
+    // Question off-topic → LLM + re-propose les mêmes alternatives
+    const req = INTENT_VEHICLE_REQUIREMENTS[origIntent];
+    const alternatives = req?.alternatives || [
+      { id: "vehicle_incompat_reprog", title: "🏎️ Reprog moteur" },
+      { id: "btn_back_menu", title: "🏠 Menu" },
     ];
-    const e85DieselRetryMsg = `Souhaitez-vous basculer sur une reprogrammation moteur ou revenir au menu principal ?`;
-    const handledED = await tryOffTopicAnswer({ fromWa, text, retryMessage: e85DieselRetryMsg, retryButtons: e85DieselButtons });
-    if (handledED) return true;
-    // Réafficher les boutons
-    await sendWhatsAppInteractiveButtons(fromWa, e85DieselRetryMsg, e85DieselButtons);
-    return true;
+    return respondOrAnswerQuestion(
+      fromWa, text,
+      `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`,
+      alternatives
+    );
   }
 
   // --- Cas 2 : WAITING_PLATE ---
@@ -3801,74 +3822,23 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     const vehicle = stateData.vehicle || {};
 
     if (t === "oui" || t === "1" || t === "yes" || t === "o" || buttonId === "confirm_vehicle_yes") {
-      // --- E85: bloquer si véhicule diesel ---
-      if (intent === "E85") {
-        const fuelLower = (vehicle.fuel || "").toLowerCase();
-        const isDiesel = /diesel|gazole|go\b/i.test(fuelLower);
-
-        if (isDiesel) {
-          await setConversationState(fromWa, "E85_DIESEL_REFUSED", "E85", { plate, vehicle });
-          await sendWhatsAppInteractiveButtons(
-            fromWa,
-            `❌ Conversion E85 non compatible\n\n` +
-            `Votre véhicule est un *${vehicle.make} ${vehicle.model}* motorisation *${vehicle.fuel}*.\n\n` +
-            `La conversion E85 (bioéthanol) est réservée uniquement aux véhicules *essence*. ` +
-            `Les moteurs diesel ne sont pas compatibles avec le bioéthanol.\n\n` +
-            `💡 En revanche, nous pouvons vous proposer une *reprogrammation moteur* pour optimiser les performances de votre diesel !`,
-            [
-              { id: "e85_diesel_reprog", title: "🏎️ Reprog moteur" },
-              { id: "e85_diesel_menu", title: "🏠 Menu principal" },
-            ]
-          );
-          log.info("E85 refusé: véhicule diesel", { wa_id: fromWa, fuel: vehicle.fuel, plate });
-          return true;
-        }
-      }
-
-      // --- FAP: bloquer si véhicule non-diesel (les moteurs essence n'ont pas de FAP) ---
-      if (intent === "FAP") {
-        if (!_isDieselVehicle(vehicle)) {
-          await setConversationState(fromWa, "FAP_ESSENCE_REFUSED", "FAP", { plate, vehicle });
-          await sendWhatsAppInteractiveButtons(
-            fromWa,
-            `❌ Suppression FAP non applicable\n\n` +
-            `Votre véhicule est un *${vehicle.make} ${vehicle.model}* motorisation *${vehicle.fuel || "non diesel"}*.\n\n` +
-            `Les moteurs *essence* n'ont pas de filtre à particules (FAP). Cette prestation est réservée aux véhicules *diesel*.\n\n` +
-            `💡 Pour un véhicule essence, je peux vous proposer une *reprogrammation moteur* (plus de puissance) ou une *conversion E85* (économies carburant) !`,
-            [
-              { id: "fap_essence_reprog", title: "🏎️ Reprog moteur" },
-              { id: "fap_essence_e85", title: "🌿 Conversion E85" },
-              { id: "btn_back_menu", title: "🏠 Menu" },
-            ]
-          );
-          log.info("FAP refusé: véhicule non-diesel", { wa_id: fromWa, fuel: vehicle.fuel, plate });
-          return true;
-        }
-      }
-
-      // --- EGR: bloquer si véhicule non-diesel ---
-      if (intent === "EGR") {
-        const fuelLower = (vehicle.fuel || "").toLowerCase();
-        const isDiesel = /diesel|gazole|hdi|tdi|dci|cdi|bluehdi|d4d|crdi|go\b/i.test(fuelLower);
-
-        if (!isDiesel) {
-          await setConversationState(fromWa, "EGR_ESSENCE_REFUSED", "EGR", { plate, vehicle });
-          await sendWhatsAppInteractiveButtons(
-            fromWa,
-            `❌ Suppression EGR non recommandée\n\n` +
-            `Votre véhicule est un *${vehicle.make} ${vehicle.model}* motorisation *${vehicle.fuel || "non diesel"}*.\n\n` +
-            `La suppression EGR est pertinente uniquement sur les moteurs *diesel* (vanne EGR encrassée par les particules). ` +
-            `Sur les motorisations essence/hybride, cette intervention n'apporte pas les mêmes bénéfices.\n\n` +
-            `💡 Nous pouvons vous proposer une *reprogrammation moteur* ou une *conversion E85* pour optimiser votre véhicule !`,
-            [
-              { id: "egr_essence_reprog", title: "🏎️ Reprog moteur" },
-              { id: "egr_essence_e85", title: "🌿 Conversion E85" },
-              { id: "btn_back_menu", title: "🏠 Menu" },
-            ]
-          );
-          log.info("EGR refusé: véhicule non-diesel", { wa_id: fromWa, fuel: vehicle.fuel, plate });
-          return true;
-        }
+      // --- Validation centralisée de la compatibilité véhicule/intent ---
+      // Toutes les règles sont définies dans INTENT_VEHICLE_REQUIREMENTS.
+      // Pour ajouter une nouvelle règle : modifier la table, PAS ce bloc.
+      const incompat = validateIntentForVehicle(intent, vehicle);
+      if (incompat) {
+        await setConversationState(fromWa, "VEHICLE_INCOMPATIBLE", intent, {
+          plate, vehicle, originalIntent: intent,
+        });
+        await sendWhatsAppInteractiveButtons(
+          fromWa,
+          `❌ ${incompat.title}\n\n${incompat.explain(vehicle)}`,
+          incompat.alternatives
+        );
+        log.info("Intent refusé: véhicule incompatible", {
+          wa_id: fromWa, intent, fuel: vehicle.fuel, plate,
+        });
+        return true;
       }
 
       // --- REPROG: lookup Shiftech stages first ---
@@ -4042,19 +4012,13 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    const vehicleConfirmRetryButtons = [
-      { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
-      { id: "confirm_vehicle_no", title: "❌ Non" },
-      { id: "btn_back_menu", title: "🏠 Menu" },
-    ];
-    const handledVC = await tryOffTopicAnswer({
-      fromWa, text,
-      retryMessage: "Est-ce bien votre véhicule ?",
-      retryButtons: vehicleConfirmRetryButtons,
-    });
-    if (handledVC) return true;
-    await sendWhatsAppInteractiveButtons(fromWa, "Est-ce bien votre véhicule ? Répondez *oui* ou *non*.", vehicleConfirmRetryButtons);
-    return true;
+    return respondOrAnswerQuestion(fromWa, text,
+      "Est-ce bien votre véhicule ? Répondez *oui* ou *non*.",
+      [
+        { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
+        { id: "confirm_vehicle_no", title: "❌ Non" },
+        { id: "btn_back_menu", title: "🏠 Menu" },
+      ]);
   }
 
 
@@ -4107,14 +4071,9 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       if (retryButtons.length < 3) {
         retryButtons.push({ id: "btn_back_menu", title: "🏠 Menu" });
       }
-      const handledSC = await tryOffTopicAnswer({
-        fromWa, text,
-        retryMessage: "Quel stage souhaitez-vous ?",
-        retryButtons,
-      });
-      if (handledSC) return true;
-      await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir un des stages proposés 👇", retryButtons);
-      return true;
+      return respondOrAnswerQuestion(fromWa, text,
+        "Merci de choisir un des stages proposés 👇",
+        retryButtons);
     }
 
     const selectedStage = stages[selectedIdx];
@@ -4346,21 +4305,14 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    // Avant le fallback générique, tenter de répondre à une question off-topic via LLM
-    const quoteConfirmRetryButtons = [
-      { id: "confirm_quote_yes", title: "\u2705 Oui" },
-      { id: "confirm_quote_no", title: "\u274C Non" },
-      { id: "btn_back_menu", title: "\uD83C\uDFE0 Menu" },
-    ];
-    const handledQ = await tryOffTopicAnswer({
-      fromWa, text,
-      retryMessage: "Est-ce que ce devis vous convient ?",
-      retryButtons: quoteConfirmRetryButtons,
-    });
-    if (handledQ) return true;
-
-    await sendWhatsAppInteractiveButtons(fromWa, "Répondez par *oui* si le devis vous convient, ou *non* dans le cas contraire.", quoteConfirmRetryButtons);
-    return true;
+    // Fallback unifié (auto off-topic + retry)
+    return respondOrAnswerQuestion(fromWa, text,
+      "Répondez par *oui* si le devis vous convient, ou *non* dans le cas contraire.",
+      [
+        { id: "confirm_quote_yes", title: "\u2705 Oui" },
+        { id: "confirm_quote_no", title: "\u274C Non" },
+        { id: "btn_back_menu", title: "\uD83C\uDFE0 Menu" },
+      ]);
   }
 
   // --- WAITING_UPSELL (propositions d'options supplémentaires FAP/ADBLUE) ---
@@ -4384,22 +4336,16 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
     } else if (buttonId === "upsell_skip") {
       log.info("Upsell skipped", { wa_id: fromWa, option: options[step]?.id, step });
     } else {
-      // Unknown response → si c'est une question, répondre via LLM puis re-proposer
+      // Unknown response → question off-topic via LLM puis re-proposer l'upsell courant
       const currentOpt = options[step];
       if (currentOpt) {
-        const upsellRetryButtons = [
-          { id: "upsell_add", title: currentOpt.addBtnLabel },
-          { id: "upsell_skip", title: currentOpt.skipBtnLabel },
-          { id: "btn_back_menu", title: "🏠 Menu" },
-        ];
-        const handledQ = await tryOffTopicAnswer({
-          fromWa, text,
-          retryMessage: buildUpsellMessage(currentOpt, stateData.vehicle, null),
-          retryButtons: upsellRetryButtons,
-        });
-        if (handledQ) return true;
-        // Sinon : retry bête (re-proposer l'upsell)
-        await sendWhatsAppInteractiveButtons(fromWa, buildUpsellMessage(currentOpt, stateData.vehicle, null), upsellRetryButtons);
+        return respondOrAnswerQuestion(fromWa, text,
+          buildUpsellMessage(currentOpt, stateData.vehicle, null),
+          [
+            { id: "upsell_add", title: currentOpt.addBtnLabel },
+            { id: "upsell_skip", title: currentOpt.skipBtnLabel },
+            { id: "btn_back_menu", title: "🏠 Menu" },
+          ]);
       }
       return true;
     }
@@ -4666,20 +4612,14 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    // Fallback
-    const upsellConfirmRetryButtons = [
-      { id: "upsell_confirm_yes", title: "✅ Confirmer" },
-      { id: "upsell_confirm_no", title: "❌ Annuler" },
-      { id: "btn_back_menu", title: "🏠 Menu" },
-    ];
-    const handledUC = await tryOffTopicAnswer({
-      fromWa, text,
-      retryMessage: "Confirmez-vous votre devis avec les options retenues ?",
-      retryButtons: upsellConfirmRetryButtons,
-    });
-    if (handledUC) return true;
-    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées.", upsellConfirmRetryButtons);
-    return true;
+    // Fallback unifié (auto off-topic + retry)
+    return respondOrAnswerQuestion(fromWa, text,
+      "Merci de choisir une des options proposées.",
+      [
+        { id: "upsell_confirm_yes", title: "✅ Confirmer" },
+        { id: "upsell_confirm_no", title: "❌ Annuler" },
+        { id: "btn_back_menu", title: "🏠 Menu" },
+      ]);
   }
 
   // --- WAITING_POST_QUOTE_CHOICE (choix après devis) ---
@@ -4755,20 +4695,14 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
       return true;
     }
 
-    // Fallback si le bouton n'est pas reconnu → re-propose les options d'origine
-    const postQuoteRetryButtons = [
-      { id: "post_quote_rdv", title: "Prendre RDV" },
-      { id: "post_quote_technicien", title: "Question technicien" },
-      { id: "post_quote_accueil", title: "Retour accueil" },
-    ];
-    const handledPQ = await tryOffTopicAnswer({
-      fromWa, text,
-      retryMessage: "Comment souhaitez-vous continuer ?",
-      retryButtons: postQuoteRetryButtons,
-    });
-    if (handledPQ) return true;
-    await sendWhatsAppInteractiveButtons(fromWa, "Merci de choisir une des options proposées 👇", postQuoteRetryButtons);
-    return true;
+    // Fallback unifié (auto off-topic + retry)
+    return respondOrAnswerQuestion(fromWa, text,
+      "Merci de choisir une des options proposées 👇",
+      [
+        { id: "post_quote_rdv", title: "Prendre RDV" },
+        { id: "post_quote_technicien", title: "Question technicien" },
+        { id: "post_quote_accueil", title: "Retour accueil" },
+      ]);
   }
 
   // --- AWAITING_RDV_COORDINATES (collecte Nom + Prénom + Email en une seule étape après devis) ---
