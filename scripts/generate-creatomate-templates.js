@@ -137,6 +137,45 @@ function buildTemplate(config) {
   const GOLD = "#C9A961";
   const accent = config.accent_color || GOLD;
 
+  // ===== Readability fix =====
+  // Si l'utilisateur ajoute une vidéo de fond dans Creatomate, les textes en or
+  // deviennent peu lisibles sur le ciel / zones claires. On ajoute :
+  //   1) Un overlay noir global à 55% pour assombrir la vidéo de fond
+  //   2) Un scrim dégradé vertical centré pour renforcer la lisibilité au centre
+  // Ces éléments sont placés sur les tracks 1/2 (juste au-dessus du background
+  // et de l'accent_vignette, donc SOUS tous les textes).
+
+  const scrimOverlay = {
+    name: "scrim_overlay_global",
+    type: "shape",
+    track: 1,
+    x: "50%",
+    y: "50%",
+    width: "100%",
+    height: "100%",
+    fill_color: "rgba(10,10,10,0.55)",
+    time: 0,
+    duration: tpl.duration || 15,
+  };
+
+  const scrimCenter = {
+    name: "scrim_center_gradient",
+    type: "shape",
+    track: 2,
+    x: "50%",
+    y: "50%",
+    width: "100%",
+    height: "70%",
+    fill_color: "rgba(0,0,0,0.35)",
+    time: 0,
+    duration: tpl.duration || 15,
+  };
+
+  // On insère les scrims au début pour qu'ils soient sous tous les textes
+  // mais au-dessus de la vidéo/background éventuel(le).
+  tpl.elements.unshift(scrimCenter);
+  tpl.elements.unshift(scrimOverlay);
+
   for (const el of tpl.elements) {
     switch (el.name) {
       case "brand_tagline":
