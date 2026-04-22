@@ -98,6 +98,14 @@ function computeFapPrice(vehicle) {
   return 30000;
 }
 
+function computeEgrPrice(vehicle) {
+  // EGR : 190€ TTC uniquement pour véhicules diesel
+  const fuel = String(vehicle?.fuel || "").toLowerCase();
+  const isDiesel = /diesel|gazole|hdi|tdi|dci|cdi|bluehdi|d4d|crdi/i.test(fuel);
+  if (isDiesel) return 19000;
+  return null;
+}
+
 function computeAdbluePrice(vehicle) {
   const fields = [
     vehicle?.engine, vehicle?.model, vehicle?.fuel,
@@ -125,6 +133,7 @@ module.exports = {
   computeReprogPrice,
   computeE85Price,
   computeFapPrice,
+  computeEgrPrice,
   computeAdbluePrice,
   validateEmail,
   INTENT_MAP,

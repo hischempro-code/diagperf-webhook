@@ -1560,6 +1560,13 @@ function buildPrestationCardUrl({ vehicle, intent, prestationLabel, priceTtc, ex
     ];
     subtitleLines = ["🔍 Diagnostic électronique complet"];
     unit = "%";
+  } else if (intent === "EGR") {
+    labels = ["Encrassement moteur", "Consommation", "Fiabilité"];
+    datasets = [
+      { label: "Amélioration (%)", data: [100, 8, 80], backgroundColor: ["#10b981", "#059669", "#047857"], barThickness: 32 },
+    ];
+    subtitleLines = ["🔩 Suppression EGR (Diesel uniquement)", "Fin de l'encrassement moteur"];
+    unit = "%";
   } else {
     return null;
   }
@@ -2725,6 +2732,16 @@ function computeAdbluePrice(vehicle) {
   return 30000;
 }
 
+// ====== EGR pricing rule ======
+// Prix TTC fixe 190€ → diesel uniquement
+// Sinon (essence/hybride/électrique) → null (bloqué en amont)
+function computeEgrPrice(vehicle) {
+  const fuel = String(vehicle?.fuel || "").toLowerCase();
+  const isDiesel = /diesel|gazole|hdi|tdi|dci|cdi|bluehdi|d4d|crdi/i.test(fuel);
+  if (isDiesel) return 19000;
+  return null;
+}
+
 // ====== FAP pricing rule ======
 // Prix TTC. Année < 2019 → 260€ TTC (26000 centimes)
 // Année ≥ 2019 ou absente → 300€ TTC (30000 centimes)
@@ -2737,7 +2754,7 @@ function computeFapPrice(vehicle) {
 }
 
 // ====== FIX #1 : Intents dont le prix calculé est déjà TTC ======
-const TTC_INTENTS = new Set(["REPROG", "E85", "FAP", "ADBLUE", "DIAG"]);
+const TTC_INTENTS = new Set(["REPROG", "E85", "FAP", "ADBLUE", "EGR", "DIAG"]);
 
 // ====== Stage 1 fixed price constant ======
 const STAGE1_FIXED_PRICE_CENTS = 39000; // 390€ TTC
@@ -2833,10 +2850,37 @@ const UPSELL_OPTIONS = {
       skipBtnLabel: "⏭️ Non merci",
     },
   ],
+  REPROG: [
+    {
+      id: "reprog_bougies",
+      label: "Bougies d'allumage haute performance",
+      priceCents: 17000,
+      prestationCode: "bougies_performance",
+      // Essence uniquement (diesel n'utilise pas de bougies d'allumage)
+      condition: (vehicle) => {
+        const fuel = String(vehicle?.fuel || "").toLowerCase();
+        return /essence|gazoline|petrol|super|sp95|sp98|flex|hybride|gpl/i.test(fuel);
+      },
+      message:
+        `Excellente décision ! 🎉\n\n` +
+        `💡 Pour accompagner votre reprogrammation, nous préconisons le remplacement des *bougies d'allumage* par des *bougies haute performance*.\n\n` +
+        `Après une reprog, la combustion est plus intense. Des bougies adaptées garantissent une combustion optimale, un meilleur démarrage et prolongent la durée de vie de votre moteur.\n\n` +
+        `➕ Bougies d'allumage haute performance : +170€ TTC\n\n` +
+        `Souhaitez-vous ajouter cette option ?`,
+      addBtnLabel: "✅ Ajouter (+170€)",
+      skipBtnLabel: "⏭️ Non merci",
+    },
+  ],
 };
 
+// ====== Filter upsell options based on vehicle (some options are conditional e.g. essence only) ======
+function getUpsellOptionsForVehicle(intent, vehicle) {
+  const options = UPSELL_OPTIONS[intent] || [];
+  return options.filter((opt) => typeof opt.condition !== "function" || opt.condition(vehicle));
+}
+
 // ====== Intents that have upsells ======
-const UPSELL_INTENTS = new Set(["FAP", "ADBLUE", "E85"]);
+const UPSELL_INTENTS = new Set(["FAP", "ADBLUE", "E85", "REPROG"]);
 
 // ====== Voice transcription (Groq Whisper — free tier) ======
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
@@ -3320,7 +3364,7 @@ const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DI
 
 // FIX #3 : Intents qui nécessitent obligatoirement un devis personnalisé
 // (pas de calcul de prix automatique possible)
-const MANUAL_QUOTE_INTENTS = new Set(["EGR", "AUTRES"]);
+const MANUAL_QUOTE_INTENTS = new Set(["AUTRES"]);
 
 // Stages reprog qui nécessitent un devis personnalisé (pas de prix direct)
 const CUSTOM_QUOTE_STAGES = new Set(["stage2", "stage3", "stage4"]);
@@ -3484,6 +3528,43 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
   const prestationCode = intentToPrestationCode(intent);
   const label = intentToLabel(intent);
 
+  // --- Cas spécial : EGR_ESSENCE_REFUSED (le client a une essence et la suppression EGR n'est pas pertinente) ---
+  if (convState.state === "EGR_ESSENCE_REFUSED") {
+    if (buttonId === "egr_essence_reprog") {
+      await clearConversationState(fromWa);
+      log.info("EGR essence → bascule vers REPROG", { wa_id: fromWa });
+      return handlePrestationFlow(fromWa, "1", rawMsg);
+    }
+    if (buttonId === "egr_essence_e85") {
+      await clearConversationState(fromWa);
+      log.info("EGR essence → bascule vers E85", { wa_id: fromWa });
+      return handlePrestationFlow(fromWa, "2", rawMsg);
+    }
+    if (buttonId === "btn_back_menu") {
+      await clearConversationState(fromWa);
+      await sendMenuList(fromWa);
+      return true;
+    }
+    // Sinon, tenter la détection d'intent
+    const detectedEgr = detectIntent(text);
+    if (detectedEgr) {
+      await clearConversationState(fromWa);
+      const menuMapEgr = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+      return handlePrestationFlow(fromWa, menuMapEgr[detectedEgr] || text, rawMsg);
+    }
+    // Réafficher les boutons
+    await sendWhatsAppInteractiveButtons(
+      fromWa,
+      `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`,
+      [
+        { id: "egr_essence_reprog", title: "🏎️ Reprog moteur" },
+        { id: "egr_essence_e85", title: "🌿 Conversion E85" },
+        { id: "btn_back_menu", title: "🏠 Menu" },
+      ]
+    );
+    return true;
+  }
+
   // --- Cas spécial : E85_DIESEL_REFUSED (le client a un diesel et ne peut pas faire E85) ---
   if (convState.state === "E85_DIESEL_REFUSED") {
     if (buttonId === "e85_diesel_reprog") {
@@ -3628,6 +3709,31 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         }
       }
 
+      // --- EGR: bloquer si véhicule non-diesel ---
+      if (intent === "EGR") {
+        const fuelLower = (vehicle.fuel || "").toLowerCase();
+        const isDiesel = /diesel|gazole|hdi|tdi|dci|cdi|bluehdi|d4d|crdi|go\b/i.test(fuelLower);
+
+        if (!isDiesel) {
+          await setConversationState(fromWa, "EGR_ESSENCE_REFUSED", "EGR", { plate, vehicle });
+          await sendWhatsAppInteractiveButtons(
+            fromWa,
+            `❌ Suppression EGR non recommandée\n\n` +
+            `Votre véhicule est un *${vehicle.make} ${vehicle.model}* motorisation *${vehicle.fuel || "non diesel"}*.\n\n` +
+            `La suppression EGR est pertinente uniquement sur les moteurs *diesel* (vanne EGR encrassée par les particules). ` +
+            `Sur les motorisations essence/hybride, cette intervention n'apporte pas les mêmes bénéfices.\n\n` +
+            `💡 Nous pouvons vous proposer une *reprogrammation moteur* ou une *conversion E85* pour optimiser votre véhicule !`,
+            [
+              { id: "egr_essence_reprog", title: "🏎️ Reprog moteur" },
+              { id: "egr_essence_e85", title: "🌿 Conversion E85" },
+              { id: "btn_back_menu", title: "🏠 Menu" },
+            ]
+          );
+          log.info("EGR refusé: véhicule non-diesel", { wa_id: fromWa, fuel: vehicle.fuel, plate });
+          return true;
+        }
+      }
+
       // --- REPROG: lookup Shiftech stages first ---
       if (intent === "REPROG") {
         try {
@@ -3652,6 +3758,8 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         priceCents = computeAdbluePrice(vehicle);
       } else if (intent === "FAP") {
         priceCents = computeFapPrice(vehicle);
+      } else if (intent === "EGR") {
+        priceCents = computeEgrPrice(vehicle);
       } else {
         const tarif = await getPrestationTarif(prestationCode);
         priceCents = tarif?.prix_base_centimes || null;
@@ -3699,8 +3807,8 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
           plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel,
         });
 
-        // Send premium prestation card (best effort, non-blocking) for E85/FAP/ADBLUE
-        if (intent === "E85" || intent === "FAP" || intent === "ADBLUE") {
+        // Send premium prestation card (best effort, non-blocking) for E85/FAP/ADBLUE/EGR
+        if (intent === "E85" || intent === "FAP" || intent === "ADBLUE" || intent === "EGR") {
           const cardUrl = buildPrestationCardUrl({ vehicle, intent, prestationLabel: displayLabel, priceTtc: ttcTxt });
           if (cardUrl) {
             sendWhatsAppImage(fromWa, cardUrl, `📋 Fiche technique — ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}`).catch(cardErr => {
@@ -3997,8 +4105,8 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
         });
       }
 
-      // Check for upsell options
-      const upsellOptions = UPSELL_OPTIONS[intent] || [];
+      // Check for upsell options (filtered by vehicle compatibility, e.g. essence only)
+      const upsellOptions = getUpsellOptionsForVehicle(intent, vehicle);
       if (upsellOptions.length > 0) {
         const firstOpt = upsellOptions[0];
         await setConversationState(fromWa, "WAITING_UPSELL", intent, {
@@ -4065,7 +4173,7 @@ async function handlePrestationFlow(fromWa, text, rawMsg) {
   if (convState.state === "WAITING_UPSELL") {
     const stateData = convState.data || {};
     const upsellType = stateData.upsellType || intent;
-    const options = UPSELL_OPTIONS[upsellType] || [];
+    const options = getUpsellOptionsForVehicle(upsellType, stateData.vehicle);
     const step = stateData.upsellStep || 0;
     const addedOptions = [...(stateData.addedOptions || [])];
 
