@@ -395,20 +395,31 @@ tr:hover td{background:rgba(255,255,255,.015)}
 }
 /* Desktop : 3 colonnes, nav en header */
 @media(min-width:1100px){
-  .client-devis-list{grid-template-columns:repeat(3,1fr)}
-  .client-stats{grid-template-columns:repeat(4,1fr);max-width:800px}
-  .client-stat-val{font-size:36px}
+  .client-devis-list{grid-template-columns:repeat(3,1fr);gap:20px}
+  .client-stats{grid-template-columns:repeat(2,1fr);max-width:600px}
+  .client-stat{padding:28px 24px}
+  .client-stat-val{font-size:52px}
+  .client-stat-label{font-size:11px}
   .client-desktop-nav{display:flex}
   .client-badge{display:none}
   .client-bottom{display:none}
-  .client-content{padding-bottom:40px}
-  .client-hero{padding:36px 0 0}
-  .client-hero-title{font-size:28px}
-  .client-sec-hd{margin-top:8px}
-}
-/* Large desktop */
-@media(min-width:1400px){
-  .client-devis-list{grid-template-columns:repeat(4,1fr)}
+  .client-content{padding:0 40px 60px}
+  .client-hero{padding:40px 0 0}
+  .client-hero-title{font-size:30px}
+  .client-hero-sub{font-size:14px;margin-bottom:28px}
+  .client-sec-hd{margin:28px 0 16px}
+  .client-sec-title{font-size:13px}
+  /* merged into .client-dc-inner above */
+  .client-dc .client-dc-inner{padding:24px}
+  .client-dc-price{font-size:42px}
+  .client-dc-price-lbl{font-size:13px}
+  .client-dc-fields{gap:10px;margin-bottom:16px}
+  .client-dc-field-lbl{font-size:12px}
+  .client-dc-field-val{font-size:13px}
+  .client-dc-step-dot{width:30px;height:30px;font-size:11px}
+  .client-dc-step-lbl{font-size:10px}
+  .client-btn{padding:14px 10px;font-size:13px}
+  .client-devis-list .plaque{font-size:12px}
 }
 </style>
 </head>
