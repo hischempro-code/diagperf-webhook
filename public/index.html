@@ -81,10 +81,34 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,.5)}
 .fab svg{width:28px;height:28px}
 
+/* STATS */
+.stats-section{padding:60px 20px;background:var(--bg)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:900px;margin:0 auto}
+.stat-item{text-align:center;padding:24px 16px}
+.stat-num{font-size:clamp(32px,5vw,48px);font-weight:900;background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:12px;color:var(--t3);margin-top:6px;font-weight:500}
+
+/* TESTIMONIALS */
+.testimonials{padding:80px 20px;background:var(--surface);border-top:1px solid var(--border)}
+.testimonials h2{text-align:center;font-size:28px;font-weight:800;margin-bottom:8px}
+.testimonials-sub{text-align:center;color:var(--t3);font-size:14px;margin-bottom:40px}
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:1000px;margin:0 auto}
+.testimonial-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:24px;transition:border-color .2s}
+.testimonial-card:hover{border-color:var(--accent)}
+.testimonial-stars{font-size:14px;margin-bottom:12px}
+.testimonial-text{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:12px;font-style:italic}
+.testimonial-author{font-size:12px;color:var(--t4);font-weight:600}
+
+/* Scroll animations */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
 @media(max-width:600px){
   .hero{padding:30px 16px}
   .steps-grid{gap:20px}
   .grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .testimonials-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -94,28 +118,28 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 <div class="hero">
   <div class="logo">DIAG<span>PERF</span></div>
   <div class="tagline">Reprogrammation & Diagnostic automobile</div>
-  <h1>Boostez votre vehicule avec un <span class="accent">devis gratuit</span> en 2 minutes</h1>
-  <p>Envoyez simplement votre plaque d'immatriculation sur WhatsApp et recevez un devis personnalise instantanement — 100% automatise.</p>
+  <h1>Boostez votre véhicule avec un <span class="accent">devis gratuit</span> en 2 minutes</h1>
+  <p>Envoyez simplement votre plaque d'immatriculation sur WhatsApp et recevez un devis personnalisé instantanément — 100% automatisé.</p>
   <div class="cta-group">
     <a class="btn-wa" href="https://wa.me/33756812795?text=Bonjour%20DiagPerf" target="_blank">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
       Obtenir mon devis gratuit
     </a>
-    <span class="cta-sub">Reponse instantanee - Aucun engagement</span>
+    <span class="cta-sub">Réponse instantanée - Aucun engagement</span>
   </div>
 </div>
 
 <!-- QR CODE -->
 <div class="qr-section" id="qrcode">
   <h2>Scannez pour nous contacter</h2>
-  <p>Ouvrez l'appareil photo de votre telephone et scannez ce QR code</p>
+  <p>Ouvrez l'appareil photo de votre téléphone et scannez ce QR code</p>
   <div class="qr-wrap">
     <div class="qr-card">
       <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F33756812795%3Ftext%3DBonjour%2520DiagPerf&format=png&color=0-0-0&bgcolor=255-255-255&margin=0" alt="QR Code WhatsApp DiagPerf">
     </div>
     <a class="qr-download" href="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=https%3A%2F%2Fwa.me%2F33756812795%3Ftext%3DBonjour%2520DiagPerf&format=png&color=0-0-0&bgcolor=255-255-255&margin=20" download="diagperf-qrcode.png">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Telecharger le QR code (HD)
+      Télécharger le QR code (HD)
     </a>
   </div>
 </div>
@@ -128,33 +152,33 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     <div class="scard">
       <div class="scard-icon">⚡</div>
       <h3>Reprogrammation moteur</h3>
-      <p>Optimisation de la cartographie moteur pour un gain significatif de puissance et de couple, en toute securite.</p>
+      <p>Optimisation de la cartographie moteur pour un gain significatif de puissance et de couple, en toute sécurité.</p>
       <span class="tag">Stage 1 - Stage 2</span>
     </div>
     <div class="scard">
       <div class="scard-icon">🌿</div>
       <h3>Conversion E85</h3>
-      <p>Passez au bioethanol et reduisez votre budget carburant de 40% tout en preservant la planete.</p>
+      <p>Passez au bioéthanol et réduisez votre budget carburant de 40% tout en préservant la planète.</p>
       <span class="tag">Essence uniquement</span>
     </div>
     <div class="scard">
       <div class="scard-icon">🔧</div>
       <h3>Suppression FAP / EGR / AdBlue</h3>
-      <p>Suppression logicielle des systemes antipollution defaillants. Solution definitive et fiable.</p>
+      <p>Suppression logicielle des systèmes antipollution défaillants. Solution définitive et fiable.</p>
       <span class="tag">Diesel - Sur devis</span>
     </div>
     <div class="scard">
       <div class="scard-icon">🔍</div>
       <h3>Diagnostic complet</h3>
-      <p>Lecture complete des calculateurs, identification des defauts et recommandations personnalisees.</p>
-      <span class="tag">Tous vehicules</span>
+      <p>Lecture complète des calculateurs, identification des défauts et recommandations personnalisées.</p>
+      <span class="tag">Tous véhicules</span>
     </div>
   </div>
 </div>
 
 <!-- STEPS -->
 <div class="steps">
-  <h2>Comment ca marche ?</h2>
+  <h2>Comment ça marche ?</h2>
   <div class="steps-grid">
     <div class="step">
       <div class="step-num">1</div>
@@ -164,17 +188,50 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     <div class="step">
       <div class="step-num">2</div>
       <h3>Choisissez la prestation</h3>
-      <p>Le bot detecte votre vehicule et vous propose les prestations adaptees</p>
+      <p>Le bot détecte votre véhicule et vous propose les prestations adaptées</p>
     </div>
     <div class="step">
       <div class="step-num">3</div>
       <h3>Recevez votre devis</h3>
-      <p>Devis detaille avec gains de puissance et tarif, en quelques secondes</p>
+      <p>Devis détaillé avec gains de puissance et tarif, en quelques secondes</p>
     </div>
     <div class="step">
       <div class="step-num">4</div>
       <h3>Prenez rendez-vous</h3>
       <p>Confirmez le devis et planifiez votre intervention</p>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-section" id="stats">
+  <div class="stats-grid">
+    <div class="stat-item"><div class="stat-num" data-target="500">0</div><div class="stat-label">Véhicules reprogrammés</div></div>
+    <div class="stat-item"><div class="stat-num" data-target="4.8" data-decimals="1">0</div><div class="stat-label">⭐ Note Google</div></div>
+    <div class="stat-item"><div class="stat-num" data-target="98" data-suffix="%">0</div><div class="stat-label">Clients satisfaits</div></div>
+    <div class="stat-item"><div class="stat-num" data-target="24" data-suffix="h">0</div><div class="stat-label">Délai moyen de prise en charge</div></div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials" id="avis">
+  <h2>Ce que disent nos clients</h2>
+  <p class="testimonials-sub">Avis vérifiés Google</p>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+      <p class="testimonial-text">"Reprog Stage 1 sur ma Golf 7 GTD. Résultat bluffant, le couple est impressionnant. Youcef est très pro et explique tout clairement."</p>
+      <div class="testimonial-author">— Mehdi K.</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+      <p class="testimonial-text">"Conversion E85 sur Mégane 3 RS. Économie carburant au top et la voiture n'a jamais aussi bien tourné. Je recommande à 100%."</p>
+      <div class="testimonial-author">— Julien R.</div>
+    </div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+      <p class="testimonial-text">"Diagnostic complet + suppression FAP sur mon Peugeot 308. Plus de voyant, plus de problème. Travail rapide et soigné."</p>
+      <div class="testimonial-author">— Sarah L.</div>
     </div>
   </div>
 </div>
@@ -202,5 +259,42 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
 </a>
 
+<script>
+// Animated counters
+function animateCounters() {
+  document.querySelectorAll(".stat-num").forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    const decimals = parseInt(el.dataset.decimals || "0");
+    const suffix = el.dataset.suffix || "";
+    const duration = 2000;
+    const start = performance.now();
+    function update(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+      el.textContent = current.toFixed(decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  });
+}
+
+// Scroll reveal + counter trigger
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add("visible");
+      if (entry.target.id === "stats") animateCounters();
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll(".services, .steps, .stats-section, .testimonials, .qr-section").forEach(el => {
+  el.classList.add("reveal");
+  observer.observe(el);
+});
+document.getElementById("stats") && observer.observe(document.getElementById("stats"));
+</script>
 </body>
 </html>

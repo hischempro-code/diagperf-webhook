@@ -42,18 +42,26 @@ function createDashboardRouter({ supabase, log, sgMail }) {
   }
 
   // ====== Client PWA API (public, auth by wa_id hash) ======
+  // Auth helper : vérifie le PIN (client_pins en priorité, fallback 4 derniers chiffres)
+  async function checkClientPin(wa, pin) {
+    let validPin = wa.replace(/\D/g, "").slice(-4);
+    try {
+      const { data } = await supabase.from("client_pins").select("pin").eq("wa_id", wa).maybeSingle();
+      if (data?.pin) validPin = data.pin;
+    } catch {}
+    return pin === validPin;
+  }
+
   router.get("/api/client/devis", async (req, res) => {
     try {
       const wa = req.query.wa;
       const pin = req.query.pin;
       if (!wa || !pin) return res.status(400).json({ error: "wa et pin requis" });
-      // PIN = 4 derniers chiffres du numéro WhatsApp
-      const expectedPin = wa.replace(/\D/g, "").slice(-4);
-      if (pin !== expectedPin) return res.status(401).json({ error: "PIN incorrect" });
+      if (!(await checkClientPin(wa, pin))) return res.status(401).json({ error: "PIN incorrect" });
 
       const { data: devis, error } = await supabase
         .from("devis")
-        .select("id, plaque, prestation_code, total_ttc_centimes, total_ht_centimes, statut, created_at")
+        .select("id, plaque, prestation_code, total_ttc_centimes, total_ht_centimes, statut, rdv_date, created_at")
         .eq("wa_id", wa)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -62,6 +70,43 @@ function createDashboardRouter({ supabase, log, sgMail }) {
       res.json({ devis: devis || [] });
     } catch (err) {
       log.error("Client API error", { error: String(err?.message || err) });
+      res.status(500).json({ error: "Erreur" });
+    }
+  });
+
+  router.patch("/api/client/devis/:id", express.json(), async (req, res) => {
+    try {
+      const wa = req.body.wa;
+      const pin = req.body.pin;
+      const statut = req.body.statut;
+      if (!wa || !pin) return res.status(400).json({ error: "wa et pin requis" });
+      if (!(await checkClientPin(wa, pin))) return res.status(401).json({ error: "PIN incorrect" });
+      if (!["sent", "refused", "completed"].includes(statut)) return res.status(400).json({ error: "Statut invalide" });
+
+      const id = Number(req.params.id);
+      if (!id) return res.status(400).json({ error: "ID invalide" });
+
+      // Verify the devis belongs to this client
+      const { data: devis, error: fetchErr } = await supabase
+        .from("devis")
+        .select("id, wa_id, statut")
+        .eq("id", id)
+        .eq("wa_id", wa)
+        .single();
+      if (fetchErr || !devis) return res.status(404).json({ error: "Devis non trouvé" });
+      if (devis.statut !== "draft") return res.status(400).json({ error: "Ce devis ne peut plus être modifié" });
+
+      const { error: updateErr } = await supabase.from("devis").update({ statut }).eq("id", id);
+      if (updateErr) throw updateErr;
+
+      // Broadcast to admin dashboard
+      const eventType = statut === "sent" ? "devis_confirmed" : "devis_refused";
+      broadcastDashboardEvent(eventType, { devisId: id, wa_id: wa, plate: devis.plaque || "" });
+
+      log.info("Client devis action", { wa_id: wa, devisId: id, statut });
+      res.json({ ok: true });
+    } catch (err) {
+      log.error("Client patch devis error", { error: String(err?.message || err) });
       res.status(500).json({ error: "Erreur" });
     }
   });
@@ -149,7 +194,7 @@ function createDashboardRouter({ supabase, log, sgMail }) {
       // Derniers devis (50 pour Kanban complet)
       const { data: recentDevis } = await supabase
         .from("devis")
-        .select("id, plaque, prestation_code, total_ttc_centimes, total_ht_centimes, statut, wa_id, created_at")
+        .select("id, plaque, prestation_code, total_ttc_centimes, total_ht_centimes, statut, wa_id, created_at, customer_name, customer_email, rdv_date, admin_notes")
         .order("created_at", { ascending: false })
         .limit(50);
 
@@ -181,12 +226,17 @@ function createDashboardRouter({ supabase, log, sgMail }) {
         log.debug("Depenses table not yet created", { error: String(depErr?.message || depErr) });
       }
 
+      const confirmedCount = (allDevisData || []).filter(d => d.statut === "sent" || d.statut === "completed").length;
+      const totalCount = (allDevisData || []).length;
+      const conversionRate = totalCount > 0 ? Math.round((confirmedCount / totalCount) * 100) : 0;
+
       res.json({
         devis: {
           total: allDevis.count || 0,
           today: todayDevis.count || 0,
           week: weekDevis.count || 0,
           month: monthDevis.count || 0,
+          conversionRate,
         },
         revenue: {
           total: revenueTotalCents,
@@ -273,6 +323,10 @@ function createDashboardRouter({ supabase, log, sgMail }) {
         updates.total_ht_centimes = Math.round(ttc / 1.20);
         updates.total_tva_centimes = ttc - updates.total_ht_centimes;
       }
+      if (req.body.admin_notes !== undefined) updates.admin_notes = req.body.admin_notes || null;
+      if (req.body.rdv_date !== undefined) updates.rdv_date = req.body.rdv_date || null;
+      if (req.body.customer_name !== undefined) updates.customer_name = req.body.customer_name || null;
+      if (req.body.customer_email !== undefined) updates.customer_email = req.body.customer_email || null;
       if (Object.keys(updates).length === 0) return res.status(400).json({ error: "Rien à modifier" });
       const { error } = await supabase.from("devis").update(updates).eq("id", id);
       if (error) throw error;

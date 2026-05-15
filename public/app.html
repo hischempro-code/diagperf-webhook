@@ -7,7 +7,23 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
-<title>DiagPerf — Espace</title>
+<title>DiagPerf — Espace Client</title>
+<meta name="description" content="Suivez vos devis en temps réel, validez en un clic et recevez vos notifications instantanément.">
+<!-- Open Graph / WhatsApp Link Preview -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://webhook.diagperf.com/app.html">
+<meta property="og:title" content="🚀 DiagPerf — Votre Espace Client">
+<meta property="og:description" content="📊 Suivi de devis en temps réel • ✅ Validation en 1 clic • 🔔 Notifications instantanées">
+<meta property="og:image" content="https://webhook.diagperf.com/og-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="DiagPerf">
+<meta property="og:locale" content="fr_FR">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="🚀 DiagPerf — Votre Espace Client">
+<meta name="twitter:description" content="📊 Suivi de devis en temps réel • ✅ Validation en 1 clic • 🔔 Notifications instantanées">
+<meta name="twitter:image" content="https://webhook.diagperf.com/og-preview.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
@@ -88,7 +104,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .btn-accent:hover{box-shadow:0 4px 16px var(--accent-g);border-color:transparent}
 
 /* ═══ KPI ═══ */
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s}
 .kpi:hover{border-color:var(--border2)}
 .kpi .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
@@ -138,6 +154,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .pill-confirmed{background:var(--green-bg);color:var(--green)}
 .pill-sent{background:var(--blue-bg);color:var(--blue)}
 .pill-lost{background:var(--red-bg);color:var(--red)}
+.pill-completed{background:rgba(139,92,246,.15);color:var(--purple)}
 .plaque{font-family:'Courier New',monospace;font-weight:700;background:var(--surface2);padding:3px 8px;border-radius:6px;font-size:11px;letter-spacing:.5px}
 .del-btn{background:none;border:none;color:var(--t4);cursor:pointer;padding:4px;border-radius:6px;transition:all .15s;display:inline-flex}
 .del-btn:hover{color:var(--red);background:var(--red-bg)}
@@ -173,6 +190,13 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .kanban-btn-confirm{border-color:rgba(16,185,129,.3);color:var(--green)}
 .kanban-btn-confirm:hover{background:var(--green-bg);border-color:var(--green)}
 .kanban-empty{text-align:center;padding:20px 10px;font-size:12px;color:var(--t4)}
+
+.kanban-notes-input,.kanban-date-input{width:100%;margin-top:6px;padding:6px 8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--t2);font-size:11px;font-family:inherit;outline:none;transition:border .2s}
+.kanban-notes-input:focus,.kanban-date-input:focus{border-color:var(--accent)}
+.kanban-notes-input{resize:none;min-height:52px}
+.kanban-save-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--t3);font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit;margin-top:4px}
+.kanban-save-btn:hover{border-color:var(--accent);color:var(--accent)}
+.kanban-client-name{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px}
 
 /* Drag & drop */
 .kanban-card[draggable="true"]{cursor:grab}
@@ -245,6 +269,54 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .client-bottom a,.client-bottom button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:10px;text-decoration:none;color:var(--t4);font-size:9px;font-weight:600;background:none;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
 .client-bottom a.active,.client-bottom button.active{color:var(--accent);background:rgba(59,130,246,.08)}
 .client-bottom a svg,.client-bottom button svg{width:20px;height:20px}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+@keyframes pulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.4)}50%{box-shadow:0 0 0 10px rgba(16,185,129,0)}}
+@keyframes confettiBurst{0%{transform:scale(0) rotate(0deg);opacity:1}50%{transform:scale(1.2) rotate(180deg);opacity:.8}100%{transform:scale(0) rotate(360deg);opacity:0}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.animate-in{animation:fadeInUp .4s ease both}
+.animate-slide{animation:slideInRight .4s ease both}
+.stagger-1{animation-delay:.05s}.stagger-2{animation-delay:.1s}.stagger-3{animation-delay:.15s}.stagger-4{animation-delay:.2s}.stagger-5{animation-delay:.25s}
+
+/* Skeleton */
+.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:400px 100%;animation:shimmer 1.5s infinite;border-radius:10px}
+.skeleton-card{height:140px;border-radius:14px;margin-bottom:10px}
+.skeleton-stat{height:80px;border-radius:14px}
+.skeleton-line{height:14px;margin-bottom:8px;width:80%}
+.skeleton-line.short{width:50%}
+
+/* Pulse badge for confirmed devis */
+.pulse-confirmed{animation:pulseGreen 2s ease infinite}
+
+/* Confetti */
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 2.5s ease-out forwards}
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0deg) scale(1);opacity:1}100%{transform:translateY(100vh) rotate(720deg) scale(0);opacity:0}}
+
+/* Client action buttons */
+.client-dc-actions{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.client-btn{flex:1;padding:10px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.client-btn:active{transform:scale(.96)}
+.client-btn-accept{background:var(--green-bg);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.client-btn-accept:hover{background:var(--green);color:#fff}
+.client-btn-refuse{background:var(--red-bg);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.client-btn-refuse:hover{background:var(--red);color:#fff}
+.client-btn-wa{background:#25D366;color:#fff;border:1px solid transparent}
+.client-btn-wa:hover{opacity:.85}
+.client-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 24px}
+.empty-state-icon{font-size:48px;margin-bottom:16px;opacity:.6}
+.empty-state-title{font-size:16px;font-weight:700;margin-bottom:8px}
+.empty-state-sub{font-size:12px;color:var(--t4);margin-bottom:20px;line-height:1.5}
+.empty-state-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:#25D366;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;font-family:inherit}
+.empty-state-cta:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(37,211,102,.3)}
+
+/* Refresh indicator */
+.refresh-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulseGreen 2s ease infinite}
 
 /* ═══ RESPONSIVE ═══ */
 @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.kanban-wrap{grid-template-columns:repeat(2,minmax(220px,1fr))}}
@@ -345,7 +417,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
     <div class="section" id="sec-devis">
       <div class="tcard"><div class="hd"><h3>Tous les devis</h3><div class="actions"><button class="btn-sm btn-accent" onclick="openModal('modalDevis')">+ Nouveau devis</button></div></div>
-      <table><thead><tr><th>Réf</th><th>Plaque</th><th>Prestation</th><th>Montant TTC</th><th>Statut</th><th>Date</th><th></th></tr></thead><tbody id="tbDevis"></tbody></table></div>
+      <table><thead><tr><th>Réf</th><th>Plaque</th><th>Prestation</th><th>Client</th><th>Montant TTC</th><th>Statut</th><th>Date</th><th></th></tr></thead><tbody id="tbDevis"></tbody></table></div>
     </div>
     <div class="section" id="sec-pipeline">
       <div class="tcard">
@@ -416,8 +488,8 @@ let D = null, C1, C2, C3;
 
 const PL={reprogrammation:"Reprog moteur",reprog_moteur:"Reprog moteur",conversion_e85:"Conversion E85",e85:"Conversion E85",suppression_fap:"Suppression FAP",suppression_egr:"Suppression EGR",suppression_adblue:"Suppression AdBlue",diagnostic_complet:"Diagnostic",diagnostic:"Diagnostic",autre:"Autre"};
 const CATS={materiel:"Matériel",deplacement:"Déplacement",outil:"Outil",loyer:"Loyer",assurance:"Assurance",autre:"Autre"};
-const PIPELINE_COLUMNS=[{key:"draft",title:"Nouveaux devis"},{key:"sent",title:"Confirmés / Envoyés"},{key:"refused",title:"Perdus / Refusés"}];
-const STATUS_CLIENT={draft:{label:"En attente",cls:"pill-draft"},sent:{label:"Confirmé",cls:"pill-confirmed"},refused:{label:"Refusé",cls:"pill-lost"}};
+const PIPELINE_COLUMNS=[{key:"draft",title:"Nouveaux devis"},{key:"sent",title:"Confirmés / Envoyés"},{key:"completed",title:"Terminés"},{key:"refused",title:"Perdus / Refusés"}];
+const STATUS_CLIENT={draft:{label:"En attente",cls:"pill-draft"},sent:{label:"Confirmé",cls:"pill-confirmed"},completed:{label:"Terminé",cls:"pill-completed"},refused:{label:"Refusé",cls:"pill-lost"}};
 const fmt=c=>(c/100).toLocaleString("fr-FR",{minimumFractionDigits:2})+"\u00a0€";
 const fmtD=iso=>{if(!iso)return"—";const d=new Date(iso);return d.toLocaleDateString("fr-FR",{day:"2-digit",month:"2-digit",year:"numeric"})+" "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})};
 const fmtDShort=iso=>{if(!iso)return"—";return new Date(iso+"T00:00:00").toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"})};
@@ -495,28 +567,114 @@ function showClient() {
   document.getElementById("loginWrap").classList.add("hide");
   document.getElementById("adminApp").style.display = "none";
   document.getElementById("clientApp").style.display = "";
-  document.getElementById("clientBadge").textContent = "+" + clientWa.substring(0,4) + "…";
+  document.getElementById("clientBadge").innerHTML = '<span class="refresh-dot"></span>+' + clientWa.substring(0,4) + "…";
+  startClientRefresh();
 }
 
 // ═══ CLIENT ═══
-async function loadClientDevis() {
+let clientDevisCache = [];
+
+function renderSkeletonClient() {
+  return `<div class="client-devis-list">
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card"></div>
+    <div class="skeleton skeleton-card" style="height:100px"></div>
+  </div>`;
+}
+
+async function loadClientDevis(silent = false) {
   const container = document.getElementById("clientDevisContainer");
-  container.innerHTML = '<div style="text-align:center;padding:30px"><div class="ld" style="display:inline-block"></div></div>';
+  if (!silent) container.innerHTML = renderSkeletonClient();
   try {
     const r = await fetch(`/api/client/devis?wa=${encodeURIComponent(clientWa)}&pin=${encodeURIComponent(clientPin)}`);
     if (r.status === 401) { doLogout(); return; }
     const json = await r.json();
     const devis = json.devis || [];
+    const oldIds = clientDevisCache.map(d => d.id + d.statut).join(",");
+    const newIds = devis.map(d => d.id + d.statut).join(",");
+    clientDevisCache = devis;
     document.getElementById("cStatTotal").textContent = devis.length;
-    document.getElementById("cStatActive").textContent = devis.filter(d => d.statut==="draft" || d.statut==="confirmed").length;
-    if (!devis.length) { container.innerHTML = '<div class="client-empty">Aucun devis pour le moment.<br>Contactez-nous sur WhatsApp !</div>'; return; }
-    container.innerHTML = '<div class="client-devis-list">' + devis.map(d => {
+    document.getElementById("cStatActive").textContent = devis.filter(d => d.statut==="draft" || d.statut==="sent").length;
+    if (!devis.length) {
+      container.innerHTML = `<div class="empty-state animate-in">
+        <div class="empty-state-icon">📋</div>
+        <div class="empty-state-title">Aucun devis pour le moment</div>
+        <div class="empty-state-sub">Envoyez votre plaque d'immatriculation sur WhatsApp pour recevoir un devis instantané !</div>
+        <a class="empty-state-cta" href="https://wa.me/33675547085?text=Bonjour" target="_blank">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+          Demander un devis
+        </a>
+      </div>`;
+      return;
+    }
+    // Detect new confirmed devis for confetti
+    if (silent && oldIds !== newIds) {
+      const newConfirmed = devis.find(d => d.statut === "sent" && !clientDevisCache.some(o => o.id === d.id && o.statut === "sent"));
+      if (newConfirmed) launchConfetti();
+    }
+    container.innerHTML = '<div class="client-devis-list">' + devis.map((d, i) => {
       const st = STATUS_CLIENT[d.statut] || STATUS_CLIENT.draft;
       const ttc = typeof d.total_ttc_centimes==="number" ? (d.total_ttc_centimes/100).toFixed(2)+"€" : "—";
       const date = d.created_at ? new Date(d.created_at).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"}) : "—";
-      return `<div class="client-dc"><div class="client-dc-top"><span class="client-dc-ref">DEV-${d.id}</span><span class="client-dc-status ${st.cls}">${st.label}</span></div><div class="client-dc-body"><div class="client-dc-row"><span class="client-dc-label">Prestation</span><span class="client-dc-value">${PL[d.prestation_code]||d.prestation_code||"—"}</span></div><div class="client-dc-row"><span class="client-dc-label">Plaque</span><span class="plaque">${d.plaque||"—"}</span></div><div class="client-dc-row"><span class="client-dc-label">Total TTC</span><span class="client-dc-price">${ttc}</span></div><div class="client-dc-row"><span class="client-dc-label">Date</span><span style="font-size:11px;color:var(--t4)">${date}</span></div></div></div>`;
+      const staggerClass = `animate-in stagger-${Math.min(i + 1, 5)}`;
+      const pulseClass = d.statut === "sent" ? "pulse-confirmed" : "";
+      const actionBtns = d.statut === "draft" ? `<div class="client-dc-actions">
+        <button class="client-btn client-btn-accept" onclick="clientPatchDevis(${d.id},'sent',this)">✅ Accepter</button>
+        <button class="client-btn client-btn-refuse" onclick="clientPatchDevis(${d.id},'refused',this)">❌ Refuser</button>
+      </div>` : d.statut === "sent" ? `<div class="client-dc-actions">
+        <a class="client-btn client-btn-wa" href="https://wa.me/33675547085?text=Bonjour%2C%20je%20souhaite%20prendre%20RDV%20pour%20le%20devis%20DEV-${d.id}" target="_blank">📅 Prendre RDV</a>
+      </div>` : "";
+      return `<div class="client-dc ${staggerClass} ${pulseClass}"><div class="client-dc-top"><span class="client-dc-ref">DEV-${d.id}</span><span class="client-dc-status ${st.cls}">${st.label}</span></div><div class="client-dc-body"><div class="client-dc-row"><span class="client-dc-label">Prestation</span><span class="client-dc-value">${PL[d.prestation_code]||d.prestation_code||"—"}</span></div><div class="client-dc-row"><span class="client-dc-label">Plaque</span><span class="plaque">${d.plaque||"—"}</span></div><div class="client-dc-row"><span class="client-dc-label">Total TTC</span><span class="client-dc-price">${ttc}</span></div><div class="client-dc-row"><span class="client-dc-label">Date</span><span style="font-size:11px;color:var(--t4)">${date}</span></div></div>${actionBtns}</div>`;
     }).join("") + '</div>';
-  } catch(e) { container.innerHTML = '<div class="client-empty">Erreur de chargement.</div>'; }
+  } catch(e) { if (!silent) container.innerHTML = '<div class="client-empty">Erreur de chargement.</div>'; }
+}
+
+async function clientPatchDevis(id, statut, btnEl) {
+  if (btnEl) btnEl.disabled = true;
+  try {
+    const r = await fetch(`/api/client/devis/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wa: clientWa, pin: clientPin, statut })
+    });
+    if (!r.ok) { alert("Erreur lors de la mise à jour"); return; }
+    if (statut === "sent") launchConfetti();
+    await loadClientDevis(true);
+  } catch (e) { alert("Erreur réseau"); }
+  finally { if (btnEl) btnEl.disabled = false; }
+}
+
+function launchConfetti() {
+  const wrap = document.createElement("div");
+  wrap.className = "confetti-wrap";
+  const colors = ["#3b82f6","#10b981","#f59e0b","#8b5cf6","#ef4444","#06b6d4","#f97316"];
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement("div");
+    p.className = "confetti-piece";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.top = "-10px";
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = (Math.random() * 0.8) + "s";
+    p.style.animationDuration = (1.5 + Math.random() * 1.5) + "s";
+    p.style.width = (6 + Math.random() * 8) + "px";
+    p.style.height = (6 + Math.random() * 8) + "px";
+    p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 3500);
+}
+
+// Client auto-refresh (polling every 15s)
+let clientRefreshInterval = null;
+function startClientRefresh() {
+  if (clientRefreshInterval) clearInterval(clientRefreshInterval);
+  clientRefreshInterval = setInterval(() => {
+    if (role === "client" && clientWa && clientPin) loadClientDevis(true);
+  }, 15000);
+}
+function stopClientRefresh() {
+  if (clientRefreshInterval) { clearInterval(clientRefreshInterval); clientRefreshInterval = null; }
 }
 
 // ═══ ADMIN ═══
@@ -586,7 +744,8 @@ function render(d) {
     <div class="kpi"><div class="ico green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="lb">CA du mois</div><div class="vl" style="color:var(--green)">${fmt(d.revenue.month)}</div><div class="sb">Total ${fmt(d.revenue.total)}</div></div>
     <div class="kpi"><div class="ico red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lb">Dépenses mois</div><div class="vl" style="color:var(--red)">${fmt(d.depenses.month)}</div><div class="sb">Total ${fmt(d.depenses.total)}</div></div>
     <div class="kpi"><div class="ico ${d.benefice.month>=0?'green':'red'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div><div class="lb">Bénéfice mois</div><div class="vl" style="color:${benColor}">${fmt(d.benefice.month)}</div><div class="sb">Total ${fmt(d.benefice.total)}</div></div>
-    <div class="kpi"><div class="ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="lb">Conversations</div><div class="vl" style="color:var(--blue)">${d.conversations}</div><div class="sb">${d.todayMessages} msg auj.</div></div>`;
+    <div class="kpi"><div class="ico blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div class="lb">Conversations</div><div class="vl" style="color:var(--blue)">${d.conversations}</div><div class="sb">${d.todayMessages} msg auj.</div></div>
+    <div class="kpi"><div class="ico purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="lb">Taux conversion</div><div class="vl" style="color:var(--purple)">${d.devis.conversionRate ?? 0}%</div><div class="sb">Devis confirmés / total</div></div>`;
   renderMonthlyChart(d.monthlyRevenue,d.monthlyDepenses);
   renderDevisChart(d.dailyDevisCount);
   renderPrestaChart(d.prestationBreakdown,d.devis.total);
@@ -637,18 +796,21 @@ function renderReviews(rv){
 
 function renderDevisTable(list){
   const tb=document.getElementById("tbDevis");
-  if(!list.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--t4);padding:20px">Aucun devis</td></tr>';return}
+  if(!list.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--t4);padding:20px">Aucun devis</td></tr>';return}
   tb.innerHTML=list.map(d=>{
-    const sc=d.statut==="draft"?"pill-draft":d.statut==="sent"?"pill-confirmed":d.statut==="refused"?"pill-lost":"pill-draft";
-    const sl=d.statut==="draft"?"Brouillon":d.statut==="sent"?"Confirmé":d.statut==="refused"?"Refusé":d.statut||"—";
-    const toggle=d.statut==="draft"?"sent":"draft";const toggleL=d.statut==="draft"?"Confirmer":"Brouillon";
-    return`<tr><td><strong>DEV-${d.id}</strong></td><td><span class="plaque">${d.plaque||"—"}</span></td><td>${PL[d.prestation_code]||d.prestation_code||"—"}</td><td><strong style="color:var(--green)">${fmt(d.total_ttc_centimes||0)}</strong></td><td><span class="pill ${sc}" style="cursor:pointer" onclick="patchStatut(${d.id},'${toggle}')" title="${toggleL}">${sl}</span></td><td style="color:var(--t3)">${fmtD(d.created_at)}</td><td><button class="del-btn" onclick="deleteDevis(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></td></tr>`;
+    const sc=STATUS_CLIENT[d.statut]?.cls||"pill-draft";
+    const sl=STATUS_CLIENT[d.statut]?.label||d.statut||"—";
+    const toggle=d.statut==="draft"?"sent":d.statut==="sent"?"completed":"draft";
+    const toggleL=d.statut==="draft"?"Confirmer":d.statut==="sent"?"Terminer":"Brouillon";
+    const clientCell=d.customer_name?`<span style="font-size:11px;color:var(--t2)">${d.customer_name}</span>`:`<span style="color:var(--t4)">—</span>`;
+    return`<tr><td><strong>DEV-${d.id}</strong></td><td><span class="plaque">${d.plaque||"—"}</span></td><td>${PL[d.prestation_code]||d.prestation_code||"—"}</td><td>${clientCell}</td><td><strong style="color:var(--green)">${fmt(d.total_ttc_centimes||0)}</strong></td><td><span class="pill ${sc}" style="cursor:pointer" onclick="patchStatut(${d.id},'${toggle}')" title="${toggleL}">${sl}</span></td><td style="color:var(--t3)">${fmtD(d.created_at)}</td><td><button class="del-btn" onclick="deleteDevis(${d.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button></td></tr>`;
   }).join("");
 }
 
 function getPipelineNextActions(s){
   if(s==="draft")return[{label:"✓ Confirmer",value:"sent",cls:"kanban-btn-confirm"},{label:"✗ Refusé",value:"refused",cls:"kanban-btn-danger"}];
-  if(s==="sent")return[{label:"↩ Brouillon",value:"draft"},{label:"✗ Refusé",value:"refused",cls:"kanban-btn-danger"}];
+  if(s==="sent")return[{label:"✅ Terminé",value:"completed",cls:"kanban-btn-confirm"},{label:"↩ Brouillon",value:"draft"},{label:"✗ Refusé",value:"refused",cls:"kanban-btn-danger"}];
+  if(s==="completed")return[{label:"↩ En cours",value:"sent"}];
   if(s==="refused")return[{label:"↩ Réactiver",value:"draft"}];
   return[];
 }
@@ -671,7 +833,8 @@ function filterPipeline() {
       ("DEV-"+d.id).toLowerCase().includes(q) ||
       (d.plaque||"").toLowerCase().includes(q) ||
       (d.wa_id||"").includes(q) ||
-      (PL[d.prestation_code]||"").toLowerCase().includes(q)
+      (PL[d.prestation_code]||"").toLowerCase().includes(q) ||
+      (d.customer_name||"").toLowerCase().includes(q)
     );
   }
   if (prestaFilter) list = list.filter(d => d.prestation_code === prestaFilter);
@@ -692,9 +855,16 @@ function renderKanban(list) {
   filterPipeline();
 }
 
+async function saveNotes(id, notes) {
+  await apiCall("PATCH", "/api/dashboard/devis/" + id, { admin_notes: notes });
+}
+async function saveRdvDate(id, date) {
+  await apiCall("PATCH", "/api/dashboard/devis/" + id, { rdv_date: date || null });
+}
+
 function renderKanbanCards(list) {
   const w = document.getElementById("kanbanWrap"); if(!w) return;
-  const g = {draft:[],sent:[],refused:[]};
+  const g = {draft:[],sent:[],completed:[],refused:[]};
   for (const d of list) { (g[d.statut]||g.draft).push(d); }
 
   w.innerHTML = PIPELINE_COLUMNS.map(col => {
@@ -706,6 +876,7 @@ function renderKanbanCards(list) {
       const trashBtn = d.statut === "refused" ? `<button class="kanban-btn kanban-btn-danger" onclick="deleteDevis(${d.id})" title="Supprimer définitivement">🗑 Supprimer</button>` : "";
       const waDisp = formatWaDisplay(d.wa_id);
       const waLink = d.wa_id ? `https://wa.me/${d.wa_id.replace(/\D/g,"")}` : "";
+      const clientNameRow = d.customer_name ? `<div class="kanban-client-name">👤 ${d.customer_name}${d.customer_email ? ` · ${d.customer_email}` : ''}</div>` : "";
       const clientRow = d.wa_id ? `<div class="kanban-client">
         <span class="kanban-client-id">${waDisp}</span>
         <a class="kanban-wa-btn" href="${waLink}" target="_blank" onclick="event.stopPropagation()">
@@ -713,6 +884,8 @@ function renderKanbanCards(list) {
           WhatsApp
         </a>
       </div>` : "";
+      const rdvRow = `<div style="margin-top:6px"><label style="font-size:10px;color:var(--t4);font-weight:600;display:block;margin-bottom:3px">📅 RDV</label><input type="date" class="kanban-date-input" value="${d.rdv_date||''}" onchange="saveRdvDate(${d.id},this.value)" title="Date du RDV"></div>`;
+      const notesRow = `<div style="margin-top:6px"><label style="font-size:10px;color:var(--t4);font-weight:600;display:block;margin-bottom:3px">📝 Notes</label><textarea class="kanban-notes-input" rows="2" placeholder="Notes internes…" onblur="saveNotes(${d.id},this.value)">${d.admin_notes||''}</textarea></div>`;
 
       return `<div class="kanban-card" draggable="true" data-id="${d.id}" data-statut="${d.statut}">
         <div class="kanban-card-top"><div class="kanban-ref">DEV-${d.id}</div><div class="kanban-price">${fmt(d.total_ttc_centimes||0)}</div></div>
@@ -721,7 +894,7 @@ function renderKanbanCards(list) {
           <div class="kanban-line">${PL[d.prestation_code]||d.prestation_code||"Autre"}</div>
           <div class="kanban-line">${fmtD(d.created_at)}</div>
         </div>
-        ${clientRow}
+        ${clientNameRow}${clientRow}${rdvRow}${notesRow}
         <div class="kanban-actions">${acts}${trashBtn}</div>
       </div>`;
     }).join("") : `<div class="kanban-empty">Aucun devis.</div>`;

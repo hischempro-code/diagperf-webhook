@@ -474,7 +474,17 @@ function createPrestationFlow(ctx) {
         sendWhatsAppText(fromWa, `📜 Veuillez consulter nos conditions générales de vente :\nhttps://www.diagperf.com/conditions-generales-de-vente/`).catch(() => {});
 
         const waDigits = fromWa.replace(/\D/g, "");
-        const clientPin = waDigits.slice(-4);
+        // PIN sécurisé : réutiliser le PIN existant ou en générer un aléatoire
+        let clientPin = waDigits.slice(-4);
+        try {
+          const { data: pinRow } = await supabase.from("client_pins").select("pin").eq("wa_id", fromWa).maybeSingle();
+          if (pinRow?.pin) {
+            clientPin = pinRow.pin;
+          } else {
+            clientPin = String(Math.floor(1000 + Math.random() * 9000));
+            await supabase.from("client_pins").upsert({ wa_id: fromWa, pin: clientPin }, { onConflict: "wa_id" });
+          }
+        } catch { /* fallback si client_pins pas encore créé */ }
         const pwaUrl = `https://webhook.diagperf.com/app.html?wa=${encodeURIComponent(fromWa)}&pin=${clientPin}`;
         sendWhatsAppText(fromWa, [
           `━━━━━━━━━━━━━━━━━━━━━`,
@@ -679,6 +689,11 @@ function createPrestationFlow(ctx) {
       } catch (err) { log.error("Erreur envoi emails devis", { wa_id: fromWa, error: String(err?.message || err) }); }
 
       notifyGarage(`👤 COORDONNÉES CLIENT REÇUES\nDevis : ${devisRef}\nClient : ${customerName}\nEmail : ${customerEmail}\nWhatsApp : ${fromWa}\nVéhicule : ${vehicleDesc}\nPlaque : ${plate}\nPrestation : ${emailPrestationLabel}\nHT : ${htTxt} | TTC : ${ttcTxt}`).catch(() => {});
+
+      // Sauvegarder nom + email sur le devis pour le dashboard
+      if (stateData.devisId) {
+        supabase.from("devis").update({ customer_name: customerName, customer_email: customerEmail }).eq("id", stateData.devisId).then(() => {}).catch(() => {});
+      }
 
       const nextData = { ...stateData, customerName, customerEmail, firstName, lastName };
       await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, nextData);
