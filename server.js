@@ -601,8 +601,7 @@ const reviewInterval = setInterval(() => {
 }, REVIEW_CHECK_INTERVAL_MS);
 log.info(`Scheduler avis client démarré (intervalle: ${REVIEW_CHECK_INTERVAL_MS / 1000}s)`);
 
-// ====== Scheduler : relances devis (toutes les heures) ======
-setTimeout(() => runRelances().catch(err => log.error("Relance init error", { error: String(err?.message || err) })), 60 * 1000);
+// ====== Scheduler : relances devis (toutes les heures, sans tir initial) ======
 const relanceInterval = setInterval(() => runRelances().catch(err => log.error("Relance scheduler error", { error: String(err?.message || err) })), 60 * 60 * 1000);
 log.info("Scheduler relances devis démarré (intervalle: 1h)");
 
