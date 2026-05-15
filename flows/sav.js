@@ -13,6 +13,7 @@ function createSavFlow(ctx) {
     setConversationState, clearConversationState, getConversationState,
     notifyGarage, getVehicleImageUrl,
     sendSavClientEmail, sendSavDiagperfEmail,
+    respondOrAnswerQuestion,
   } = ctx;
 
   // ====== SAV flow handler ======
@@ -56,12 +57,11 @@ function createSavFlow(ctx) {
       const topic = topicMap[buttonId] || topicMap[t] || null;
 
       if (!topic) {
-        await sendWhatsAppInteractiveButtons(fromWa, "Veuillez choisir une option dans la liste.", [
+        return respondOrAnswerQuestion(fromWa, t, "Veuillez choisir une option dans la liste.", [
           { id: "sav_topic_1", title: "Après prestation" },
           { id: "sav_topic_2", title: "Garantie" },
           { id: "sav_topic_3", title: "Autre" },
-        ]);
-        return true;
+        ], rawMsg);
       }
       await setConversationState(fromWa, "SAV_COORDINATES", "SAV", { topic });
       await sendWhatsAppInteractiveButtons(
@@ -110,14 +110,6 @@ function createSavFlow(ctx) {
       try {
         const vehicle = await lookupVehicleFromPlate(plate);
         await setConversationState(fromWa, "SAV_VEHICLE_CONFIRM", "SAV", { ...convState.data, plate, vehicle });
-        // Send vehicle image (best effort, non-blocking)
-        getVehicleImageUrl(vehicle).then(savImgUrl => {
-          if (savImgUrl) {
-            sendWhatsAppImage(fromWa, savImgUrl, `🚘 ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}${vehicle.year ? ` (${vehicle.year})` : ""}`).catch(imgErr => {
-              log.debug("SAV vehicle image failed (non-blocking)", { error: String(imgErr?.message || imgErr) });
-            });
-          }
-        }).catch(e => log.debug("SAV vehicle image URL lookup failed", { error: String(e?.message || e) }));
         await sendWhatsAppInteractiveButtons(fromWa, buildVehicleOnlyText(vehicle), [
           { id: "sav_vehicle_yes", title: "✅ Oui, c'est bon" },
           { id: "sav_vehicle_no", title: "❌ Non" },
@@ -154,12 +146,11 @@ function createSavFlow(ctx) {
         return true;
       }
 
-      await sendWhatsAppInteractiveButtons(fromWa, "Répondez par *oui* si c'est bien votre véhicule, ou *non* dans le cas contraire.", [
+      return respondOrAnswerQuestion(fromWa, t, "Répondez par *oui* si c'est bien votre véhicule, ou *non* dans le cas contraire.", [
         { id: "sav_vehicle_yes", title: "✅ Oui, c'est bon" },
         { id: "sav_vehicle_no", title: "❌ Non" },
         { id: "btn_back_menu", title: "🏠 Menu" },
-      ]);
-      return true;
+      ], rawMsg);
     }
 
     // --- Étape 3c : Saisie manuelle du véhicule (fallback) ---
