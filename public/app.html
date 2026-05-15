@@ -233,41 +233,88 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 /* ═══ CLIENT VIEW ═══ */
 .client-app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
-.client-header{padding:18px 20px 14px;display:flex;align-items:center;justify-content:space-between}
+.client-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(6,6,17,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
 .client-logo{display:flex;align-items:center;gap:10px}
-.client-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#6366f1);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.client-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#6366f1);border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(59,130,246,.35)}
 .client-logo-icon svg{width:18px;height:18px;color:#fff}
 .client-logo-text{font-size:18px;font-weight:800;letter-spacing:-.5px}
 .client-logo-text span{color:var(--accent)}
-.client-badge{font-size:10px;color:var(--t4);background:var(--surface);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
-.client-content{flex:1;padding:0 16px 90px}
-.client-welcome h2{font-size:17px;font-weight:700;margin-bottom:4px}
-.client-welcome p{font-size:12px;color:var(--t4);margin-bottom:18px}
-.client-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.client-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
-.client-stat-val{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent),#6366f1);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.client-stat-label{font-size:10px;color:var(--t4);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
-.client-sec{font-size:13px;font-weight:700;color:var(--t3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
-.client-devis-list{display:flex;flex-direction:column;gap:10px}
-.client-dc{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
-.client-dc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.client-dc-ref{font-size:12px;font-weight:700;color:var(--accent)}
-.client-dc-status{font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
-.client-dc-body{display:flex;flex-direction:column;gap:5px}
-.client-dc-row{display:flex;align-items:center;justify-content:space-between}
-.client-dc-label{font-size:11px;color:var(--t4)}
-.client-dc-value{font-size:12px;font-weight:600}
-.client-dc-price{font-size:15px;font-weight:800;color:var(--green)}
-.client-contact{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px}
-.client-contact h3{font-size:14px;font-weight:700;margin-bottom:10px}
-.client-contact-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.client-badge{font-size:10px;color:var(--t4);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.client-content{flex:1;padding:0 16px 100px}
+.client-hero{padding:28px 4px 0;text-align:center;position:relative}
+.client-hero-title{font-size:24px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
+.client-hero-sub{font-size:12px;color:var(--t4);margin-bottom:22px;line-height:1.5}
+.client-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:26px}
+.client-stat{border-radius:18px;padding:20px 16px;text-align:center;position:relative;overflow:hidden}
+.client-stat-a{background:linear-gradient(135deg,rgba(59,130,246,.14),rgba(99,102,241,.07));border:1px solid rgba(59,130,246,.22)}
+.client-stat-b{background:linear-gradient(135deg,rgba(16,185,129,.14),rgba(6,182,212,.07));border:1px solid rgba(16,185,129,.22)}
+.client-stat-val{font-size:42px;font-weight:900;line-height:1;margin-bottom:5px}
+.client-stat-a .client-stat-val{background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.client-stat-b .client-stat-val{background:linear-gradient(135deg,var(--green),#06b6d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.client-stat-label{font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.client-sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.client-sec-title{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.client-devis-list{display:flex;flex-direction:column;gap:14px}
+
+/* Devis cards */
+.client-dc{border-radius:20px;overflow:hidden;transition:transform .22s,box-shadow .22s}
+.client-dc:hover{transform:translateY(-3px)}
+.client-dc.status-draft{background:var(--surface);border:1px solid rgba(245,158,11,.28);box-shadow:0 4px 20px rgba(245,158,11,.07)}
+.client-dc.status-sent{background:linear-gradient(160deg,rgba(16,185,129,.07),var(--surface));border:1px solid rgba(16,185,129,.32);box-shadow:0 4px 24px rgba(16,185,129,.1)}
+.client-dc.status-sent.pulse-confirmed{animation:cardGlowPulse 3s ease infinite}
+.client-dc.status-completed{background:linear-gradient(160deg,rgba(139,92,246,.08),var(--surface));border:1px solid rgba(139,92,246,.28)}
+.client-dc.status-refused{background:var(--surface);border:1px solid var(--border);opacity:.5}
+@keyframes cardGlowPulse{0%,100%{box-shadow:0 4px 24px rgba(16,185,129,.1),0 0 0 0 rgba(16,185,129,.3)}50%{box-shadow:0 6px 32px rgba(16,185,129,.22),0 0 0 8px rgba(16,185,129,0)}}
+.client-dc-stripe{height:3px;width:100%}
+.client-dc-stripe.draft{background:linear-gradient(90deg,var(--amber),#f97316)}
+.client-dc-stripe.sent{background:linear-gradient(90deg,var(--green),#06b6d4)}
+.client-dc-stripe.completed{background:linear-gradient(90deg,var(--purple),#6366f1)}
+.client-dc-stripe.refused{background:var(--border2)}
+.client-dc-inner{padding:18px}
+.client-dc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.client-dc-ref{font-size:11px;font-weight:700;color:var(--t3);display:flex;align-items:center;gap:5px}
+.client-dc-ref svg{width:12px;height:12px}
+.client-dc-status{font-size:9px;font-weight:700;padding:4px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.client-dc-price-block{margin-bottom:16px}
+.client-dc-price{font-size:34px;font-weight:900;line-height:1;color:var(--green)}
+.client-dc-price-lbl{font-size:11px;color:var(--t3);font-weight:500;margin-top:3px}
+.client-dc-divider{height:1px;background:rgba(255,255,255,.05);margin:14px 0}
+.client-dc-fields{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.client-dc-field{display:flex;align-items:center;justify-content:space-between}
+.client-dc-field-lbl{display:flex;align-items:center;gap:6px;color:var(--t4);font-size:11px}
+.client-dc-field-lbl svg{width:12px;height:12px;opacity:.7}
+.client-dc-field-val{font-size:12px;font-weight:600;color:var(--t2)}
+/* Progress tracker */
+.client-dc-progress{display:flex;align-items:flex-start;gap:0;margin:14px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.05)}
+.client-dc-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.client-dc-step-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:2px solid var(--border2);background:var(--bg);color:var(--t4);transition:all .3s;position:relative;z-index:1}
+.client-dc-step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 14px rgba(59,130,246,.55)}
+.client-dc-step-dot.done{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 0 10px rgba(16,185,129,.4)}
+.client-dc-step-lbl{font-size:9px;color:var(--t4);font-weight:600;letter-spacing:.3px;text-align:center}
+.client-dc-step-lbl.active{color:var(--accent)}
+.client-dc-step-lbl.done{color:var(--green)}
+.client-dc-connector{height:2px;flex:1;background:var(--border2);margin-top:12px;align-self:flex-start;transition:background .3s}
+.client-dc-connector.done{background:linear-gradient(90deg,var(--green),var(--accent))}
+.client-dc-actions{display:flex;gap:8px;padding-top:14px;margin-top:14px;border-top:1px solid rgba(255,255,255,.05)}
+.client-btn{flex:1;padding:12px 8px;border-radius:12px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.2px}
+.client-btn:active{transform:scale(.95)}
+.client-btn-accept{background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(6,182,212,.12));color:var(--green);border:1px solid rgba(16,185,129,.35)}
+.client-btn-accept:hover{background:linear-gradient(135deg,var(--green),#06b6d4);color:#fff;box-shadow:0 4px 18px rgba(16,185,129,.38)}
+.client-btn-refuse{background:rgba(239,68,68,.07);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.client-btn-refuse:hover{background:var(--red);color:#fff}
+.client-btn-wa{background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border:1px solid transparent}
+.client-btn-wa:hover{opacity:.9;box-shadow:0 4px 16px rgba(37,211,102,.38)}
+.client-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.client-contact{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:20px}
+.client-contact h3{font-size:13px;font-weight:700;margin-bottom:12px;color:var(--t2)}
+.client-contact-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .client-contact-row:last-child{border-bottom:none}
 .client-contact-row svg{width:16px;height:16px;color:var(--accent);flex-shrink:0}
 .client-contact-row a{color:var(--t1);text-decoration:none;font-size:13px;font-weight:500}
 .client-empty{text-align:center;padding:36px 20px;color:var(--t4);font-size:13px}
-.client-bottom{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:rgba(6,6,17,.95);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:8px 16px 18px;gap:6px;z-index:10}
-.client-bottom a,.client-bottom button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:10px;text-decoration:none;color:var(--t4);font-size:9px;font-weight:600;background:none;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
-.client-bottom a.active,.client-bottom button.active{color:var(--accent);background:rgba(59,130,246,.08)}
+.client-bottom{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:rgba(6,6,17,.92);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid rgba(255,255,255,.06);display:flex;padding:8px 16px 22px;gap:6px;z-index:10}
+.client-bottom a,.client-bottom button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px;border-radius:12px;text-decoration:none;color:var(--t4);font-size:9px;font-weight:600;background:none;border:none;cursor:pointer;transition:all .2s;font-family:inherit}
+.client-bottom a.active,.client-bottom button.active{color:var(--accent);background:rgba(59,130,246,.1)}
 .client-bottom a svg,.client-bottom button svg{width:20px;height:20px}
 
 /* ═══ ANIMATIONS ═══ */
@@ -287,8 +334,8 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .skeleton-line{height:14px;margin-bottom:8px;width:80%}
 .skeleton-line.short{width:50%}
 
-/* Pulse badge for confirmed devis */
-.pulse-confirmed{animation:pulseGreen 2s ease infinite}
+/* Pulse badge for confirmed devis — handled per card via cardGlowPulse */
+.pulse-confirmed{}
 
 /* Confetti */
 .confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
@@ -460,9 +507,15 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="client-badge" id="clientBadge">Mon espace</div>
   </div>
   <div class="client-content">
-    <div class="client-welcome"><h2 id="clientWelcome">Bienvenue 👋</h2><p>Retrouvez ici tous vos devis DiagPerf</p></div>
-    <div class="client-stats"><div class="client-stat"><div class="client-stat-val" id="cStatTotal">—</div><div class="client-stat-label">Devis total</div></div><div class="client-stat"><div class="client-stat-val" id="cStatActive">—</div><div class="client-stat-label">En cours</div></div></div>
-    <div class="client-sec">Mes devis</div>
+    <div class="client-hero">
+      <h2 class="client-hero-title" id="clientWelcome">Bienvenue 👋</h2>
+      <p class="client-hero-sub">Retrouvez tous vos devis DiagPerf en temps réel</p>
+      <div class="client-stats">
+        <div class="client-stat client-stat-a"><div class="client-stat-val" id="cStatTotal">—</div><div class="client-stat-label">Devis total</div></div>
+        <div class="client-stat client-stat-b"><div class="client-stat-val" id="cStatActive">—</div><div class="client-stat-label">En cours</div></div>
+      </div>
+    </div>
+    <div class="client-sec-hd"><span class="client-sec-title">Mes devis</span></div>
     <div id="clientDevisContainer"><div style="text-align:center;padding:30px"><div class="ld" style="display:inline-block"></div></div></div>
     <div class="client-contact">
       <h3>📞 Nous contacter</h3>
@@ -612,19 +665,61 @@ async function loadClientDevis(silent = false) {
       const newConfirmed = devis.find(d => d.statut === "sent" && !clientDevisCache.some(o => o.id === d.id && o.statut === "sent"));
       if (newConfirmed) launchConfetti();
     }
+    const stepMap = {draft:0,sent:1,completed:2,refused:-1};
     container.innerHTML = '<div class="client-devis-list">' + devis.map((d, i) => {
       const st = STATUS_CLIENT[d.statut] || STATUS_CLIENT.draft;
-      const ttc = typeof d.total_ttc_centimes==="number" ? (d.total_ttc_centimes/100).toFixed(2)+"€" : "—";
+      const ttc = typeof d.total_ttc_centimes==="number" ? (d.total_ttc_centimes/100).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:0})+" €" : "—";
       const date = d.created_at ? new Date(d.created_at).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"}) : "—";
-      const staggerClass = `animate-in stagger-${Math.min(i + 1, 5)}`;
-      const pulseClass = d.statut === "sent" ? "pulse-confirmed" : "";
-      const actionBtns = d.statut === "draft" ? `<div class="client-dc-actions">
-        <button class="client-btn client-btn-accept" onclick="clientPatchDevis(${d.id},'sent',this)">✅ Accepter</button>
-        <button class="client-btn client-btn-refuse" onclick="clientPatchDevis(${d.id},'refused',this)">❌ Refuser</button>
-      </div>` : d.statut === "sent" ? `<div class="client-dc-actions">
+      const staggerClass = `animate-in stagger-${Math.min(i+1,5)}`;
+      const pulseClass = d.statut==="sent" ? "pulse-confirmed" : "";
+      const step = stepMap[d.statut] ?? 0;
+      const refused = d.statut === "refused";
+
+      const steps = [{lbl:"Reçu"},{lbl:"Confirmé"},{lbl:"Terminé"}];
+      let progressHtml;
+      if (refused) {
+        progressHtml = `<div class="client-dc-progress" style="justify-content:center;padding-top:14px;margin-top:14px"><span style="font-size:11px;color:var(--red);font-weight:700;letter-spacing:.3px">❌ Devis refusé</span></div>`;
+      } else {
+        progressHtml = `<div class="client-dc-progress">${steps.map((s,si) => {
+          const done = step > si, active = step === si;
+          const dot = `<div class="client-dc-step-dot ${done?'done':active?'active':''}">${done?'✓':si+1}</div>`;
+          const lbl = `<div class="client-dc-step-lbl ${done?'done':active?'active':''}">${s.lbl}</div>`;
+          const conn = si < steps.length-1 ? `<div class="client-dc-connector ${done?'done':''}"></div>` : '';
+          return `<div class="client-dc-step">${dot}${lbl}</div>${conn}`;
+        }).join('')}</div>`;
+      }
+
+      const actionBtns = d.statut==="draft" ? `<div class="client-dc-actions">
+        <button class="client-btn client-btn-accept" onclick="clientPatchDevis(${d.id},'sent',this)">✅ Accepter le devis</button>
+        <button class="client-btn client-btn-refuse" style="flex:0 0 auto;padding:12px 14px" onclick="clientPatchDevis(${d.id},'refused',this)">✗</button>
+      </div>` : d.statut==="sent" ? `<div class="client-dc-actions">
         <a class="client-btn client-btn-wa" href="https://wa.me/33675547085?text=Bonjour%2C%20je%20souhaite%20prendre%20RDV%20pour%20le%20devis%20DEV-${d.id}" target="_blank">📅 Prendre RDV</a>
       </div>` : "";
-      return `<div class="client-dc ${staggerClass} ${pulseClass}"><div class="client-dc-top"><span class="client-dc-ref">DEV-${d.id}</span><span class="client-dc-status ${st.cls}">${st.label}</span></div><div class="client-dc-body"><div class="client-dc-row"><span class="client-dc-label">Prestation</span><span class="client-dc-value">${PL[d.prestation_code]||d.prestation_code||"—"}</span></div><div class="client-dc-row"><span class="client-dc-label">Plaque</span><span class="plaque">${d.plaque||"—"}</span></div><div class="client-dc-row"><span class="client-dc-label">Total TTC</span><span class="client-dc-price">${ttc}</span></div><div class="client-dc-row"><span class="client-dc-label">Date</span><span style="font-size:11px;color:var(--t4)">${date}</span></div></div>${actionBtns}</div>`;
+
+      return `<div class="client-dc status-${d.statut} ${staggerClass} ${pulseClass}">
+        <div class="client-dc-stripe ${d.statut}"></div>
+        <div class="client-dc-inner">
+          <div class="client-dc-top">
+            <div class="client-dc-ref"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>DEV-${d.id}</div>
+            <span class="client-dc-status ${st.cls}">${st.label}</span>
+          </div>
+          <div class="client-dc-price-block">
+            <div class="client-dc-price">${ttc}</div>
+            <div class="client-dc-price-lbl">${PL[d.prestation_code]||d.prestation_code||"Prestation"}</div>
+          </div>
+          <div class="client-dc-fields">
+            <div class="client-dc-field">
+              <span class="client-dc-field-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Plaque</span>
+              <span class="plaque">${d.plaque||"—"}</span>
+            </div>
+            <div class="client-dc-field">
+              <span class="client-dc-field-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Date</span>
+              <span class="client-dc-field-val" style="color:var(--t3);font-weight:500">${date}</span>
+            </div>
+          </div>
+          ${progressHtml}${actionBtns}
+        </div>
+      </div>`;
     }).join("") + '</div>';
   } catch(e) { if (!silent) container.innerHTML = '<div class="client-empty">Erreur de chargement.</div>'; }
 }
