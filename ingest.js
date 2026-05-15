@@ -144,11 +144,11 @@ async function main() {
   }
 
   // Charger le modèle d'embeddings local
-  console.log("🧠 Chargement du modèle d'embeddings (all-MiniLM-L6-v2)...");
-  console.log("   (Premier lancement : téléchargement ~80MB, ensuite instantané)\n");
+  console.log("🧠 Chargement du modèle d'embeddings (paraphrase-multilingual-MiniLM-L12-v2)...");
+  console.log("   (Premier lancement : téléchargement ~400MB, ensuite en cache)\n");
 
   const { pipeline } = await import("@xenova/transformers");
-  const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+  const embedder = await pipeline("feature-extraction", "Xenova/paraphrase-multilingual-MiniLM-L12-v2");
 
   let totalChunks = 0;
   let totalTokens = 0;

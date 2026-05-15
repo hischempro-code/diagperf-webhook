@@ -67,9 +67,9 @@ async function getEmbedder() {
   _embedderLoading = true;
   try {
     const { pipeline } = await import("@xenova/transformers");
-    _embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+    _embedder = await pipeline("feature-extraction", "Xenova/paraphrase-multilingual-MiniLM-L12-v2");
     _embedderReady = true;
-    console.log("✅ Modèle d'embeddings chargé (all-MiniLM-L6-v2)");
+    console.log("✅ Modèle d'embeddings chargé (paraphrase-multilingual-MiniLM-L12-v2)");
     return _embedder;
   } catch (err) {
     console.error("❌ Erreur chargement modèle d'embeddings:", err.message);
