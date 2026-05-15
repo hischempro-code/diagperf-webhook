@@ -238,7 +238,7 @@ function createPrestationFlow(ctx) {
       { id: "vehicle_incompat_reprog", title: "🏎️ Reprog moteur" },
       { id: "btn_back_menu", title: "🏠 Menu" },
     ];
-    return respondOrAnswerQuestion(fromWa, text, `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`, alternatives);
+    return respondOrAnswerQuestion(fromWa, text, `Souhaitez-vous opter pour une autre prestation adaptée à votre véhicule ?`, alternatives, rawMsg);
   }
   registerPrestationState("VEHICLE_INCOMPATIBLE", handleVehicleIncompatible);
 
@@ -409,7 +409,7 @@ function createPrestationFlow(ctx) {
 
       return respondOrAnswerQuestion(fromWa, text, "Est-ce bien votre véhicule ? Répondez *oui* ou *non*.", [
         { id: "confirm_vehicle_yes", title: "✅ Oui" }, { id: "confirm_vehicle_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" }
-      ]);
+      ], rawMsg);
     }
 
     // --- WAITING_STAGE_CHOICE ---
@@ -438,7 +438,7 @@ function createPrestationFlow(ctx) {
           return { id: `stage_choice_${i + 1}`, title: `${btnLabel} — ${btnPrix}`.slice(0, 20) };
         });
         if (retryButtons.length < 3) retryButtons.push({ id: "btn_back_menu", title: "🏠 Menu" });
-        return respondOrAnswerQuestion(fromWa, text, "Merci de choisir un des stages proposés 👇", retryButtons);
+        return respondOrAnswerQuestion(fromWa, text, "Merci de choisir un des stages proposés 👇", retryButtons, rawMsg);
       }
 
       const selectedStage = stages[selectedIdx];
@@ -467,9 +467,6 @@ function createPrestationFlow(ctx) {
 
         await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort });
 
-        const cardUrl = buildVehicleCardUrl({ vehicle, stage: selectedStage, stageLabel, priceTtc: ttcTxt });
-        if (cardUrl) sendWhatsAppImage(fromWa, cardUrl, `📋 Fiche technique — ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}`).catch(cardErr => { log.debug("Vehicle card send failed (non-blocking)", { error: String(cardErr?.message || cardErr) }); });
-
         await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : 2h-4h\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
           { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" },
         ]);
@@ -479,7 +476,21 @@ function createPrestationFlow(ctx) {
         const waDigits = fromWa.replace(/\D/g, "");
         const clientPin = waDigits.slice(-4);
         const pwaUrl = `https://webhook.diagperf.com/app.html?wa=${encodeURIComponent(fromWa)}&pin=${clientPin}`;
-        sendWhatsAppText(fromWa, `📱 Suivez vos devis en ligne :\n${pwaUrl}\n\n_Ajoutez cette page à votre écran d'accueil pour un accès rapide !_`).catch(e => { log.debug("PWA link send failed", { error: String(e?.message || e) }); });
+        sendWhatsAppText(fromWa, [
+          `━━━━━━━━━━━━━━━━━━━━━`,
+          `🚀 *VOTRE ESPACE CLIENT DIAGPERF*`,
+          `━━━━━━━━━━━━━━━━━━━━━`,
+          ``,
+          `📊 Suivez vos devis en temps réel`,
+          `✅ Validez directement depuis votre téléphone`,
+          `🔔 Notifications de mise à jour instantanées`,
+          ``,
+          `👉 *Accédez à votre espace :*`,
+          pwaUrl,
+          ``,
+          `💡 _Astuce : ajoutez cette page à votre écran d'accueil pour un accès en 1 clic !_`,
+          `━━━━━━━━━━━━━━━━━━━━━`,
+        ].join("\n"), { preview_url: true }).catch(e => { log.debug("PWA link send failed", { error: String(e?.message || e) }); });
 
         if (devisRow.isNew) {
           broadcastDashboardEvent("new_devis", { devisId, plate: plate || "", wa_id: fromWa, prestation: `Reprogrammation ${stageLabel}`, ttc: ttcTxt });
@@ -549,7 +560,7 @@ function createPrestationFlow(ctx) {
 
       return respondOrAnswerQuestion(fromWa, text, "Répondez par *oui* si le devis vous convient, ou *non* dans le cas contraire.", [
         { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" },
-      ]);
+      ], rawMsg);
     }
 
     // --- WAITING_UPSELL ---
@@ -568,7 +579,7 @@ function createPrestationFlow(ctx) {
         const currentOpt = options[step];
         if (currentOpt) return respondOrAnswerQuestion(fromWa, text, buildUpsellMessage(currentOpt, stateData.vehicle, null), [
           { id: "upsell_add", title: currentOpt.addBtnLabel }, { id: "upsell_skip", title: currentOpt.skipBtnLabel }, { id: "btn_back_menu", title: "🏠 Menu" },
-        ]);
+        ], rawMsg);
         return true;
       }
 
@@ -705,7 +716,7 @@ function createPrestationFlow(ctx) {
 
       return respondOrAnswerQuestion(fromWa, text, "Merci de choisir une des options proposées.", [
         { id: "upsell_confirm_yes", title: "✅ Confirmer" }, { id: "upsell_confirm_no", title: "❌ Annuler" }, { id: "btn_back_menu", title: "🏠 Menu" },
-      ]);
+      ], rawMsg);
     }
 
     // --- WAITING_POST_QUOTE_CHOICE ---
@@ -718,7 +729,7 @@ function createPrestationFlow(ctx) {
         if (stateData.customerEmail && stateData.customerName) {
           notifyGarage(`📅 DEMANDE RDV\nClient : ${stateData.customerName} (${stateData.customerEmail})\nDevis : DEV-${stateData.devisId || "N/A"}\nWhatsApp : ${fromWa}`).catch(() => {});
           await setConversationState(fromWa, "AWAITING_CITY_FOR_TRAVEL", intent, { ...stateData, contactReason: "rdv" });
-          await sendWhatsAppInteractiveButtons(fromWa, `Excellent choix ${stateData.customerName} ! 🎉\n\nNotre équipe vous recontactera dans les 24h pour fixer un créneau.\n\n🗺️ En attendant, indiquez votre *ville ou code postal* et je vous donnerai le temps de trajet estimé jusqu'à DiagPerf !`, [
+          await sendWhatsAppInteractiveButtons(fromWa, `Excellent choix ${stateData.customerName} ! 🎉\n\nNotre équipe vous recontactera dans les 24h pour fixer un créneau.\n\n� Vous pouvez aussi joindre directement *Youcef* au *06 75 54 70 85*\n\n�️ En attendant, indiquez votre *ville ou code postal* et je vous donnerai le temps de trajet estimé jusqu'à DiagPerf !`, [
             { id: "skip_travel", title: "⏭️ Passer" }, { id: "btn_back_menu", title: "🏠 Menu" },
           ]);
           log.info("Post-quote RDV (coords already known) → travel estimate", { wa_id: fromWa, intent });
@@ -753,7 +764,7 @@ function createPrestationFlow(ctx) {
 
       return respondOrAnswerQuestion(fromWa, text, "Merci de choisir une des options proposées 👇", [
         { id: "post_quote_rdv", title: "Prendre RDV" }, { id: "post_quote_technicien", title: "Question technicien" }, { id: "post_quote_accueil", title: "Retour accueil" },
-      ]);
+      ], rawMsg);
     }
 
     // --- AWAITING_RDV_COORDINATES ---
@@ -785,7 +796,7 @@ function createPrestationFlow(ctx) {
       const engineCode = vehicle.engine_code || "Non disponible";
       const emailPrestationLabel = stateData.stageLabel ? `Reprogrammation moteur — ${stateData.stageLabel}` : label;
 
-      await sendWhatsAppInteractiveButtons(fromWa, `Merci pour votre confiance ! ✅\n\n📧 Un récapitulatif de votre devis a été envoyé à ${email}.\nNotre équipe vous recontactera dans les 24h pour répondre à vos questions.`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+      await sendWhatsAppInteractiveButtons(fromWa, `Merci pour votre confiance ! ✅\n\n📧 Un récapitulatif de votre devis a été envoyé à ${email}.\nNotre équipe vous recontactera dans les 24h pour répondre à vos questions.\n\n📞 Vous pouvez aussi joindre directement *Youcef* au *06 75 54 70 85*`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
 
       try {
         await Promise.all([
@@ -836,8 +847,11 @@ function createPrestationFlow(ctx) {
       const selected = DIAG_OPTIONS.find(opt => listId === opt.id || text === opt.id || text === opt.title || text.toLowerCase().includes(opt.title.toLowerCase()));
 
       if (!selected) {
-        await sendWhatsAppList(fromWa, "Je n'ai pas compris votre choix 😅\nVeuillez sélectionner une option :", "🔍 Voir les options", [
-          { title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} — ${(opt.priceTtcCents / 100).toFixed(0)}€ TTC` })) },
+        // Try LLM fallback for unexpected input (question or intent change)
+        const fallback = await respondOrAnswerQuestion(fromWa, text, null, null, rawMsg);
+        if (fallback) return true;
+        await sendWhatsAppList(fromWa, "Je n'ai pas compris votre choix \ud83d\ude05\nVeuillez s\u00e9lectionner une option :", "\ud83d\udd0d Voir les options", [
+          { title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) },
         ]);
         return true;
       }
@@ -849,55 +863,6 @@ function createPrestationFlow(ctx) {
       return true;
     }
 
-    // --- DIAG_DESCRIBE ---
-    if (convState.state === "DIAG_DESCRIBE" && intent === "DIAG") {
-      const description = String(text || "").trim();
-      if (description.length < 5) { await sendWhatsAppText(fromWa, "Merci de décrire votre problème un peu plus en détail (au moins quelques mots) 🙏"); return true; }
-      await setConversationState(fromWa, "DIAG_PLATE", "DIAG", { ...convState.data, problemDescription: description });
-      await sendWhatsAppText(fromWa, `Merci pour ces informations ! 📋\n\nVeuillez maintenant envoyer votre plaque d'immatriculation (format AA-123-CD).`);
-      log.info("DIAG flow → description reçue, attente plaque", { wa_id: fromWa });
-      return true;
-    }
-
-    // --- DIAG_PLATE ---
-    if (convState.state === "DIAG_PLATE" && intent === "DIAG") {
-      const { valid, plate } = validatePlate(text);
-      if (!valid) { await sendWhatsAppText(fromWa, "Je n'ai pas reconnu la plaque 😅\nEnvoie-la au format AA-123-CD."); return true; }
-
-      let vehicle;
-      try { vehicle = await lookupVehicleFromPlate(plate); }
-      catch (err) {
-        const emsg = String(err?.message || err || "");
-        log.error("DIAG plate lookup error", { error: emsg, plate });
-        if (emsg.includes("VEHICLE_NOT_FOUND")) await sendWhatsAppText(fromWa, "Je n'ai pas trouvé ce véhicule 😕\nVérifie ta plaque et réessaie (format AA-123-CD).");
-        else if (emsg.includes("OUT_OF_CREDIT") || emsg.includes("IMMATRICULATION_API_FAILED") || emsg.includes("NOT_CONFIGURED") || emsg.includes("INVALID_TOKEN")) await sendWhatsAppText(fromWa, "Je n'arrive pas à identifier le véhicule automatiquement 😕\nVeuillez indiquer : Marque / Modèle / Année (ex: Peugeot 308 2016).");
-        else await sendWhatsAppText(fromWa, "Je n'ai pas pu récupérer les infos du véhicule 😕\nVeuillez vérifier votre plaque et réessayer (format AA-123-CD).");
-        return true;
-      }
-
-      const data = convState.data;
-      const priceTxt = `${(data.diagPriceTtcCents / 100).toFixed(0)}€ TTC`;
-      const vehicleName = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
-      const detailParts = [];
-      if (vehicle.fuel) detailParts.push(vehicle.fuel);
-      if (vehicle.engine_cc) detailParts.push(`${vehicle.engine_cc}cc`);
-      if (vehicle.power_hp) detailParts.push(`${vehicle.power_hp}ch`);
-      else if (vehicle.power_kw) detailParts.push(`${vehicle.power_kw}kW`);
-      const detailsTxt = detailParts.length ? ` (${detailParts.join(" | ")})` : "";
-      const yearTxt = vehicle.year ? ` - ${vehicle.year}` : "";
-
-      await setConversationState(fromWa, "DIAG_CONFIRM", "DIAG", { ...data, plate, vehicle: { make: vehicle.make, model: vehicle.model, trim: vehicle.trim, fuel: vehicle.fuel, engine_cc: vehicle.engine_cc, power_hp: vehicle.power_hp, power_kw: vehicle.power_kw, year: vehicle.year, engine_code: vehicle.engine_code } });
-
-      const diagCardUrl = buildPrestationCardUrl({ vehicle: { ...vehicle, plate }, intent: "DIAG", prestationLabel: data.diagTitle, priceTtc: priceTxt });
-      if (diagCardUrl) sendWhatsAppImage(fromWa, diagCardUrl, `📋 Fiche technique — ${vehicleName}`).catch(cardErr => { log.debug("DIAG prestation card send failed (non-blocking)", { error: String(cardErr?.message || cardErr) }); });
-
-      await sendWhatsAppInteractiveButtons(fromWa, `Véhicule détecté :\n🚘 ${vehicleName}${detailsTxt}${yearTxt}\n🔧 Code moteur : ${vehicle.engine_code || "Non disponible"}\n\nPrestation : ${data.diagTitle}\nDétail : ${data.diagDetail}\nPrix : ${priceTxt}\nDurée estimée : ${data.diagDuration}\n\nConfirmer ?`, [
-        { id: "diag_confirm_yes", title: "✅ Confirmer" }, { id: "diag_confirm_no", title: "❌ Annuler" },
-      ]);
-      log.info("DIAG flow → véhicule identifié, attente confirmation", { wa_id: fromWa, plate, vehicleName });
-      return true;
-    }
-
     // --- DIAG_CONFIRM ---
     if (convState.state === "DIAG_CONFIRM" && intent === "DIAG") {
       const t = String(text || "").trim().toLowerCase();
@@ -906,10 +871,9 @@ function createPrestationFlow(ctx) {
 
       if (isNo) { await clearConversationState(fromWa); await sendWhatsAppText(fromWa, "Demande annulée. N'hésitez pas à revenir ! 🙂"); return true; }
       if (!isYes) {
-        await sendWhatsAppInteractiveButtons(fromWa, "Merci de confirmer ou annuler votre demande :", [
-          { id: "diag_confirm_yes", title: "✅ Confirmer" }, { id: "diag_confirm_no", title: "❌ Annuler" },
-        ]);
-        return true;
+        return respondOrAnswerQuestion(fromWa, text, "Merci de confirmer ou annuler votre demande :", [
+          { id: "diag_confirm_yes", title: "\u2705 Confirmer" }, { id: "diag_confirm_no", title: "\u274c Annuler" },
+        ], rawMsg);
       }
 
       await setConversationState(fromWa, "DIAG_EMAIL", "DIAG", convState.data);
