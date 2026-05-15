@@ -46,7 +46,8 @@ function createDashboardRouter({ supabase, log, sgMail }) {
   async function checkClientPin(wa, pin) {
     let validPin = wa.replace(/\D/g, "").slice(-4);
     try {
-      const { data } = await supabase.from("client_pins").select("pin").eq("wa_id", wa).maybeSingle();
+      const { data, error } = await supabase.from("client_pins").select("pin").eq("wa_id", wa).maybeSingle();
+      if (error) throw error; // table inexistante → catch → reste sur last-4
       if (data?.pin) validPin = data.pin;
     } catch {}
     return pin === validPin;

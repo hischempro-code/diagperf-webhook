@@ -474,17 +474,18 @@ function createPrestationFlow(ctx) {
         sendWhatsAppText(fromWa, `📜 Veuillez consulter nos conditions générales de vente :\nhttps://www.diagperf.com/conditions-generales-de-vente/`).catch(() => {});
 
         const waDigits = fromWa.replace(/\D/g, "");
-        // PIN sécurisé : réutiliser le PIN existant ou en générer un aléatoire
         let clientPin = waDigits.slice(-4);
         try {
-          const { data: pinRow } = await supabase.from("client_pins").select("pin").eq("wa_id", fromWa).maybeSingle();
+          const { data: pinRow, error: pinSelectErr } = await supabase.from("client_pins").select("pin").eq("wa_id", fromWa).maybeSingle();
+          if (pinSelectErr) throw pinSelectErr; // table inexistante → catch → garde last-4
           if (pinRow?.pin) {
             clientPin = pinRow.pin;
           } else {
-            clientPin = String(Math.floor(1000 + Math.random() * 9000));
-            await supabase.from("client_pins").upsert({ wa_id: fromWa, pin: clientPin }, { onConflict: "wa_id" });
+            const newPin = String(Math.floor(1000 + Math.random() * 9000));
+            const { error: upsertErr } = await supabase.from("client_pins").upsert({ wa_id: fromWa, pin: newPin }, { onConflict: "wa_id" });
+            if (!upsertErr) clientPin = newPin; // n'utilise le nouveau PIN que s'il a été stocké
           }
-        } catch { /* fallback si client_pins pas encore créé */ }
+        } catch { /* table client_pins pas encore créée, on garde last-4 */ }
         const pwaUrl = `https://webhook.diagperf.com/app.html?wa=${encodeURIComponent(fromWa)}&pin=${clientPin}`;
         sendWhatsAppText(fromWa, [
           `━━━━━━━━━━━━━━━━━━━━━`,
