@@ -232,15 +232,23 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .cat-assurance{background:rgba(236,72,153,.1);color:#ec4899}
 
 /* ═══ CLIENT VIEW ═══ */
-.client-app{max-width:520px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column}
-.client-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(6,6,17,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
+.client-app{min-height:100dvh;display:flex;flex-direction:column}
+.client-header{padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;background:rgba(6,6,17,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
+.client-header-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1400px;margin:0 auto}
 .client-logo{display:flex;align-items:center;gap:10px}
 .client-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#6366f1);border-radius:11px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(59,130,246,.35)}
 .client-logo-icon svg{width:18px;height:18px;color:#fff}
 .client-logo-text{font-size:18px;font-weight:800;letter-spacing:-.5px}
 .client-logo-text span{color:var(--accent)}
 .client-badge{font-size:10px;color:var(--t4);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:5px 12px;border-radius:20px;display:flex;align-items:center;gap:5px}
-.client-content{flex:1;padding:0 16px 100px}
+.client-desktop-nav{display:none;align-items:center;gap:8px}
+.client-desktop-nav a,.client-desktop-nav button{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--t3);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s;font-family:inherit}
+.client-desktop-nav a:hover,.client-desktop-nav button:hover{background:var(--surface);color:var(--t1);border-color:var(--border2)}
+.client-desktop-nav .nav-wa{background:rgba(37,211,102,.1);border-color:rgba(37,211,102,.25);color:#25D366}
+.client-desktop-nav .nav-wa:hover{background:#25D366;color:#fff}
+.client-desktop-nav .nav-logout{border-color:rgba(239,68,68,.2);color:var(--t4)}
+.client-desktop-nav .nav-logout:hover{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.client-content{flex:1;padding:0 24px 100px;max-width:1400px;margin:0 auto;width:100%}
 .client-hero{padding:28px 4px 0;text-align:center;position:relative}
 .client-hero-title{font-size:24px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
 .client-hero-sub{font-size:12px;color:var(--t4);margin-bottom:22px;line-height:1.5}
@@ -371,11 +379,37 @@ tr:hover td{background:rgba(255,255,255,.015)}
 @keyframes card3dIn{from{opacity:0;transform:perspective(900px) rotateX(-18deg) translateY(28px)}to{opacity:1;transform:perspective(900px) rotateX(0deg) translateY(0)}}
 .client-dc.animate-in{animation:card3dIn .55s cubic-bezier(.22,1,.36,1) both}
 
-/* ═══ RESPONSIVE ═══ */
+/* ═══ RESPONSIVE — ADMIN ═══ */
 @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.kanban-wrap{grid-template-columns:repeat(2,minmax(220px,1fr))}}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.kanban-wrap{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{display:none}.main{padding:18px 14px}}
 @media(max-width:480px){.kpis{grid-template-columns:1fr}}
+
+/* ═══ RESPONSIVE — CLIENT PWA ═══ */
+/* Tablet : 2 colonnes */
+@media(min-width:700px){
+  .client-devis-list{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start}
+  .client-stats{grid-template-columns:repeat(2,1fr);max-width:480px;margin-left:auto;margin-right:auto}
+  .client-hero{text-align:center}
+  .client-bottom{left:50%;transform:translateX(-50%);width:100%;max-width:500px;border-radius:20px 20px 0 0}
+}
+/* Desktop : 3 colonnes, nav en header */
+@media(min-width:1100px){
+  .client-devis-list{grid-template-columns:repeat(3,1fr)}
+  .client-stats{grid-template-columns:repeat(4,1fr);max-width:800px}
+  .client-stat-val{font-size:36px}
+  .client-desktop-nav{display:flex}
+  .client-badge{display:none}
+  .client-bottom{display:none}
+  .client-content{padding-bottom:40px}
+  .client-hero{padding:36px 0 0}
+  .client-hero-title{font-size:28px}
+  .client-sec-hd{margin-top:8px}
+}
+/* Large desktop */
+@media(min-width:1400px){
+  .client-devis-list{grid-template-columns:repeat(4,1fr)}
+}
 </style>
 </head>
 <body>
@@ -506,11 +540,18 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <!-- ═══ CLIENT VIEW ═══ -->
 <div class="client-app" id="clientApp" style="display:none">
   <div class="client-header">
-    <div class="client-logo">
-      <div class="client-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h4l3-8 5 16 3-8h4"/></svg></div>
-      <div class="client-logo-text">Diag<span>Perf</span></div>
+    <div class="client-header-inner">
+      <div class="client-logo">
+        <div class="client-logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h4l3-8 5 16 3-8h4"/></svg></div>
+        <div class="client-logo-text">Diag<span>Perf</span></div>
+      </div>
+      <nav class="client-desktop-nav">
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Mes devis</a>
+        <a class="nav-wa" href="https://wa.me/33675547085" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg> WhatsApp</a>
+        <button class="nav-logout" onclick="doLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg> Déconnexion</button>
+      </nav>
+      <div class="client-badge" id="clientBadge">Mon espace</div>
     </div>
-    <div class="client-badge" id="clientBadge">Mon espace</div>
   </div>
   <div class="client-content">
     <div class="client-hero">
