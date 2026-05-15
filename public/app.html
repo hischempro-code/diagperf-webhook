@@ -257,8 +257,8 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .client-devis-list{display:flex;flex-direction:column;gap:14px}
 
 /* Devis cards */
-.client-dc{border-radius:20px;overflow:hidden;transition:transform .22s,box-shadow .22s}
-.client-dc:hover{transform:translateY(-3px)}
+.client-dc{border-radius:20px;overflow:hidden;transition:transform .12s ease,box-shadow .12s ease;transform-style:preserve-3d;will-change:transform;cursor:default}
+.client-dc-inner{padding:18px;transform-style:preserve-3d;position:relative}
 .client-dc.status-draft{background:var(--surface);border:1px solid rgba(245,158,11,.28);box-shadow:0 4px 20px rgba(245,158,11,.07)}
 .client-dc.status-sent{background:linear-gradient(160deg,rgba(16,185,129,.07),var(--surface));border:1px solid rgba(16,185,129,.32);box-shadow:0 4px 24px rgba(16,185,129,.1)}
 .client-dc.status-sent.pulse-confirmed{animation:cardGlowPulse 3s ease infinite}
@@ -270,13 +270,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .client-dc-stripe.sent{background:linear-gradient(90deg,var(--green),#06b6d4)}
 .client-dc-stripe.completed{background:linear-gradient(90deg,var(--purple),#6366f1)}
 .client-dc-stripe.refused{background:var(--border2)}
-.client-dc-inner{padding:18px}
+/* merged into .client-dc-inner above */
 .client-dc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.client-dc-ref{font-size:11px;font-weight:700;color:var(--t3);display:flex;align-items:center;gap:5px}
 .client-dc-ref svg{width:12px;height:12px}
-.client-dc-status{font-size:9px;font-weight:700;padding:4px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
 .client-dc-price-block{margin-bottom:16px}
-.client-dc-price{font-size:34px;font-weight:900;line-height:1;color:var(--green)}
 .client-dc-price-lbl{font-size:11px;color:var(--t3);font-weight:500;margin-top:3px}
 .client-dc-divider{height:1px;background:rgba(255,255,255,.05);margin:14px 0}
 .client-dc-fields{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
@@ -364,6 +361,15 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 /* Refresh indicator */
 .refresh-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulseGreen 2s ease infinite}
+
+/* ═══ 3D CARD ═══ */
+.card-shine{position:absolute;inset:0;border-radius:20px;pointer-events:none;background:radial-gradient(circle at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.13) 0%,transparent 55%);opacity:0;transition:opacity .4s;z-index:20}
+.client-dc-price{font-size:34px;font-weight:900;line-height:1;color:var(--green);display:inline-block;transform:translateZ(28px)}
+.client-dc-status{font-size:9px;font-weight:700;padding:4px 11px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;display:inline-flex;transform:translateZ(18px)}
+.client-dc-ref{font-size:11px;font-weight:700;color:var(--t3);display:flex;align-items:center;gap:5px;transform:translateZ(10px)}
+.client-dc-stripe{height:3px;width:100%;transform:translateZ(6px)}
+@keyframes card3dIn{from{opacity:0;transform:perspective(900px) rotateX(-18deg) translateY(28px)}to{opacity:1;transform:perspective(900px) rotateX(0deg) translateY(0)}}
+.client-dc.animate-in{animation:card3dIn .55s cubic-bezier(.22,1,.36,1) both}
 
 /* ═══ RESPONSIVE ═══ */
 @media(max-width:1200px){.kpis{grid-template-columns:repeat(3,1fr)}.kanban-wrap{grid-template-columns:repeat(2,minmax(220px,1fr))}}
@@ -666,7 +672,7 @@ async function loadClientDevis(silent = false) {
       if (newConfirmed) launchConfetti();
     }
     const stepMap = {draft:0,sent:1,completed:2,refused:-1};
-    container.innerHTML = '<div class="client-devis-list">' + devis.map((d, i) => {
+    const html = '<div class="client-devis-list">' + devis.map((d, i) => {
       const st = STATUS_CLIENT[d.statut] || STATUS_CLIENT.draft;
       const ttc = typeof d.total_ttc_centimes==="number" ? (d.total_ttc_centimes/100).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:0})+" €" : "—";
       const date = d.created_at ? new Date(d.created_at).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"}) : "—";
@@ -699,6 +705,7 @@ async function loadClientDevis(silent = false) {
       return `<div class="client-dc status-${d.statut} ${staggerClass} ${pulseClass}">
         <div class="client-dc-stripe ${d.statut}"></div>
         <div class="client-dc-inner">
+          <div class="card-shine"></div>
           <div class="client-dc-top">
             <div class="client-dc-ref"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>DEV-${d.id}</div>
             <span class="client-dc-status ${st.cls}">${st.label}</span>
@@ -721,7 +728,34 @@ async function loadClientDevis(silent = false) {
         </div>
       </div>`;
     }).join("") + '</div>';
+    container.innerHTML = html;
+    init3DCards();
   } catch(e) { if (!silent) container.innerHTML = '<div class="client-empty">Erreur de chargement.</div>'; }
+}
+
+function init3DCards() {
+  document.querySelectorAll('.client-dc').forEach(card => {
+    const onMove = (x, y, w, h) => {
+      const rx = ((y / h) - 0.5) * -16;
+      const ry = ((x / w) - 0.5) * 16;
+      card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02,1.02,1.02)`;
+      const shine = card.querySelector('.card-shine');
+      if (shine) { shine.style.setProperty('--sx', (x/w*100)+'%'); shine.style.setProperty('--sy', (y/h*100)+'%'); shine.style.opacity='1'; }
+    };
+    const onLeave = () => {
+      card.style.transition = 'transform .55s cubic-bezier(.22,1,.36,1), box-shadow .3s ease';
+      card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+      const shine = card.querySelector('.card-shine'); if (shine) shine.style.opacity='0';
+    };
+    card.addEventListener('mouseenter', () => { card.style.transition = 'transform .1s ease, box-shadow .1s ease'; });
+    card.addEventListener('mousemove', e => { const r=card.getBoundingClientRect(); onMove(e.clientX-r.left, e.clientY-r.top, r.width, r.height); });
+    card.addEventListener('mouseleave', onLeave);
+    card.addEventListener('touchmove', e => {
+      const t=e.touches[0]; const r=card.getBoundingClientRect();
+      card.style.transition='none'; onMove(t.clientX-r.left, t.clientY-r.top, r.width, r.height);
+    }, {passive:true});
+    card.addEventListener('touchend', onLeave);
+  });
 }
 
 async function clientPatchDevis(id, statut, btnEl) {
