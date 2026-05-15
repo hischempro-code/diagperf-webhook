@@ -99,6 +99,27 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .testimonial-text{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:12px;font-style:italic}
 .testimonial-author{font-size:12px;color:var(--t4);font-weight:600}
 
+/* ── 3D TILT ── */
+.scard,.testimonial-card{transform-style:preserve-3d;will-change:transform;position:relative}
+.qr-card{transform-style:preserve-3d;will-change:transform;position:relative;cursor:default}
+.tilt-shine{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:5;opacity:0;transition:opacity .35s;mix-blend-mode:screen;background:radial-gradient(ellipse 65% 45% at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.22) 0%,rgba(255,255,255,.05) 40%,transparent 70%),linear-gradient(var(--ha,135deg),transparent 0%,rgba(255,0,128,.13) 15%,rgba(255,200,0,.13) 30%,rgba(0,255,100,.13) 45%,rgba(0,200,255,.13) 60%,rgba(150,0,255,.13) 75%,transparent 90%)}
+.scard-icon{display:inline-block;transform:translateZ(26px)}
+.scard h3{transform:translateZ(18px)}
+.scard .tag{transform:translateZ(12px)}
+.testimonial-stars{display:inline-block;transform:translateZ(20px)}
+.testimonial-text{transform:translateZ(12px)}
+/* Steps float */
+.step-num{animation:floatBob 3s ease-in-out infinite}
+.step:nth-child(2) .step-num{animation-delay:.6s}
+.step:nth-child(3) .step-num{animation-delay:1.2s}
+.step:nth-child(4) .step-num{animation-delay:1.8s}
+@keyframes floatBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.08)}}
+/* Stats lift */
+.stat-item{transition:transform .3s cubic-bezier(.22,1,.36,1);cursor:default}
+.stat-item:hover{transform:translateY(-8px) scale(1.06)}
+/* Hero parallax */
+.hero::before{transform:translateX(calc(-50% + var(--px,0px))) translateY(var(--py,0px));transition:transform .15s ease}
+
 /* Scroll animations */
 .reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
@@ -295,6 +316,67 @@ document.querySelectorAll(".services, .steps, .stats-section, .testimonials, .qr
   observer.observe(el);
 });
 document.getElementById("stats") && observer.observe(document.getElementById("stats"));
+
+// ── 3D Tilt cards ─────────────────────────────────────────────
+(function() {
+  function initTilt(selector, maxAngle) {
+    document.querySelectorAll(selector).forEach(card => {
+      const shine = document.createElement('div');
+      shine.className = 'tilt-shine';
+      card.prepend(shine);
+
+      let tRx=0, tRy=0, cRx=0, cRy=0, rafId=null;
+      const lerp = (a,b,t) => a+(b-a)*t;
+
+      const apply = (rx, ry) => {
+        const i = Math.sqrt(rx*rx+ry*ry)/maxAngle;
+        const s = (1+i*0.04).toFixed(4);
+        card.style.transform = `perspective(800px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale3d(${s},${s},1)`;
+        const sx=ry*1.8, sy=-rx*1.8, b=18+i*42, a=(0.06+i*0.26).toFixed(2);
+        card.style.boxShadow = `${sx}px ${sy}px ${b}px rgba(59,130,246,${a}),0 ${5+i*14}px ${14+i*24}px rgba(0,0,0,.38)`;
+      };
+
+      const tick = () => {
+        cRx=lerp(cRx,tRx,.1); cRy=lerp(cRy,tRy,.1);
+        apply(cRx, cRy);
+        if(Math.abs(cRx-tRx)>.04||Math.abs(cRy-tRy)>.04) { rafId=requestAnimationFrame(tick); }
+        else { cRx=tRx; cRy=tRy; apply(tRx,tRy); rafId=null; if(!tRx&&!tRy) card.style.boxShadow=''; }
+      };
+
+      const onMove = (x,y,w,h) => {
+        tRx=((y/h)-.5)*-maxAngle; tRy=((x/w)-.5)*maxAngle;
+        if(!rafId) rafId=requestAnimationFrame(tick);
+        shine.style.setProperty('--sx',(x/w*100)+'%');
+        shine.style.setProperty('--sy',(y/h*100)+'%');
+        shine.style.setProperty('--ha',Math.atan2(y-h/2,x-w/2)*(180/Math.PI)+180+'deg');
+        shine.style.opacity='1';
+      };
+      const onLeave = () => {
+        tRx=0; tRy=0; if(!rafId) rafId=requestAnimationFrame(tick);
+        shine.style.opacity='0';
+      };
+
+      card.addEventListener('mousemove', e => { const r=card.getBoundingClientRect(); onMove(e.clientX-r.left,e.clientY-r.top,r.width,r.height); });
+      card.addEventListener('mouseleave', onLeave);
+    });
+  }
+
+  initTilt('.scard', 16);
+  initTilt('.testimonial-card', 14);
+  initTilt('.qr-card', 10);
+
+  // Hero parallax on mouse
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    hero.addEventListener('mousemove', e => {
+      hero.style.setProperty('--px', ((e.clientX/window.innerWidth-.5)*28)+'px');
+      hero.style.setProperty('--py', ((e.clientY/window.innerHeight-.5)*28)+'px');
+    }, {passive:true});
+    hero.addEventListener('mouseleave', () => {
+      hero.style.setProperty('--px','0px'); hero.style.setProperty('--py','0px');
+    });
+  }
+})();
 </script>
 </body>
 </html>
