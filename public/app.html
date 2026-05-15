@@ -693,7 +693,7 @@ async function loadClientDevis(silent = false) {
         <button class="client-btn client-btn-accept" onclick="clientPatchDevis(${d.id},'sent',this)">✅ Accepter le devis</button>
         <button class="client-btn client-btn-refuse" style="flex:0 0 auto;padding:12px 14px" onclick="clientPatchDevis(${d.id},'refused',this)">✗</button>
       </div>` : d.statut==="sent" ? `<div class="client-dc-actions">
-        <a class="client-btn client-btn-wa" href="https://wa.me/33675547085?text=Bonjour%2C%20je%20souhaite%20prendre%20RDV%20pour%20le%20devis%20DEV-${d.id}" target="_blank">📅 Prendre RDV</a>
+        <a class="client-btn client-btn-wa" href="https://wa.me/33675547085?text=${encodeURIComponent(`Bonjour, je souhaite prendre RDV pour le devis DEV-${d.id} (${PL[d.prestation_code]||d.prestation_code||'prestation'})`)}" target="_blank">📅 Prendre RDV</a>
       </div>` : "";
 
       return `<div class="client-dc status-${d.statut} ${staggerClass} ${pulseClass}">
