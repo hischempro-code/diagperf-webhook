@@ -244,6 +244,9 @@ function createPrestationFlow(ctx) {
 
   // ====== Handler: WAITING_PLATE ======
   async function handleWaitingPlate(fromWa, text, rawMsg, convState, intent, buttonId) {
+    // Don't send plate error for empty or placeholder text
+    if (!text || /^\[.+\]$/.test(text)) return false;
+
     let { valid, plate } = validatePlate(text);
     if (!valid && text) {
       const extracted = extractAndValidatePlate(text);

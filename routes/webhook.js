@@ -144,6 +144,12 @@ function createWebhookHandler(ctx) {
             continue;
           }
 
+          // Skip messages with no usable text (e.g. empty text body when user sends nothing)
+          if (!text) {
+            log.debug("Skipping message with empty text", { wa_id: fromWa, type: msg.type });
+            continue;
+          }
+
           const conversationId = await getOrCreateConversation(fromWa);
 
           const ins = await insertInboundMessage({

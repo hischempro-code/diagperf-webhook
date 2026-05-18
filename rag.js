@@ -216,15 +216,9 @@ function formatContextForPrompt(chunks, maxChars = 4800) {
 }
 
 /**
- * Pré-charger le modèle au démarrage du serveur (optionnel, améliore la latence du 1er appel)
+ * No-op kept for backward compatibility — embedding is now handled via Google API at call time.
  */
-async function preloadEmbedder() {
-  try {
-    await getEmbedder();
-  } catch {
-    // Silently fail — sera retentée au premier appel
-  }
-}
+async function preloadEmbedder() {}
 
 module.exports = {
   generateEmbedding,
