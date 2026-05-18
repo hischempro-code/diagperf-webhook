@@ -195,7 +195,11 @@ const supabase = createClient(
 // ====== SendGrid init ======
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  console.log("✅ SendGrid configuré");
+  const fromAddr = process.env.SENDGRID_FROM || "contact@diagperf.com";
+  console.log(`✅ SendGrid configuré (from: ${fromAddr})`);
+  if (!process.env.SENDGRID_FROM) {
+    console.warn("⚠️ SENDGRID_FROM absent — using contact@diagperf.com. Assurez-vous que cette adresse est vérifiée dans SendGrid (Sender Identity).");
+  }
 } else {
   console.warn("⚠️ SENDGRID_API_KEY absent, emails désactivés");
 }

@@ -685,12 +685,12 @@ function createPrestationFlow(ctx) {
       const lastName = nameTokens[0] || "";
       const firstName = nameTokens.slice(1).join(" ") || "";
 
-      try {
-        await Promise.all([
-          sendRdvClientEmail({ to: customerEmail, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
-          sendRdvDiagperfEmail({ firstName, lastName, clientEmail: customerEmail, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
-        ]);
-      } catch (err) { log.error("Erreur envoi emails devis", { wa_id: fromWa, error: String(err?.message || err) }); }
+      const [clientEmailRes] = await Promise.allSettled([
+        sendRdvClientEmail({ to: customerEmail, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
+        sendRdvDiagperfEmail({ firstName, lastName, clientEmail: customerEmail, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
+      ]);
+      const clientEmailSent = clientEmailRes.status === "fulfilled" && clientEmailRes.value === true;
+      if (!clientEmailSent) log.warn("Client email failed or SendGrid not configured", { wa_id: fromWa, customerEmail });
 
       notifyGarage(`👤 COORDONNÉES CLIENT REÇUES\nDevis : ${devisRef}\nClient : ${customerName}\nEmail : ${customerEmail}\nWhatsApp : ${fromWa}\nVéhicule : ${vehicleDesc}\nPlaque : ${plate}\nPrestation : ${emailPrestationLabel}\nHT : ${htTxt} | TTC : ${ttcTxt}`).catch(() => {});
 
@@ -701,7 +701,10 @@ function createPrestationFlow(ctx) {
 
       const nextData = { ...stateData, customerName, customerEmail, firstName, lastName };
       await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, nextData);
-      await sendWhatsAppInteractiveButtons(fromWa, `Merci pour votre confiance ${customerName} ! ✅\n\n📄 Votre devis PDF vient de vous être envoyé.\n📧 Un récapitulatif a également été envoyé à ${customerEmail}.\n\nQue souhaitez-vous faire ensuite ?`, [
+      const emailConfirmLine = clientEmailSent
+        ? `📧 Un récapitulatif a également été envoyé à ${customerEmail}.\n`
+        : `📧 Vous pouvez aussi nous écrire à Diag.perf.pro@gmail.com\n`;
+      await sendWhatsAppInteractiveButtons(fromWa, `Merci pour votre confiance ${customerName} ! ✅\n\n📄 Votre devis PDF vient de vous être envoyé.\n${emailConfirmLine}\nQue souhaitez-vous faire ensuite ?`, [
         { id: "post_quote_rdv", title: "Prendre RDV" }, { id: "post_quote_technicien", title: "Question technicien" }, { id: "post_quote_accueil", title: "Retour accueil" },
       ]);
       log.info("Customer contact collected → PDF + emails sent → post-quote choice", { wa_id: fromWa, intent, customerName, customerEmail });
@@ -815,14 +818,17 @@ function createPrestationFlow(ctx) {
       const engineCode = vehicle.engine_code || "Non disponible";
       const emailPrestationLabel = stateData.stageLabel ? `Reprogrammation moteur — ${stateData.stageLabel}` : label;
 
-      await sendWhatsAppInteractiveButtons(fromWa, `Merci pour votre confiance ! ✅\n\n📧 Un récapitulatif de votre devis a été envoyé à ${email}.\nNotre équipe vous recontactera dans les 24h pour répondre à vos questions.\n\n📞 Vous pouvez aussi joindre directement *Youcef* au *06 75 54 70 85*`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+      const [rdvClientEmailRes] = await Promise.allSettled([
+        sendRdvClientEmail({ to: email, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason }),
+        sendRdvDiagperfEmail({ firstName, lastName, clientEmail: email, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason }),
+      ]);
+      const rdvEmailSent = rdvClientEmailRes.status === "fulfilled" && rdvClientEmailRes.value === true;
+      if (!rdvEmailSent) log.warn("RDV client email failed or SendGrid not configured", { wa_id: fromWa, email });
 
-      try {
-        await Promise.all([
-          sendRdvClientEmail({ to: email, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason }),
-          sendRdvDiagperfEmail({ firstName, lastName, clientEmail: email, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason }),
-        ]);
-      } catch (err) { log.error("Erreur envoi emails RDV", { wa_id: fromWa, error: String(err?.message || err) }); }
+      const rdvEmailLine = rdvEmailSent
+        ? `📧 Un récapitulatif de votre devis a été envoyé à ${email}.\n`
+        : `📧 Vous pouvez aussi nous écrire à Diag.perf.pro@gmail.com\n`;
+      await sendWhatsAppInteractiveButtons(fromWa, `Merci pour votre confiance ! ✅\n\n${rdvEmailLine}Notre équipe vous recontactera dans les 24h pour répondre à vos questions.\n\n📞 Vous pouvez aussi joindre directement *Youcef* au *06 75 54 70 85*`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
 
       await setConversationState(fromWa, "AWAITING_CITY_FOR_TRAVEL", intent, {});
       await sendWhatsAppInteractiveButtons(fromWa, `🗺️ Pour vous aider à planifier votre venue, indiquez votre *ville ou code postal* et je vous donnerai le temps de trajet estimé !`, [

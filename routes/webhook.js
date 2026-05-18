@@ -220,9 +220,15 @@ function createWebhookHandler(ctx) {
           if (savHandled) continue;
 
           // ✅ LLM fallback : interprétation intelligente avant menu
+          let llmGaveMenu = false;
           try {
             const llmResult = await askLLM(text, fromWa);
             if (llmResult) {
+              // Cas 3 : LLM couldn't understand even with history → flag for friendly menu
+              if (llmResult.type === "menu") {
+                llmGaveMenu = true;
+              }
+
               // Cas 1 & 4 : intent ou routing avancé détecté → re-router vers le bon flow
               let routeInstruction = parseRoutingInstruction(llmResult);
               if (routeInstruction) {
@@ -282,7 +288,10 @@ function createWebhookHandler(ctx) {
             log.error("LLM fallback error", { wa_id: fromWa, error: String(llmErr?.message || llmErr) });
           }
 
-          // fallback final → menu
+          // fallback final → menu (with a message if LLM explicitly returned "menu" or failed)
+          if (llmGaveMenu) {
+            await sendWhatsAppText(fromWa, "Je n'ai pas bien compris ta demande 😅 Voici ce que je peux faire pour toi :");
+          }
           await sendMenuList(fromWa);
         }
         return;
