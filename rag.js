@@ -1,22 +1,20 @@
 /**
  * rag.js — Module de retrieval pour le bot WhatsApp DiagPerf
  *
- * Utilise les embeddings locaux (all-MiniLM-L6-v2) et Supabase pgvector
+ * Utilise l'API Google gemini-embedding-001 (384 dims) et Supabase pgvector
  * pour retrouver les chunks de la base de connaissances les plus pertinents.
- *
- * v2 — Améliorations :
- * - Query expansion (synonymes FR → EN pour le modèle anglophone)
- * - Recherche hybride (vecteur + full-text PostgreSQL)
- * - Reranking avec score combiné
- * - Déduplication des chunks
- * - Formatage enrichi avec métadonnées (catégorie, intent)
- * - Budget contexte augmenté (4800 chars)
- * - Boost par catégorie/intent si hint fourni
  */
 
-let _embedder = null;
-let _embedderLoading = false;
-let _embedderReady = false;
+const { GoogleGenAI } = require("@google/genai");
+let _googleAI = null;
+
+function getGoogleAI() {
+  if (!_googleAI) _googleAI = new GoogleGenAI({
+    apiKey: process.env.GOOGLE_AI_API_KEY,
+    httpOptions: { apiVersion: "v1" },
+  });
+  return _googleAI;
+}
 
 // ====== Synonymes FR pour améliorer le match du modèle anglophone ======
 const QUERY_SYNONYMS = {
@@ -48,46 +46,19 @@ const QUERY_SYNONYMS = {
   "virtual cockpit": "tableau bord digital ecran compteur",
 };
 
-// ====== Chargement du modèle ======
-
 /**
- * Charger le modèle d'embeddings (lazy, une seule fois)
- * Le premier appel prend ~2-5s, les suivants sont instantanés.
- */
-async function getEmbedder() {
-  if (_embedder && _embedderReady) return _embedder;
-
-  if (_embedderLoading) {
-    while (_embedderLoading) {
-      await new Promise((r) => setTimeout(r, 100));
-    }
-    return _embedder;
-  }
-
-  _embedderLoading = true;
-  try {
-    const { pipeline } = await import("@xenova/transformers");
-    _embedder = await pipeline("feature-extraction", "Xenova/paraphrase-multilingual-MiniLM-L12-v2");
-    _embedderReady = true;
-    console.log("✅ Modèle d'embeddings chargé (paraphrase-multilingual-MiniLM-L12-v2)");
-    return _embedder;
-  } catch (err) {
-    console.error("❌ Erreur chargement modèle d'embeddings:", err.message);
-    throw err;
-  } finally {
-    _embedderLoading = false;
-  }
-}
-
-/**
- * Générer l'embedding d'un texte
+ * Générer l'embedding d'un texte via Google gemini-embedding-001
  * @param {string} text — Le texte à encoder
  * @returns {number[]} — Vecteur de 384 dimensions
  */
 async function generateEmbedding(text) {
-  const embedder = await getEmbedder();
-  const output = await embedder(text, { pooling: "mean", normalize: true });
-  return Array.from(output.data);
+  const ai = getGoogleAI();
+  const result = await ai.models.embedContent({
+    model: "gemini-embedding-001",
+    contents: text,
+    config: { outputDimensionality: 384 },
+  });
+  return result.embeddings[0].values;
 }
 
 // ====== Query expansion ======
