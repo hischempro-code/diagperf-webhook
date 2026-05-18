@@ -127,8 +127,9 @@ async function retrieveContext(supabase, userQuery, options = {}) {
     });
     data = result.data;
     error = result.error;
-  } catch {
+  } catch (hybridErr) {
     // Fallback : la fonction hybride n'existe pas encore → utiliser l'ancienne
+    console.warn("[rag] match_kb_chunks_hybrid failed, falling back to match_kb_chunks:", String(hybridErr?.message || hybridErr));
     const result = await supabase.rpc("match_kb_chunks", {
       query_embedding: queryEmbedding,
       match_threshold: matchThreshold,

@@ -330,12 +330,14 @@ function verifyMetaSignature(req) {
     "sha256=" +
     crypto.createHmac("sha256", appSecret).update(req.rawBody).digest("hex");
 
-  // timingSafeEqual exige même longueur
-  const a = Buffer.from(signature, "utf8");
-  const b = Buffer.from(expected, "utf8");
-  if (a.length !== b.length) return { ok: false, reason: "length_mismatch" };
-
-  const ok = crypto.timingSafeEqual(a, b);
+  // Comparaison en temps constant sur des buffers de taille fixe (71 = "sha256=" + 64 hex)
+  const SIG_LEN = 71;
+  const sigBuf = Buffer.alloc(SIG_LEN, 0);
+  const expBuf = Buffer.alloc(SIG_LEN, 0);
+  Buffer.from(signature.slice(0, SIG_LEN), "utf8").copy(sigBuf);
+  Buffer.from(expected.slice(0, SIG_LEN), "utf8").copy(expBuf);
+  const bytesMatch = crypto.timingSafeEqual(sigBuf, expBuf);
+  const ok = bytesMatch && signature.length === expected.length;
   return { ok, reason: ok ? "ok" : "bad_signature" };
 }
 
@@ -620,4 +622,12 @@ function gracefulShutdown(signal) {
   }, 10000);
 }
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGINT",  () => gracefulShutdown("SIGINT"));
+
+// Capture les erreurs async non catchées (sinon silencieuses sur Render)
+process.on("unhandledRejection", (reason) => {
+  log.error("Unhandled Promise rejection", { reason: String(reason?.message || reason) });
+});
+process.on("uncaughtException", (err) => {
+  log.error("Uncaught exception", { error: String(err?.message || err), stack: err?.stack?.slice(0, 500) });
+});
