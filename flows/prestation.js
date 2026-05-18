@@ -886,7 +886,6 @@ function createPrestationFlow(ctx) {
     if (convState.state === "DIAG_DESCRIBE" && intent === "DIAG") {
       const description = String(text || "").trim();
 
-      // Texte trop court → re-demander
       if (description.length < 5) {
         await sendWhatsAppInteractiveButtons(fromWa,
           "Merci de décrire votre problème en quelques mots 📝\n(ex: voyant moteur allumé, perte de puissance, code défaut...)",
@@ -895,7 +894,6 @@ function createPrestationFlow(ctx) {
         return true;
       }
 
-      // Si c'est une question hors-sujet → LLM répond puis re-demande
       if (isLikelyQuestion(description)) {
         const fallback = await respondOrAnswerQuestion(fromWa, description,
           "Pouvez-vous décrire votre problème en quelques lignes ?",
@@ -906,21 +904,54 @@ function createPrestationFlow(ctx) {
       }
 
       const data = convState.data;
-      const priceTxt = `${(data.diagPriceTtcCents / 100).toFixed(0)}€ TTC`;
+      // Store as problemDescription to match the field expected by DIAG_EMAIL
+      await setConversationState(fromWa, "DIAG_PLATE", "DIAG", { ...data, problemDescription: description });
+      await sendWhatsAppInteractiveButtons(fromWa,
+        "Merci ! 👍\n\nQuelle est la plaque d'immatriculation de votre véhicule ?\n(ex: AB 123 CD)",
+        [{ id: "btn_back_menu", title: "🏠 Menu" }]
+      );
+      log.info("DIAG flow → description reçue, attente plaque", { wa_id: fromWa, descLen: description.length });
+      return true;
+    }
 
-      await setConversationState(fromWa, "DIAG_CONFIRM", "DIAG", { ...data, description });
+    // --- DIAG_PLATE ---
+    if (convState.state === "DIAG_PLATE" && intent === "DIAG") {
+      let { valid, plate } = validatePlate(text);
+      if (!valid && text) {
+        const extracted = extractAndValidatePlate?.(text);
+        if (extracted?.plate) { plate = extracted.plate; valid = extracted.valid; }
+      }
+
+      if (!valid) {
+        await sendWhatsAppInteractiveButtons(fromWa,
+          "Je n'ai pas reconnu la plaque 😅\nEnvoie-la au format AA 123 BB (avec ou sans tirets).",
+          [{ id: "btn_back_menu", title: "🏠 Menu" }]
+        );
+        return true;
+      }
+
+      let vehicle = null;
+      try { vehicle = await lookupVehicleFromPlate(plate); } catch { /* non-bloquant */ }
+
+      const data = convState.data;
+      const priceTxt = `${(data.diagPriceTtcCents / 100).toFixed(0)}€ TTC`;
+      const vehicleTxt = vehicle ? `${vehicle.make || ""} ${vehicle.model || ""}`.trim() : null;
+
+      await setConversationState(fromWa, "DIAG_CONFIRM", "DIAG", { ...data, plate, vehicle });
       await sendWhatsAppInteractiveButtons(fromWa,
         `📋 *Récapitulatif de votre demande :*\n\n` +
         `🔍 Prestation : *${data.diagTitle}*\n` +
-        `💰 Prix : *${priceTxt}* (durée : ${data.diagDuration})\n\n` +
-        `📝 Votre problème :\n${description}\n\n` +
+        `💰 Prix : *${priceTxt}* (durée : ${data.diagDuration})\n` +
+        (vehicleTxt ? `🚗 Véhicule : ${vehicleTxt}\n` : "") +
+        `🪪 Plaque : ${plate}\n\n` +
+        `📝 Votre problème :\n${data.problemDescription}\n\n` +
         `Souhaitez-vous confirmer cette demande ?`,
         [
           { id: "diag_confirm_yes", title: "✅ Confirmer" },
           { id: "diag_confirm_no",  title: "❌ Annuler" },
         ]
       );
-      log.info("DIAG flow → description reçue, attente confirmation", { wa_id: fromWa, descLen: description.length });
+      log.info("DIAG flow → plaque enregistrée, attente confirmation", { wa_id: fromWa, plate });
       return true;
     }
 
@@ -985,12 +1016,19 @@ function createPrestationFlow(ctx) {
       if (devisRow?.isNew) broadcastDashboardEvent("new_devis", { devisId, plate: data.plate || "", wa_id: fromWa, prestation: data.diagTitle, ttc: ttcTxt });
       if (devisId !== "N/A") sendQuotePdf(fromWa, { devisId, plate: data.plate, vehicle: v, prestationLabel: data.diagTitle, devisRow, customerName, customerEmail, customerPhone: fromWa }).catch(() => {});
 
+      const diagNameParts = customerName.split(/\s+/);
+      const diagLastName = diagNameParts[0] || "";
+      const diagFirstName = diagNameParts.slice(1).join(" ") || "";
+      const diagDevisRef = devisId !== "N/A" ? `DEV-${devisId}` : "—";
+      const diagVehicleDesc = `${vehicleTxt}${vehicleDetails ? ` (${vehicleDetails})` : ""}`;
+
       try {
-        const diagNameParts = customerName.split(/\s+/);
-        const diagLastName = diagNameParts[0] || "";
-        const diagFirstName = diagNameParts.slice(1).join(" ") || "";
-        await sendContactRecapEmail({ lastName: diagLastName, firstName: diagFirstName, contact: customerEmail || fromWa, prestation: `${data.diagTitle} (${priceTxt} — ${data.diagDuration})`, plate: data.plate, vehicleDesc: `${vehicleTxt}${vehicleDetails ? ` (${vehicleDetails})` : ""} — Problème : ${data.problemDescription}` });
-      } catch (emailErr) { log.error("Erreur envoi email notif diagnostic", { wa_id: fromWa, error: String(emailErr?.message || emailErr) }); }
+        await sendContactRecapEmail({ lastName: diagLastName, firstName: diagFirstName, contact: customerEmail || fromWa, prestation: `${data.diagTitle} (${priceTxt} — ${data.diagDuration})`, plate: data.plate, vehicleDesc: `${diagVehicleDesc} — Problème : ${data.problemDescription}` });
+      } catch (emailErr) { log.error("Erreur envoi email notif diagnostic (garage)", { wa_id: fromWa, error: String(emailErr?.message || emailErr) }); }
+
+      try {
+        await sendRdvClientEmail({ to: customerEmail, firstName: diagFirstName, lastName: diagLastName, vehicleDesc: diagVehicleDesc, prestationLabel: `${data.diagTitle} — ${data.diagDuration}`, devisRef: diagDevisRef, htTxt, ttcTxt, contactReason: "technicien" });
+      } catch (emailErr) { log.error("Erreur envoi email confirmation client diagnostic", { wa_id: fromWa, error: String(emailErr?.message || emailErr) }); }
 
       try {
         await notifyGarage(
