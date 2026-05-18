@@ -882,6 +882,48 @@ function createPrestationFlow(ctx) {
       return true;
     }
 
+    // --- DIAG_DESCRIBE ---
+    if (convState.state === "DIAG_DESCRIBE" && intent === "DIAG") {
+      const description = String(text || "").trim();
+
+      // Texte trop court → re-demander
+      if (description.length < 5) {
+        await sendWhatsAppInteractiveButtons(fromWa,
+          "Merci de décrire votre problème en quelques mots 📝\n(ex: voyant moteur allumé, perte de puissance, code défaut...)",
+          [{ id: "btn_back_menu", title: "🏠 Menu" }]
+        );
+        return true;
+      }
+
+      // Si c'est une question hors-sujet → LLM répond puis re-demande
+      if (isLikelyQuestion(description)) {
+        const fallback = await respondOrAnswerQuestion(fromWa, description,
+          "Pouvez-vous décrire votre problème en quelques lignes ?",
+          [{ id: "btn_back_menu", title: "🏠 Menu" }],
+          rawMsg
+        );
+        if (fallback) return true;
+      }
+
+      const data = convState.data;
+      const priceTxt = `${(data.diagPriceTtcCents / 100).toFixed(0)}€ TTC`;
+
+      await setConversationState(fromWa, "DIAG_CONFIRM", "DIAG", { ...data, description });
+      await sendWhatsAppInteractiveButtons(fromWa,
+        `📋 *Récapitulatif de votre demande :*\n\n` +
+        `🔍 Prestation : *${data.diagTitle}*\n` +
+        `💰 Prix : *${priceTxt}* (durée : ${data.diagDuration})\n\n` +
+        `📝 Votre problème :\n${description}\n\n` +
+        `Souhaitez-vous confirmer cette demande ?`,
+        [
+          { id: "diag_confirm_yes", title: "✅ Confirmer" },
+          { id: "diag_confirm_no",  title: "❌ Annuler" },
+        ]
+      );
+      log.info("DIAG flow → description reçue, attente confirmation", { wa_id: fromWa, descLen: description.length });
+      return true;
+    }
+
     // --- DIAG_CONFIRM ---
     if (convState.state === "DIAG_CONFIRM" && intent === "DIAG") {
       const t = String(text || "").trim().toLowerCase();
