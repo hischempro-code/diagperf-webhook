@@ -2,10 +2,11 @@ const express = require("express");
 
 /**
  * Dashboard & Client API routes.
- * @param {{ supabase: import("@supabase/supabase-js").SupabaseClient, log: object, transporter: object }} deps
+ * @param {{ supabase: import("@supabase/supabase-js").SupabaseClient, log: object }} deps
  * @returns {{ router: express.Router, broadcastDashboardEvent: Function, sseClients: Set }}
  */
-function createDashboardRouter({ supabase, log, transporter }) {
+function createDashboardRouter({ supabase, log }) {
+  const fetchFn = global.fetch || require("node-fetch");
   const router = express.Router();
 
   // ====== SSE real-time notifications for dashboard ======
@@ -377,22 +378,30 @@ function createDashboardRouter({ supabase, log, transporter }) {
     if (!to) {
       return res.status(400).json({ error: "Paramètre ?to=email@example.com requis" });
     }
-    if (!transporter) {
-      return res.status(503).json({ error: "Email non configuré (BREVO_SMTP_KEY absent)" });
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ error: "Email non configuré (BREVO_API_KEY absent)" });
     }
 
-    const msg = {
-      to,
-      from: process.env.EMAIL_FROM || '"Diagperf" <diag.perf.pro@gmail.com>',
-      subject: "DiagPerf - Email test",
-      text: "Ceci est un email de test envoyé depuis le serveur DiagPerf.",
-      html: "<h2>DiagPerf</h2><p>Ceci est un email de test envoyé depuis le serveur DiagPerf.</p>",
-    };
-
     try {
-      const response = await transporter.sendMail(msg);
-      log.info("test-email: envoi OK", { to, messageId: response.messageId });
-      return res.json({ success: true, to, messageId: response.messageId });
+      const brevoRes = await fetchFn("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": apiKey, "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          sender: { name: "Diagperf", email: process.env.EMAIL_FROM_ADDR || "diag.perf.pro@gmail.com" },
+          to: [{ email: to }],
+          subject: "DiagPerf - Email test",
+          textContent: "Ceci est un email de test envoyé depuis le serveur DiagPerf.",
+          htmlContent: "<h2>DiagPerf</h2><p>Ceci est un email de test envoyé depuis le serveur DiagPerf.</p>",
+        }),
+      });
+      if (!brevoRes.ok) {
+        const errBody = await brevoRes.text().catch(() => String(brevoRes.status));
+        log.error("test-email: échec envoi", { to, status: brevoRes.status, error: errBody });
+        return res.status(500).json({ error: "Échec envoi email", details: errBody });
+      }
+      log.info("test-email: envoi OK", { to });
+      return res.json({ success: true, to });
     } catch (err) {
       log.error("test-email: échec envoi", { to, error: String(err?.message || err) });
       return res.status(500).json({ error: "Échec envoi email", details: String(err?.message || err) });
