@@ -454,7 +454,7 @@ function createPrestationFlow(ctx) {
           const ttcTxt = typeof devisRow?.total_ttc_centimes === "number" ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}€` : "N/A";
           const displayLabel = intent === "REPROG" ? `${label} — STAGE 1` : label;
 
-          await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel });
+          await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel });
 
           if (["E85", "FAP", "ADBLUE", "EGR"].includes(intent)) {
             const cardUrl = buildPrestationCardUrl({ vehicle, intent, prestationLabel: displayLabel, priceTtc: ttcTxt });
