@@ -661,11 +661,6 @@ function createPrestationFlow(ctx) {
         catch (e) { log.warn("WAITING_DEVIS_CONTACT: devis fetch failed", { error: String(e?.message || e) }); }
       }
 
-      if (stateData.devisId) {
-        try { await sendQuotePdf(fromWa, { devisId: stateData.devisId, plate: stateData.plate, vehicle: stateData.vehicle, prestationLabel: stateData.prestationLabel || intentToLabel(intent), stageLabel: stateData.stageLabel, gainTxt: stateData.gainTxt, devisRow, customerName, customerEmail, customerPhone: fromWa }); }
-        catch (err) { log.error("sendQuotePdf error (non-blocking)", { wa_id: fromWa, error: String(err?.message || err) }); }
-      }
-
       const vehicle = stateData.vehicle || {};
       const plate = stateData.plate || "N/A";
       const devisId = stateData.devisId || "N/A";
@@ -685,8 +680,14 @@ function createPrestationFlow(ctx) {
       const lastName = nameTokens[0] || "";
       const firstName = nameTokens.slice(1).join(" ") || "";
 
+      let pdfBuffer = null;
+      if (stateData.devisId) {
+        try { pdfBuffer = await sendQuotePdf(fromWa, { devisId: stateData.devisId, plate: stateData.plate, vehicle: stateData.vehicle, prestationLabel: stateData.prestationLabel || intentToLabel(intent), stageLabel: stateData.stageLabel, gainTxt: stateData.gainTxt, devisRow, customerName, customerEmail, customerPhone: fromWa }); }
+        catch (err) { log.error("sendQuotePdf error (non-blocking)", { wa_id: fromWa, error: String(err?.message || err) }); }
+      }
+
       const [clientEmailRes] = await Promise.allSettled([
-        sendRdvClientEmail({ to: customerEmail, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
+        sendRdvClientEmail({ to: customerEmail, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis", pdfBuffer }),
         sendRdvDiagperfEmail({ firstName, lastName, clientEmail: customerEmail, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
       ]);
       const clientEmailSent = clientEmailRes.status === "fulfilled" && clientEmailRes.value === true;
