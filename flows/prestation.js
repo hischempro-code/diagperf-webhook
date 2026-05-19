@@ -410,6 +410,24 @@ function createPrestationFlow(ctx) {
         return true;
       }
 
+      // Client a envoyé ses coordonnées trop tôt → on les sauvegarde et on repose la question
+      if (String(text || "").includes("@")) {
+        const words = String(text || "").trim().split(/\s+/);
+        const emailWord = words.find(w => w.includes("@"));
+        const nameParts = words.filter(w => !w.includes("@") && w.length > 1);
+        if (emailWord && nameParts.length > 0) {
+          const savedName = nameParts.join(" ");
+          const savedEmail = emailWord.toLowerCase();
+          await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", intent, { ...stateData, saved_customer_name: savedName, saved_customer_email: savedEmail });
+          const vehicleName = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
+          await sendWhatsAppInteractiveButtons(fromWa,
+            `Merci ${nameParts[0]} ! 👍 J'ai bien noté vos coordonnées pour la suite.\n\nMais d'abord, confirmez-vous ce véhicule ?\n🚗 *${vehicleName}* — ${vehicle.fuel || ""} — ${vehicle.year || ""}`,
+            [{ id: "confirm_vehicle_yes", title: "✅ Oui" }, { id: "confirm_vehicle_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" }]
+          );
+          return true;
+        }
+      }
+
       return respondOrAnswerQuestion(fromWa, text, "Est-ce bien votre véhicule ? Répondez *oui* ou *non*.", [
         { id: "confirm_vehicle_yes", title: "✅ Oui" }, { id: "confirm_vehicle_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" }
       ], rawMsg);
@@ -639,12 +657,20 @@ function createPrestationFlow(ctx) {
       const stateData = convState.data || {};
       if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
 
-      const raw = String(text || "").trim();
-      const words = raw.split(/[\s\n]+/);
-      const emailWord = words.find(w => w.includes("@"));
-      const nameParts = words.filter(w => !w.includes("@"));
-      const customerName = nameParts.join(" ").trim();
-      const customerEmail = (emailWord || "").trim().toLowerCase();
+      // Coordonnées déjà fournies plus tôt dans le flow → les réutiliser directement
+      let customerName, customerEmail;
+      if (stateData.saved_customer_name && stateData.saved_customer_email && validateEmail(stateData.saved_customer_email)) {
+        customerName = stateData.saved_customer_name;
+        customerEmail = stateData.saved_customer_email;
+        log.info("WAITING_DEVIS_CONTACT: using pre-saved contact info", { wa_id: fromWa, customerName, customerEmail });
+      } else {
+        const raw = String(text || "").trim();
+        const words = raw.split(/[\s\n]+/);
+        const emailWord = words.find(w => w.includes("@"));
+        const nameParts = words.filter(w => !w.includes("@"));
+        customerName = nameParts.join(" ").trim();
+        customerEmail = (emailWord || "").trim().toLowerCase();
+      }
 
       if (!customerName || customerName.length < 2) {
         await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas pu identifier votre nom 😅\nMerci d'envoyer vos coordonnées au format :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
