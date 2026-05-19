@@ -197,8 +197,8 @@ let _emailTransporter = null;
 if (process.env.BREVO_SMTP_KEY) {
   _emailTransporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
       user: process.env.BREVO_SMTP_LOGIN || "abcf2c001@smtp-brevo.com",
       pass: process.env.BREVO_SMTP_KEY,
