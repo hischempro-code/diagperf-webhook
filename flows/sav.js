@@ -257,7 +257,7 @@ function createSavFlow(ctx) {
         log.error("Erreur création ticket SAV", { wa_id: fromWa, error: String(err?.message || err) });
         await sendWhatsAppInteractiveButtons(
           fromWa,
-          "Désolé, j'ai eu un souci pour enregistrer ta demande 😕\nRéessaie dans quelques instants.",
+          "Désolé, j'ai eu un souci pour enregistrer votre demande 😕\nVeuillez réessayer dans quelques instants.",
           [{ id: "btn_back_menu", title: "🏠 Menu" }]
         );
       }

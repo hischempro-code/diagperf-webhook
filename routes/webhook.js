@@ -290,7 +290,7 @@ function createWebhookHandler(ctx) {
 
           // fallback final → menu (with a message if LLM explicitly returned "menu" or failed)
           if (llmGaveMenu) {
-            await sendWhatsAppText(fromWa, "Je n'ai pas bien compris ta demande 😅 Voici ce que je peux faire pour toi :");
+            await sendWhatsAppText(fromWa, "Je n'ai pas bien compris votre demande 😅 Voici ce que je peux faire pour vous :");
           }
           await sendMenuList(fromWa);
         }
