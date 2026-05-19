@@ -1,6 +1,7 @@
 const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
 const { detectIntent } = require("../lib/intent-detector");
 const { lookupVehicleFromPlate, buildVehicleOnlyText } = require("../lib/vehicle-service");
+const { extractAndValidatePlate } = require("../lib/plate-extractor");
 
 /**
  * Factory: creates the SAV flow handler.
@@ -24,7 +25,13 @@ function createSavFlow(ctx) {
     if (!convState || !convState.state) {
       const intent = detectIntent(text);
       if (intent === "SAV") {
-        await setConversationState(fromWa, "SAV_TOPIC", "SAV", {});
+        // Accumuler les coordonnées présentes dans le message initial
+        const { email: initEmail, name: initName } = extractContactFromText(text);
+        const initData = {
+          ...(initEmail ? { _known_email: initEmail } : {}),
+          ...(initName ? { _known_name: initName } : {}),
+        };
+        await setConversationState(fromWa, "SAV_TOPIC", "SAV", initData);
         await sendWhatsAppInteractiveButtons(
           fromWa,
           `🛠️ SAV DiagPerf\n\nQuel est le sujet de votre demande ?`,
@@ -45,10 +52,13 @@ function createSavFlow(ctx) {
     if (convState.state) {
       const { email, name } = extractContactFromText(text);
       const prev = convState.data || {};
-      if ((email && !prev._known_email) || (name && !prev._known_name)) {
+      const plateEx = !prev._known_plate ? extractAndValidatePlate(text) : null;
+      const newPlate = plateEx?.valid ? plateEx.plate : null;
+      if ((email && !prev._known_email) || (name && !prev._known_name) || newPlate) {
         const next = { ...prev,
           ...(email && !prev._known_email ? { _known_email: email } : {}),
           ...(name && !prev._known_name ? { _known_name: name } : {}),
+          ...(newPlate ? { _known_plate: newPlate } : {}),
         };
         convState.data = next;
         setConversationState(fromWa, convState.state, "SAV", next).catch(() => {});
@@ -77,11 +87,26 @@ function createSavFlow(ctx) {
           { id: "sav_topic_3", title: "Autre" },
         ], rawMsg);
       }
-      await setConversationState(fromWa, "SAV_COORDINATES", "SAV", { topic });
+      const knownData = convState.data || {};
+      const nextData = { ...knownData, topic };
+      await setConversationState(fromWa, "SAV_COORDINATES", "SAV", nextData);
+
+      // Si les coordonnées sont déjà connues, skip SAV_COORDINATES
+      if (knownData._known_name && knownData._known_email && validateEmail(knownData._known_email)) {
+        log.info("SAV_TOPIC → coordonnées déjà connues, skip SAV_COORDINATES", { wa_id: fromWa });
+        convState.state = "SAV_COORDINATES";
+        convState.data = nextData;
+        return handleSavFlow(fromWa, t, rawMsg);
+      }
+
       await sendWhatsAppInteractiveButtons(
         fromWa,
-        `Veuillez saisir vos coordonnées en un seul message au format :\n\n*Nom Prénom Email*\n\nExemple : Dupont Jean jean.dupont@gmail.com`,
-        [{ id: "btn_back_menu", title: "\ud83c\udfe0 Menu" }]
+        `Veuillez saisir vos coordonnées en un seul message au format :
+
+*Nom Prénom Email*
+
+Exemple : Dupont Jean jean.dupont@gmail.com`,
+        [{ id: "btn_back_menu", title: "🏠 Menu" }]
       );
       return true;
     }
@@ -112,18 +137,34 @@ function createSavFlow(ctx) {
         return true;
       }
 
-      await setConversationState(fromWa, "SAV_PLATE", "SAV", {
-        ...convState.data,
-        customer_name: customerName,
-        customer_email: email,
-      });
+      const plateNextData = { ...convState.data, customer_name: customerName, customer_email: email };
+      await setConversationState(fromWa, "SAV_PLATE", "SAV", plateNextData);
+
+      // Si la plaque est déjà connue, skip SAV_PLATE
+      if (plateNextData._known_plate) {
+        log.info("SAV_COORDINATES → plaque déjà connue, skip SAV_PLATE", { wa_id: fromWa, plate: plateNextData._known_plate });
+        convState.state = "SAV_PLATE";
+        convState.data = plateNextData;
+        return handleSavFlow(fromWa, t, rawMsg);
+      }
+
       await sendWhatsAppInteractiveButtons(fromWa, "Veuillez envoyer la plaque d'immatriculation du véhicule concerné (ex: AA 001 BB).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
       return true;
     }
 
     // --- Étape 3 : Plaque d'immatriculation ---
     if (convState.state === "SAV_PLATE") {
-      const { valid, plate } = validatePlate(t);
+      let { valid, plate } = validatePlate(t);
+
+      if (!valid) {
+        const extracted = extractAndValidatePlate(t);
+        if (extracted?.valid) { valid = true; plate = extracted.plate; }
+      }
+      if (!valid && convState.data?._known_plate) {
+        plate = convState.data._known_plate;
+        valid = true;
+        log.info("SAV_PLATE → using previously accumulated plate", { wa_id: fromWa, plate });
+      }
 
       if (!valid) {
         await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas reconnu la plaque 😅\nEnvoyez-la au format AA 123 BB (avec ou sans tirets).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);

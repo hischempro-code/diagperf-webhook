@@ -1138,6 +1138,14 @@ function createPrestationFlow(ctx) {
       }
 
       await setConversationState(fromWa, "DIAG_EMAIL", "DIAG", convState.data);
+
+      // Si les coordonnées sont déjà connues, skip DIAG_EMAIL
+      if (convState.data?._known_name && convState.data?._known_email && validateEmail(convState.data._known_email)) {
+        log.info("DIAG_CONFIRM → contact déjà connu, skip DIAG_EMAIL", { wa_id: fromWa });
+        const fakeConvState = { state: "DIAG_EMAIL", intent: "DIAG", data: convState.data };
+        return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, "DIAG", null);
+      }
+
       await sendWhatsAppText(fromWa, `Parfait ! ✅\n\nPour finaliser, merci d'envoyer votre nom et email :\n\n(ex: Dupont Jean jean@mail.com)`);
       log.info("DIAG flow → confirmé, attente coordonnées", { wa_id: fromWa });
       return true;
