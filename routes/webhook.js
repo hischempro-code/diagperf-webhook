@@ -267,21 +267,10 @@ function createWebhookHandler(ctx) {
                 }
               }
 
-              // Cas 2 : question → réponse conversationnelle
+              // Cas 2 : question → texte simple, conversation libre sans bouton Menu
               if (llmResult.type === "answer" && llmResult.message) {
-                log.info("LLM → réponse FAQ", { wa_id: fromWa, msgLen: llmResult.message.length, final: !!llmResult.final });
-                if (llmResult.final) {
-                  // Fin naturelle de sujet → bouton Menu
-                  await sendWhatsAppInteractiveButtons(
-                    fromWa,
-                    llmResult.message,
-                    [{ id: "btn_back_menu", title: "🏠 Menu" }]
-                  );
-                } else {
-                  // Échange en cours → texte simple pour laisser la conversation continuer
-                  await sendWhatsAppText(fromWa, llmResult.message);
-                }
-                // Send location pin if LLM flagged it
+                log.info("LLM → réponse FAQ", { wa_id: fromWa, msgLen: llmResult.message.length });
+                await sendWhatsAppText(fromWa, llmResult.message);
                 if (llmResult.sendLocation) {
                   sendWhatsAppLocation(fromWa, DIAGPERF_LOCATION.latitude, DIAGPERF_LOCATION.longitude, DIAGPERF_LOCATION.name, DIAGPERF_LOCATION.address).catch(locErr => {
                     log.debug("Location send failed (non-blocking)", { error: String(locErr?.message || locErr) });
