@@ -690,7 +690,7 @@ function createPrestationFlow(ctx) {
         sendRdvDiagperfEmail({ firstName, lastName, clientEmail: customerEmail, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
       ]);
       const clientEmailSent = clientEmailRes.status === "fulfilled" && clientEmailRes.value === true;
-      if (!clientEmailSent) log.warn("Client email failed or SendGrid not configured", { wa_id: fromWa, customerEmail });
+      if (!clientEmailSent) log.warn("Client email failed or Brevo not configured", { wa_id: fromWa, customerEmail });
 
       notifyGarage(`👤 COORDONNÉES CLIENT REÇUES\nDevis : ${devisRef}\nClient : ${customerName}\nEmail : ${customerEmail}\nWhatsApp : ${fromWa}\nVéhicule : ${vehicleDesc}\nPlaque : ${plate}\nPrestation : ${emailPrestationLabel}\nHT : ${htTxt} | TTC : ${ttcTxt}`).catch(() => {});
 

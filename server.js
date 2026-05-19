@@ -203,6 +203,9 @@ if (process.env.BREVO_SMTP_KEY) {
       user: process.env.BREVO_SMTP_LOGIN || "abcf2c001@smtp-brevo.com",
       pass: process.env.BREVO_SMTP_KEY,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 5000,
+    socketTimeout: 15000,
   });
   console.log(`✅ Brevo SMTP configuré (from: ${process.env.EMAIL_FROM || "diag.perf.pro@gmail.com"})`);
 } else {
