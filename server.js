@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
-const sgMail = require("@sendgrid/mail");
+const nodemailer = require("nodemailer");
 const { retrieveContext, formatContextForPrompt, preloadEmbedder } = require("./rag");
 const { renderStageGainsVideo, renderPrestationVideo } = require("./lib/creatomateVideo");
 const { buildDiagnosticContext, detectDtcCodes, detectMileage, detectSymptoms } = require("./lib/diagnostic-helper");
@@ -192,16 +192,21 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// ====== SendGrid init ======
-if (process.env.SENDGRID_API_KEY) {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  const fromAddr = process.env.SENDGRID_FROM || "contact@diagperf.com";
-  console.log(`✅ SendGrid configuré (from: ${fromAddr})`);
-  if (!process.env.SENDGRID_FROM) {
-    console.warn("⚠️ SENDGRID_FROM absent — using contact@diagperf.com. Assurez-vous que cette adresse est vérifiée dans SendGrid (Sender Identity).");
-  }
+// ====== Brevo SMTP init ======
+let _emailTransporter = null;
+if (process.env.BREVO_SMTP_KEY) {
+  _emailTransporter = nodemailer.createTransport({
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.BREVO_SMTP_LOGIN || "abcf2c001@smtp-brevo.com",
+      pass: process.env.BREVO_SMTP_KEY,
+    },
+  });
+  console.log(`✅ Brevo SMTP configuré (from: ${process.env.EMAIL_FROM || "diag.perf.pro@gmail.com"})`);
 } else {
-  console.warn("⚠️ SENDGRID_API_KEY absent, emails désactivés");
+  console.warn("⚠️ BREVO_SMTP_KEY absent, emails désactivés");
 }
 
 // ====== Logger structuré (zéro dépendance) ======
@@ -222,7 +227,7 @@ const log = {
 };
 
 // ====== Init services ======
-initEmailService({ sgMail, log });
+initEmailService({ transporter: _emailTransporter, log });
 initVehicleService({ supabase, log, fetchFn });
 initDevisService({ supabase, log });
 // initWhatsAppClient called after insertOutboundMessage is defined (see below)
@@ -318,7 +323,7 @@ app.get("/webhook", (req, res) => {
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
 // ====== Dashboard & Client API routes (extracted) ======
-const { router: dashboardRouter, broadcastDashboardEvent } = createDashboardRouter({ supabase, log, sgMail });
+const { router: dashboardRouter, broadcastDashboardEvent } = createDashboardRouter({ supabase, log, transporter: _emailTransporter });
 app.use(dashboardRouter);
 
 // ====== Signature check ======

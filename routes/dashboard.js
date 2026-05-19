@@ -2,10 +2,10 @@ const express = require("express");
 
 /**
  * Dashboard & Client API routes.
- * @param {{ supabase: import("@supabase/supabase-js").SupabaseClient, log: object, sgMail: object, broadcastDashboardEvent: Function }} deps
+ * @param {{ supabase: import("@supabase/supabase-js").SupabaseClient, log: object, transporter: object }} deps
  * @returns {{ router: express.Router, broadcastDashboardEvent: Function, sseClients: Set }}
  */
-function createDashboardRouter({ supabase, log, sgMail }) {
+function createDashboardRouter({ supabase, log, transporter }) {
   const router = express.Router();
 
   // ====== SSE real-time notifications for dashboard ======
@@ -377,26 +377,25 @@ function createDashboardRouter({ supabase, log, sgMail }) {
     if (!to) {
       return res.status(400).json({ error: "Paramètre ?to=email@example.com requis" });
     }
-    if (!process.env.SENDGRID_API_KEY) {
-      return res.status(503).json({ error: "SENDGRID_API_KEY non configuré" });
+    if (!transporter) {
+      return res.status(503).json({ error: "Email non configuré (BREVO_SMTP_KEY absent)" });
     }
 
     const msg = {
       to,
-      from: process.env.SENDGRID_FROM || "noreply@diagperf.com",
+      from: process.env.EMAIL_FROM || '"Diagperf" <diag.perf.pro@gmail.com>',
       subject: "DiagPerf - Email test",
       text: "Ceci est un email de test envoyé depuis le serveur DiagPerf.",
       html: "<h2>DiagPerf</h2><p>Ceci est un email de test envoyé depuis le serveur DiagPerf.</p>",
     };
 
     try {
-      const [response] = await sgMail.send(msg);
-      log.info("test-email: envoi OK", { to, statusCode: response.statusCode });
-      return res.json({ success: true, to, statusCode: response.statusCode });
+      const response = await transporter.sendMail(msg);
+      log.info("test-email: envoi OK", { to, messageId: response.messageId });
+      return res.json({ success: true, to, messageId: response.messageId });
     } catch (err) {
-      const body = err?.response?.body || err.message;
-      log.error("test-email: échec envoi", { to, error: body });
-      return res.status(500).json({ error: "Échec envoi email", details: body });
+      log.error("test-email: échec envoi", { to, error: String(err?.message || err) });
+      return res.status(500).json({ error: "Échec envoi email", details: String(err?.message || err) });
     }
   });
 
