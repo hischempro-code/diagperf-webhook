@@ -26,7 +26,7 @@ const {
 } = require("../lib/devis-service");
 
 // ====== Universal info accumulator ======
-// Extracts name/email/plate from any message and merges into state data silently.
+// Extracts name/email/plate/stage from any message and merges into state data silently.
 // Returns the same object reference if nothing changed (cheap !== check).
 function accumulateInfoIntoState(text, stateData, _extractAndValidatePlate) {
   const { email, name } = extractContactFromText(text);
@@ -38,10 +38,26 @@ function accumulateInfoIntoState(text, stateData, _extractAndValidatePlate) {
     const ex = _extractAndValidatePlate(text);
     if (ex?.valid && ex?.plate) next._known_plate = ex.plate;
   }
+  if (!next._known_stage_num) {
+    const stageMatch = String(text || "").match(/\bstage\s*(\d+)\b/i);
+    if (stageMatch) next._known_stage_num = parseInt(stageMatch[1], 10);
+  }
   const changed = next._known_email !== prev._known_email
     || next._known_name !== prev._known_name
-    || next._known_plate !== prev._known_plate;
+    || next._known_plate !== prev._known_plate
+    || next._known_stage_num !== prev._known_stage_num;
   return changed ? next : prev;
+}
+
+// Picks only accumulated _known_* fields from state data, for forwarding across transitions.
+function pickKnown(data) {
+  const d = data || {};
+  const k = {};
+  if (d._known_email) k._known_email = d._known_email;
+  if (d._known_name) k._known_name = d._known_name;
+  if (d._known_plate) k._known_plate = d._known_plate;
+  if (d._known_stage_num) k._known_stage_num = d._known_stage_num;
+  return k;
 }
 
 // ====== Constants ======
@@ -77,7 +93,7 @@ function createPrestationFlow(ctx) {
   } = ctx;
 
   // ====== Shared stage selection builder ======
-  async function buildAndSendStageSelection(fromWa, vehicle, plate, stages, intentOverride) {
+  async function buildAndSendStageSelection(fromWa, vehicle, plate, stages, intentOverride, prevStateData) {
     const maxDisplay = 4;
     const displayStages = stages.slice(0, maxDisplay);
     const firstRow = displayStages[0];
@@ -125,7 +141,7 @@ function createPrestationFlow(ctx) {
     }
 
     const intent = intentOverride || "REPROG";
-    await setConversationState(fromWa, "WAITING_STAGE_CHOICE", intent, { plate, vehicle, stages: displayStages });
+    await setConversationState(fromWa, "WAITING_STAGE_CHOICE", intent, { ...pickKnown(prevStateData), plate, vehicle, stages: displayStages });
     await sendWhatsAppInteractiveButtons(fromWa, msg, stageButtons);
     return displayStages;
   }
@@ -185,6 +201,8 @@ function createPrestationFlow(ctx) {
       try {
         const vehicle = await lookupVehicleFromPlate(plateExtraction.plate);
 
+        const initContact = extractContactFromText(text);
+
         // Si REPROG et stage mentionné dans le message initial → skip direct au devis
         if (detected === "REPROG") {
           const stageMatch = text.match(/stage\s*(\d+)/i);
@@ -195,9 +213,14 @@ function createPrestationFlow(ctx) {
                 const stages = await lookupReprogStages(vehicle);
                 const stageNum = parseInt(stageMatch[1], 10);
                 if (stages.length > 0 && stageNum >= 1 && stageNum <= stages.length) {
+                  const initKnown = {
+                    plate: plateExtraction.plate, vehicle, stages, _known_stage_num: stageNum,
+                    ...(initContact.email ? { _known_email: initContact.email } : {}),
+                    ...(initContact.name ? { _known_name: initContact.name } : {}),
+                  };
                   log.info("Prestation flow → plaque + stage détectés, skip direct au devis", { wa_id: fromWa, intent: detected, plate: plateExtraction.plate, stage: stageNum });
-                  const fakeConvState = { state: "WAITING_STAGE_CHOICE", intent: detected, data: { plate: plateExtraction.plate, vehicle, stages } };
-                  await setConversationState(fromWa, "WAITING_STAGE_CHOICE", detected, { plate: plateExtraction.plate, vehicle, stages });
+                  const fakeConvState = { state: "WAITING_STAGE_CHOICE", intent: detected, data: initKnown };
+                  await setConversationState(fromWa, "WAITING_STAGE_CHOICE", detected, initKnown);
                   return handleLegacyPrestationStates(fromWa, String(stageNum), rawMsg, fakeConvState, detected, null);
                 }
               }
@@ -207,7 +230,6 @@ function createPrestationFlow(ctx) {
           }
         }
 
-        const initContact = extractContactFromText(text);
         const initData = { plate: plateExtraction.plate, vehicle,
           ...(initContact.email ? { _known_email: initContact.email } : {}),
           ...(initContact.name ? { _known_name: initContact.name } : {}),
@@ -321,7 +343,7 @@ function createPrestationFlow(ctx) {
 
     try {
       const vehicle = await lookupVehicleFromPlate(plate);
-      await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", intent, { plate, vehicle });
+      await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", intent, { ...pickKnown(convState.data), plate, vehicle });
       await sendWhatsAppInteractiveButtons(fromWa, buildVehicleOnlyText(vehicle), [
         { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
         { id: "confirm_vehicle_no", title: "❌ Non" },
@@ -393,7 +415,17 @@ function createPrestationFlow(ctx) {
           try {
             const stages = await lookupReprogStages(vehicle);
             if (stages.length > 0) {
-              const displayStages = await buildAndSendStageSelection(fromWa, vehicle, plate, stages, intent);
+              // Si le client a déjà mentionné un stage, sauter directement au devis
+              if (stateData._known_stage_num) {
+                const knownIdx = stateData._known_stage_num - 1;
+                if (knownIdx >= 0 && knownIdx < stages.length) {
+                  log.info("WAITING_VEHICLE_CONFIRM → stage déjà connu, skip sélection", { wa_id: fromWa, stageNum: stateData._known_stage_num });
+                  const fakeConvState = { state: "WAITING_STAGE_CHOICE", intent, data: { ...pickKnown(stateData), plate, vehicle, stages } };
+                  await setConversationState(fromWa, "WAITING_STAGE_CHOICE", intent, { ...pickKnown(stateData), plate, vehicle, stages });
+                  return handleLegacyPrestationStates(fromWa, String(stateData._known_stage_num), rawMsg, fakeConvState, intent, null);
+                }
+              }
+              const displayStages = await buildAndSendStageSelection(fromWa, vehicle, plate, stages, intent, stateData);
               log.info("Reprog stages trouvés", { wa_id: fromWa, count: displayStages.length, total: stages.length });
               return true;
             }
@@ -514,7 +546,7 @@ function createPrestationFlow(ctx) {
       else if (typeof selectedStage.prix_centimes === "number" && !CUSTOM_QUOTE_STAGES.has(selectedStage.stage)) priceCents = selectedStage.prix_centimes;
 
       if (priceCents === null) {
-        await setConversationState(fromWa, "WAITING_COORDINATES", intent, { plate, vehicle, stageLabel });
+        await setConversationState(fromWa, "WAITING_COORDINATES", intent, { ...pickKnown(stateData), plate, vehicle, stageLabel });
         await sendWhatsAppInteractiveButtons(fromWa, `Prestation : Reprogrammation ${stageLabel}\nPrix : Sur devis personnalisé\n\nCe stage nécessite une étude personnalisée 🔍\nMerci d'envoyer vos coordonnées au format :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
@@ -528,7 +560,7 @@ function createPrestationFlow(ctx) {
         const gainTxt = (!isE85Stage && selectedStage.gain_puissance) ? `\n⚡ +${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm` : "";
         const stageGainTxtShort = (!isE85Stage && selectedStage.gain_puissance) ? `+${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm` : null;
 
-        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort });
+        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort });
 
         await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : 2h-4h\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
           { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" },
