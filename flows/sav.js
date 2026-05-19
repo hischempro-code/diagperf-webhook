@@ -1,4 +1,4 @@
-const { extractInteractiveId, validatePlate, validateEmail } = require("../lib/text-helpers");
+const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
 const { detectIntent } = require("../lib/intent-detector");
 const { lookupVehicleFromPlate, buildVehicleOnlyText } = require("../lib/vehicle-service");
 
@@ -41,6 +41,20 @@ function createSavFlow(ctx) {
 
     if (convState.intent !== "SAV") return false;
 
+    // Accumulate any info from this message silently
+    if (convState.state) {
+      const { email, name } = extractContactFromText(text);
+      const prev = convState.data || {};
+      if ((email && !prev._known_email) || (name && !prev._known_name)) {
+        const next = { ...prev,
+          ...(email && !prev._known_email ? { _known_email: email } : {}),
+          ...(name && !prev._known_name ? { _known_name: name } : {}),
+        };
+        convState.data = next;
+        setConversationState(fromWa, convState.state, "SAV", next).catch(() => {});
+      }
+    }
+
     const t = String(text || "").trim();
 
     // --- Étape 1 : Sujet ---
@@ -74,11 +88,20 @@ function createSavFlow(ctx) {
 
     // --- Étape 2 : Coordonnées (Nom + Prénom + Email) ---
     if (convState.state === "SAV_COORDINATES") {
-      const parts = t.split(/\s+/);
-      const emailPart = parts.find(p => p.includes("@"));
-      const email = validateEmail(emailPart);
-      const nameParts = parts.filter(p => !p.includes("@"));
-      const customerName = nameParts.join(" ") || "";
+      const stateData = convState.data || {};
+      let email, customerName;
+
+      if (stateData._known_name && stateData._known_email && validateEmail(stateData._known_email)) {
+        customerName = stateData._known_name;
+        email = stateData._known_email;
+        log.info("SAV_COORDINATES: using accumulated contact info", { wa_id: fromWa, customerName, email });
+      } else {
+        const parts = t.split(/\s+/);
+        const emailPart = parts.find(p => p.includes("@"));
+        email = validateEmail(emailPart);
+        const nameParts = parts.filter(p => !p.includes("@"));
+        customerName = nameParts.join(" ") || "";
+      }
 
       if (!email || customerName.length < 2) {
         await sendWhatsAppInteractiveButtons(
@@ -129,7 +152,7 @@ function createSavFlow(ctx) {
       const buttonId = extractInteractiveId(rawMsg);
       const tLow = t.toLowerCase();
 
-      if (tLow === "oui" || tLow === "o" || tLow === "yes" || buttonId === "sav_vehicle_yes") {
+      if (buttonId === "sav_vehicle_yes" || isConfirmation(tLow)) {
         const vehicle = convState.data?.vehicle || {};
         const vDesc = [vehicle.make, vehicle.model, vehicle.fuel, vehicle.power_hp ? `${vehicle.power_hp}ch` : null, vehicle.year].filter(Boolean).join(" ");
         await setConversationState(fromWa, "SAV_DESCRIPTION", "SAV", {
@@ -140,7 +163,7 @@ function createSavFlow(ctx) {
         return true;
       }
 
-      if (tLow === "non" || tLow === "n" || tLow === "no" || buttonId === "sav_vehicle_no") {
+      if (buttonId === "sav_vehicle_no" || isDenial(tLow)) {
         await setConversationState(fromWa, "SAV_VEHICLE_MANUAL", "SAV", { ...convState.data });
         await sendWhatsAppInteractiveButtons(fromWa, "Veuillez indiquer : Marque Modèle Année (ex: Peugeot 308 2016).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;

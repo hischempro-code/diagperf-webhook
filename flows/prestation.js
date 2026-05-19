@@ -1,4 +1,4 @@
-const { extractInteractiveId, validatePlate, validateEmail } = require("../lib/text-helpers");
+const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
 const { detectIntent, intentToPrestationCode, intentToLabel } = require("../lib/intent-detector");
 const { isLikelyQuestion } = require("../lib/llm-service");
 const {
@@ -24,6 +24,25 @@ const {
   createDevis,
   addUpsellOptionsToDevis,
 } = require("../lib/devis-service");
+
+// ====== Universal info accumulator ======
+// Extracts name/email/plate from any message and merges into state data silently.
+// Returns the same object reference if nothing changed (cheap !== check).
+function accumulateInfoIntoState(text, stateData, _extractAndValidatePlate) {
+  const { email, name } = extractContactFromText(text);
+  const prev = stateData || {};
+  const next = { ...prev };
+  if (email && !next._known_email) next._known_email = email;
+  if (name && !next._known_name) next._known_name = name;
+  if (!next._known_plate && _extractAndValidatePlate) {
+    const ex = _extractAndValidatePlate(text);
+    if (ex?.valid && ex?.plate) next._known_plate = ex.plate;
+  }
+  const changed = next._known_email !== prev._known_email
+    || next._known_name !== prev._known_name
+    || next._known_plate !== prev._known_plate;
+  return changed ? next : prev;
+}
 
 // ====== Constants ======
 const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DIAG", "AUTRES"]);
@@ -188,7 +207,12 @@ function createPrestationFlow(ctx) {
           }
         }
 
-        await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", detected, { plate: plateExtraction.plate, vehicle });
+        const initContact = extractContactFromText(text);
+        const initData = { plate: plateExtraction.plate, vehicle,
+          ...(initContact.email ? { _known_email: initContact.email } : {}),
+          ...(initContact.name ? { _known_name: initContact.name } : {}),
+        };
+        await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", detected, initData);
         log.info("Prestation flow → plaque détectée dans message initial, skip à confirmation", { wa_id: fromWa, intent: detected, plate: plateExtraction.plate });
         await sendWhatsAppInteractiveButtons(fromWa, buildVehicleOnlyText(vehicle), [
           { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
@@ -201,7 +225,12 @@ function createPrestationFlow(ctx) {
       }
     }
 
-    await setConversationState(fromWa, "WAITING_PLATE", detected, {});
+    const initContact2 = extractContactFromText(text);
+    const initData2 = {
+      ...(initContact2.email ? { _known_email: initContact2.email } : {}),
+      ...(initContact2.name ? { _known_name: initContact2.name } : {}),
+    };
+    await setConversationState(fromWa, "WAITING_PLATE", detected, initData2);
     await sendWhatsAppInteractiveButtons(fromWa, `${label} ✅\nVeuillez envoyer votre plaque d'immatriculation (ex: AA 123 BB).`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
     log.info("Prestation flow started", { wa_id: fromWa, intent: detected });
     return true;
@@ -251,6 +280,12 @@ function createPrestationFlow(ctx) {
     if (!valid && text) {
       const extracted = extractAndValidatePlate(text);
       if (extracted.plate) { plate = extracted.plate; valid = extracted.valid; log.info("WAITING_PLATE → plaque extraite du texte", { wa_id: fromWa, plate, valid, context: extracted.context?.slice(0, 50) }); }
+    }
+
+    if (!valid && convState.data?._known_plate) {
+      plate = convState.data._known_plate;
+      valid = true;
+      log.info("WAITING_PLATE → using previously accumulated plate", { wa_id: fromWa, plate });
     }
 
     if (!valid) {
@@ -320,6 +355,13 @@ function createPrestationFlow(ctx) {
     if (!convState || !convState.state) return handleNoState(fromWa, text, rawMsg, convState, intent, buttonId);
     if (!PRESTATION_INTENTS.has(intent)) return false;
 
+    // Accumulate any info from this message (name, email, plate) into state — silently, non-blocking
+    const enrichedData = accumulateInfoIntoState(text, convState.data, extractAndValidatePlate);
+    if (enrichedData !== convState.data) {
+      convState.data = enrichedData;
+      setConversationState(fromWa, convState.state, convState.intent, enrichedData).catch(() => {});
+    }
+
     const handled = await dispatchPrestationState(fromWa, text, rawMsg, convState, intent, buttonId);
     if (handled !== false) return handled;
 
@@ -338,7 +380,7 @@ function createPrestationFlow(ctx) {
       const plate = stateData.plate;
       const vehicle = stateData.vehicle || {};
 
-      if (t === "oui" || t === "1" || t === "yes" || t === "o" || buttonId === "confirm_vehicle_yes") {
+      if (buttonId === "confirm_vehicle_yes" || isConfirmation(t)) {
         const incompat = validateIntentForVehicle(intent, vehicle);
         if (incompat) {
           await setConversationState(fromWa, "VEHICLE_INCOMPATIBLE", intent, { plate, vehicle, originalIntent: intent });
@@ -404,7 +446,7 @@ function createPrestationFlow(ctx) {
         return true;
       }
 
-      if (t === "non" || buttonId === "confirm_vehicle_no") {
+      if (buttonId === "confirm_vehicle_no" || isDenial(t)) {
         await setConversationState(fromWa, "WAITING_PLATE", intent, {});
         await sendWhatsAppInteractiveButtons(fromWa, "Pas de souci ! Veuillez renvoyer votre plaque (format AA 123 BB).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
@@ -551,7 +593,7 @@ function createPrestationFlow(ctx) {
 
       if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
 
-      if (t === "oui" || t === "1" || t === "yes" || t === "o" || buttonId === "confirm_quote_yes") {
+      if (buttonId === "confirm_quote_yes" || isConfirmation(t)) {
         if (stateData.devisId) {
           supabase.from("devis").update({ statut: "sent" }).eq("id", stateData.devisId).then(({ error }) => {
             if (error) log.error("Failed to update devis status", { devisId: stateData.devisId, error: String(error.message) });
@@ -576,7 +618,7 @@ function createPrestationFlow(ctx) {
         return true;
       }
 
-      if (t === "non" || t === "2" || t === "no" || t === "n" || t === "annuler" || buttonId === "confirm_quote_no") {
+      if (buttonId === "confirm_quote_no" || isDenial(t)) {
         if (stateData.devisId) {
           supabase.from("devis").update({ statut: "refused" }).eq("id", stateData.devisId).then(({ error }) => {
             if (error) log.error("Failed to update devis status", { devisId: stateData.devisId, error: String(error.message) });
@@ -657,13 +699,20 @@ function createPrestationFlow(ctx) {
       const stateData = convState.data || {};
       if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
 
-      // Coordonnées déjà fournies plus tôt dans le flow → les réutiliser directement
+      // Coordonnées — vérifier les sources dans l'ordre de fiabilité
       let customerName, customerEmail;
       if (stateData.saved_customer_name && stateData.saved_customer_email && validateEmail(stateData.saved_customer_email)) {
+        // 1. Interceptées explicitement à une étape précédente
         customerName = stateData.saved_customer_name;
         customerEmail = stateData.saved_customer_email;
         log.info("WAITING_DEVIS_CONTACT: using pre-saved contact info", { wa_id: fromWa, customerName, customerEmail });
+      } else if (stateData._known_name && stateData._known_email && validateEmail(stateData._known_email)) {
+        // 2. Accumulées silencieusement depuis n'importe quel message précédent
+        customerName = stateData._known_name;
+        customerEmail = stateData._known_email;
+        log.info("WAITING_DEVIS_CONTACT: using accumulated contact info", { wa_id: fromWa, customerName, customerEmail });
       } else {
+        // 3. Parser le message actuel
         const raw = String(text || "").trim();
         const words = raw.split(/[\s\n]+/);
         const emailWord = words.find(w => w.includes("@"));
@@ -937,13 +986,39 @@ function createPrestationFlow(ctx) {
       }
 
       const data = convState.data;
-      // Store as problemDescription to match the field expected by DIAG_EMAIL
-      await setConversationState(fromWa, "DIAG_PLATE", "DIAG", { ...data, problemDescription: description });
-      await sendWhatsAppInteractiveButtons(fromWa,
-        "Merci ! 👍\n\nQuelle est la plaque d'immatriculation de votre véhicule ?\n(ex: AB 123 CD)",
-        [{ id: "btn_back_menu", title: "🏠 Menu" }]
-      );
-      log.info("DIAG flow → description reçue, attente plaque", { wa_id: fromWa, descLen: description.length });
+      // If a plate is embedded in the description (or already known), skip DIAG_PLATE
+      let knownPlate = data._known_plate;
+      if (!knownPlate) {
+        const ex = extractAndValidatePlate?.(description);
+        if (ex?.valid && ex?.plate) knownPlate = ex.plate;
+      }
+
+      if (knownPlate) {
+        let vehicle = null;
+        try { vehicle = await lookupVehicleFromPlate(knownPlate); } catch { /* non-blocking */ }
+        const newData = { ...data, problemDescription: description, plate: knownPlate, vehicle, _known_plate: knownPlate };
+        await setConversationState(fromWa, "DIAG_CONFIRM", "DIAG", newData);
+        const priceTxt = `${(data.diagPriceTtcCents / 100).toFixed(0)}€ TTC`;
+        const vehicleTxt = vehicle ? `${vehicle.make || ""} ${vehicle.model || ""}`.trim() : null;
+        await sendWhatsAppInteractiveButtons(fromWa,
+          `📋 *Récapitulatif de votre demande :*\n\n` +
+          `🔍 Prestation : *${data.diagTitle}*\n` +
+          `💰 Prix : *${priceTxt}* (durée : ${data.diagDuration})\n` +
+          (vehicleTxt ? `🚗 Véhicule : ${vehicleTxt}\n` : "") +
+          `🪪 Plaque : ${knownPlate}\n\n` +
+          `📝 Votre problème :\n${description}\n\n` +
+          `Souhaitez-vous confirmer cette demande ?`,
+          [{ id: "diag_confirm_yes", title: "✅ Confirmer" }, { id: "diag_confirm_no", title: "❌ Annuler" }]
+        );
+        log.info("DIAG flow → plaque dans description, skip DIAG_PLATE", { wa_id: fromWa, plate: knownPlate });
+      } else {
+        await setConversationState(fromWa, "DIAG_PLATE", "DIAG", { ...data, problemDescription: description });
+        await sendWhatsAppInteractiveButtons(fromWa,
+          "Merci ! 👍\n\nQuelle est la plaque d'immatriculation de votre véhicule ?\n(ex: AB 123 CD)",
+          [{ id: "btn_back_menu", title: "🏠 Menu" }]
+        );
+        log.info("DIAG flow → description reçue, attente plaque", { wa_id: fromWa, descLen: description.length });
+      }
       return true;
     }
 
@@ -953,6 +1028,12 @@ function createPrestationFlow(ctx) {
       if (!valid && text) {
         const extracted = extractAndValidatePlate?.(text);
         if (extracted?.plate) { plate = extracted.plate; valid = extracted.valid; }
+      }
+
+      if (!valid && convState.data?._known_plate) {
+        plate = convState.data._known_plate;
+        valid = true;
+        log.info("DIAG_PLATE → using previously accumulated plate", { wa_id: fromWa, plate });
       }
 
       if (!valid) {
@@ -991,8 +1072,8 @@ function createPrestationFlow(ctx) {
     // --- DIAG_CONFIRM ---
     if (convState.state === "DIAG_CONFIRM" && intent === "DIAG") {
       const t = String(text || "").trim().toLowerCase();
-      const isYes = ["oui", "yes", "ok", "confirmer", "✅ confirmer", "✅ Confirmer"].some(w => t.includes(w.toLowerCase())) || buttonId === "diag_confirm_yes";
-      const isNo = ["non", "no", "annuler", "❌ annuler", "❌ Annuler"].some(w => t.includes(w.toLowerCase())) || buttonId === "diag_confirm_no";
+      const isYes = buttonId === "diag_confirm_yes" || isConfirmation(t);
+      const isNo = buttonId === "diag_confirm_no" || isDenial(t);
 
       if (isNo) { await clearConversationState(fromWa); await sendWhatsAppText(fromWa, "Demande annulée. N'hésitez pas à revenir ! 🙂"); return true; }
       if (!isYes) {
@@ -1009,12 +1090,21 @@ function createPrestationFlow(ctx) {
 
     // --- DIAG_EMAIL ---
     if (convState.state === "DIAG_EMAIL" && intent === "DIAG") {
-      const raw = String(text || "").trim();
-      const words = raw.split(/[\s\n]+/);
-      const emailWord = words.find(w => w.includes("@"));
-      const nameParts = words.filter(w => !w.includes("@"));
-      const customerName = nameParts.join(" ").trim();
-      const customerEmail = (emailWord || "").trim().toLowerCase();
+      let customerName, customerEmail;
+      const diagData = convState.data || {};
+
+      if (diagData._known_name && diagData._known_email && validateEmail(diagData._known_email)) {
+        customerName = diagData._known_name;
+        customerEmail = diagData._known_email;
+        log.info("DIAG_EMAIL: using accumulated contact info", { wa_id: fromWa, customerName, customerEmail });
+      } else {
+        const raw = String(text || "").trim();
+        const words = raw.split(/[\s\n]+/);
+        const emailWord = words.find(w => w.includes("@"));
+        const nameParts = words.filter(w => !w.includes("@"));
+        customerName = nameParts.join(" ").trim();
+        customerEmail = (emailWord || "").trim().toLowerCase();
+      }
 
       if (!customerName || customerName.length < 2) { await sendWhatsAppText(fromWa, "Je n'ai pas pu identifier votre nom. Merci d'envoyer votre nom et email :\n(ex: Dupont Jean jean@mail.com)"); return true; }
       if (!customerEmail || !validateEmail(customerEmail)) { await sendWhatsAppText(fromWa, "L'adresse email ne semble pas valide 😅\nMerci de réessayer :\n(ex: Dupont Jean jean@mail.com)"); return true; }
