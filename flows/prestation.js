@@ -60,6 +60,39 @@ function pickKnown(data) {
   return k;
 }
 
+// Builds the "please provide your contact" message asking ONLY for what is still missing.
+function buildContactRequestMsg(stateData, prefix) {
+  const d = stateData || {};
+  const hasName = !!(d._known_name || d.saved_customer_name);
+  const hasEmail = !!(validateEmail(d._known_email || "") || validateEmail(d.saved_customer_email || ""));
+  const p = prefix !== undefined ? prefix : "Parfait ! 🎉\n\n";
+  if (hasName && !hasEmail) return `${p}Pour finaliser, merci d'envoyer votre adresse email :\n(ex: jean.dupont@gmail.com)`;
+  if (!hasName && hasEmail) return `${p}Pour finaliser, merci d'indiquer votre nom complet :\n(ex: Dupont Jean)`;
+  return `${p}Pour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`;
+}
+
+// Resolves customer name+email from all available sources, merging known fields with current text.
+function resolveContactFromState(stateData, text) {
+  const d = stateData || {};
+  let customerName = d.saved_customer_name || d._known_name || null;
+  let customerEmail = (validateEmail(d.saved_customer_email || "") ? d.saved_customer_email : null)
+                   || (validateEmail(d._known_email || "") ? d._known_email : null);
+
+  if (!customerName || !customerEmail) {
+    const raw = String(text || "").trim();
+    const words = raw.split(/[\s\n]+/);
+    if (!customerEmail) {
+      const emailWord = words.find(w => w.includes("@"));
+      if (emailWord) customerEmail = validateEmail(emailWord) ? emailWord.toLowerCase() : null;
+    }
+    if (!customerName) {
+      const { name: parsedName } = extractContactFromText(raw);
+      customerName = parsedName || words.filter(w => !w.includes("@")).join(" ").trim() || null;
+    }
+  }
+  return { customerName: customerName || "", customerEmail: customerEmail || "" };
+}
+
 // ====== Constants ======
 const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DIAG", "AUTRES"]);
 const MANUAL_QUOTE_INTENTS = new Set(["AUTRES"]);
@@ -655,7 +688,7 @@ function createPrestationFlow(ctx) {
           return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, intent, null);
         }
 
-        await sendWhatsAppInteractiveButtons(fromWa, `Parfait ! 🎉\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+        await sendWhatsAppInteractiveButtons(fromWa, buildContactRequestMsg(stateData), [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         log.info("Quote confirmed → asking for customer contact info", { wa_id: fromWa, intent });
         return true;
       }
@@ -741,34 +774,16 @@ function createPrestationFlow(ctx) {
       const stateData = convState.data || {};
       if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
 
-      // Coordonnées — vérifier les sources dans l'ordre de fiabilité
-      let customerName, customerEmail;
-      if (stateData.saved_customer_name && stateData.saved_customer_email && validateEmail(stateData.saved_customer_email)) {
-        // 1. Interceptées explicitement à une étape précédente
-        customerName = stateData.saved_customer_name;
-        customerEmail = stateData.saved_customer_email;
-        log.info("WAITING_DEVIS_CONTACT: using pre-saved contact info", { wa_id: fromWa, customerName, customerEmail });
-      } else if (stateData._known_name && stateData._known_email && validateEmail(stateData._known_email)) {
-        // 2. Accumulées silencieusement depuis n'importe quel message précédent
-        customerName = stateData._known_name;
-        customerEmail = stateData._known_email;
-        log.info("WAITING_DEVIS_CONTACT: using accumulated contact info", { wa_id: fromWa, customerName, customerEmail });
-      } else {
-        // 3. Parser le message actuel
-        const raw = String(text || "").trim();
-        const words = raw.split(/[\s\n]+/);
-        const emailWord = words.find(w => w.includes("@"));
-        const nameParts = words.filter(w => !w.includes("@"));
-        customerName = nameParts.join(" ").trim();
-        customerEmail = (emailWord || "").trim().toLowerCase();
-      }
+      // Coordonnées — merge: sources connues + compléter depuis le message actuel
+      const { customerName, customerEmail } = resolveContactFromState(stateData, text);
+      log.info("WAITING_DEVIS_CONTACT: contact resolved", { wa_id: fromWa, customerName, hasEmail: !!validateEmail(customerEmail) });
 
       if (!customerName || customerName.length < 2) {
-        await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas pu identifier votre nom 😅\nMerci d'envoyer vos coordonnées au format :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+        await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas pu identifier votre nom 😅\nMerci d'envoyer votre nom complet :\n(ex: Dupont Jean)", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
       if (!customerEmail || !validateEmail(customerEmail)) {
-        await sendWhatsAppInteractiveButtons(fromWa, "L'adresse email ne semble pas valide 😕\nMerci de réessayer au format :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+        await sendWhatsAppInteractiveButtons(fromWa, "L'adresse email ne semble pas valide 😕\nMerci d'envoyer votre adresse email :\n(ex: jean.dupont@gmail.com)", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
 
@@ -850,7 +865,7 @@ function createPrestationFlow(ctx) {
           const fakeConvState = { state: "WAITING_DEVIS_CONTACT", intent, data: updatedData };
           return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, intent, null);
         }
-        await sendWhatsAppInteractiveButtons(fromWa, `Parfait ! 🎉\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+        await sendWhatsAppInteractiveButtons(fromWa, buildContactRequestMsg(updatedData), [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         log.info("Upsell confirmed → asking for customer contact info", { wa_id: fromWa, intent, addedOptions: stateData.addedOptions });
         return true;
       }
@@ -863,7 +878,7 @@ function createPrestationFlow(ctx) {
           const fakeConvState = { state: "WAITING_DEVIS_CONTACT", intent, data: stateData };
           return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, intent, null);
         }
-        await sendWhatsAppInteractiveButtons(fromWa, `Pas de souci ! 🙂\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+        await sendWhatsAppInteractiveButtons(fromWa, buildContactRequestMsg(stateData, "Pas de souci ! 🙂\n\n"), [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
 
@@ -1146,31 +1161,19 @@ function createPrestationFlow(ctx) {
         return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, "DIAG", null);
       }
 
-      await sendWhatsAppText(fromWa, `Parfait ! ✅\n\nPour finaliser, merci d'envoyer votre nom et email :\n\n(ex: Dupont Jean jean@mail.com)`);
+      await sendWhatsAppText(fromWa, buildContactRequestMsg(convState.data, "Parfait ! ✅\n\n"));
       log.info("DIAG flow → confirmé, attente coordonnées", { wa_id: fromWa });
       return true;
     }
 
     // --- DIAG_EMAIL ---
     if (convState.state === "DIAG_EMAIL" && intent === "DIAG") {
-      let customerName, customerEmail;
       const diagData = convState.data || {};
+      const { customerName, customerEmail } = resolveContactFromState(diagData, text);
+      log.info("DIAG_EMAIL: contact resolved", { wa_id: fromWa, customerName, hasEmail: !!validateEmail(customerEmail) });
 
-      if (diagData._known_name && diagData._known_email && validateEmail(diagData._known_email)) {
-        customerName = diagData._known_name;
-        customerEmail = diagData._known_email;
-        log.info("DIAG_EMAIL: using accumulated contact info", { wa_id: fromWa, customerName, customerEmail });
-      } else {
-        const raw = String(text || "").trim();
-        const words = raw.split(/[\s\n]+/);
-        const emailWord = words.find(w => w.includes("@"));
-        const nameParts = words.filter(w => !w.includes("@"));
-        customerName = nameParts.join(" ").trim();
-        customerEmail = (emailWord || "").trim().toLowerCase();
-      }
-
-      if (!customerName || customerName.length < 2) { await sendWhatsAppText(fromWa, "Je n'ai pas pu identifier votre nom. Merci d'envoyer votre nom et email :\n(ex: Dupont Jean jean@mail.com)"); return true; }
-      if (!customerEmail || !validateEmail(customerEmail)) { await sendWhatsAppText(fromWa, "L'adresse email ne semble pas valide 😅\nMerci de réessayer :\n(ex: Dupont Jean jean@mail.com)"); return true; }
+      if (!customerName || customerName.length < 2) { await sendWhatsAppText(fromWa, "Je n'ai pas pu identifier votre nom 😅\nMerci d'envoyer votre nom complet :\n(ex: Dupont Jean)"); return true; }
+      if (!customerEmail || !validateEmail(customerEmail)) { await sendWhatsAppText(fromWa, "L'adresse email ne semble pas valide 😅\nMerci d'envoyer votre adresse email :\n(ex: jean@mail.com)"); return true; }
 
       const data = convState.data;
       const priceTxt = `${(data.diagPriceTtcCents / 100).toFixed(0)}€ TTC`;

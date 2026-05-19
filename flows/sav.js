@@ -99,41 +99,43 @@ function createSavFlow(ctx) {
         return handleSavFlow(fromWa, t, rawMsg);
       }
 
-      await sendWhatsAppInteractiveButtons(
-        fromWa,
-        `Veuillez saisir vos coordonnées en un seul message au format :
-
-*Nom Prénom Email*
-
-Exemple : Dupont Jean jean.dupont@gmail.com`,
-        [{ id: "btn_back_menu", title: "🏠 Menu" }]
-      );
+      const hasName = !!(knownData._known_name);
+      const hasEmail = !!(validateEmail(knownData._known_email || ""));
+      let coordMsg;
+      if (hasName && !hasEmail) coordMsg = `Merci ! Pour continuer, veuillez envoyer votre adresse email :\n(ex: jean.dupont@gmail.com)`;
+      else if (!hasName && hasEmail) coordMsg = `Merci ! Pour continuer, veuillez indiquer votre nom complet :\n(ex: Dupont Jean)`;
+      else coordMsg = `Veuillez saisir vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`;
+      await sendWhatsAppInteractiveButtons(fromWa, coordMsg, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
       return true;
     }
 
     // --- Étape 2 : Coordonnées (Nom + Prénom + Email) ---
     if (convState.state === "SAV_COORDINATES") {
       const stateData = convState.data || {};
-      let email, customerName;
 
-      if (stateData._known_name && stateData._known_email && validateEmail(stateData._known_email)) {
-        customerName = stateData._known_name;
-        email = stateData._known_email;
-        log.info("SAV_COORDINATES: using accumulated contact info", { wa_id: fromWa, customerName, email });
-      } else {
+      // Merge: use what's already known + fill gaps from current message
+      let customerName = stateData._known_name || null;
+      let email = (stateData._known_email && validateEmail(stateData._known_email)) ? stateData._known_email : null;
+
+      if (!customerName || !email) {
         const parts = t.split(/\s+/);
-        const emailPart = parts.find(p => p.includes("@"));
-        email = validateEmail(emailPart);
-        const nameParts = parts.filter(p => !p.includes("@"));
-        customerName = nameParts.join(" ") || "";
+        if (!email) {
+          const emailPart = parts.find(p => p.includes("@"));
+          email = validateEmail(emailPart) ? emailPart.toLowerCase() : null;
+        }
+        if (!customerName) {
+          const { name: parsedName } = extractContactFromText(t);
+          customerName = parsedName || parts.filter(p => !p.includes("@")).join(" ").trim() || null;
+        }
       }
+      log.info("SAV_COORDINATES: contact resolved", { wa_id: fromWa, customerName, hasEmail: !!email });
 
-      if (!email || customerName.length < 2) {
-        await sendWhatsAppInteractiveButtons(
-          fromWa,
-          `Je n'ai pas compris 😅\nVeuillez envoyer au format : *Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`,
-          [{ id: "btn_back_menu", title: "🏠 Menu" }]
-        );
+      if (!email) {
+        await sendWhatsAppInteractiveButtons(fromWa, "Merci d'envoyer votre adresse email :\n(ex: jean.dupont@gmail.com)", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+        return true;
+      }
+      if (!customerName || customerName.length < 2) {
+        await sendWhatsAppInteractiveButtons(fromWa, "Merci d'indiquer votre nom complet :\n(ex: Dupont Jean)", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
 
