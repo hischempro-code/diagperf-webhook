@@ -645,6 +645,16 @@ function createPrestationFlow(ctx) {
         }
 
         await setConversationState(fromWa, "WAITING_DEVIS_CONTACT", intent, stateData);
+
+        // Si les coordonnées sont déjà connues, ne pas redemander — traiter directement
+        if ((stateData._known_name || stateData.saved_customer_name) &&
+            (stateData._known_email || stateData.saved_customer_email) &&
+            validateEmail(stateData._known_email || stateData.saved_customer_email)) {
+          log.info("Quote confirmed → contact déjà connu, skip WAITING_DEVIS_CONTACT", { wa_id: fromWa });
+          const fakeConvState = { state: "WAITING_DEVIS_CONTACT", intent, data: stateData };
+          return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, intent, null);
+        }
+
         await sendWhatsAppInteractiveButtons(fromWa, `Parfait ! 🎉\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         log.info("Quote confirmed → asking for customer contact info", { wa_id: fromWa, intent });
         return true;
@@ -833,6 +843,13 @@ function createPrestationFlow(ctx) {
         }
         const updatedData = { ...stateData, htTxt: stateData.newHtTxt || stateData.htTxt, ttcTxt: stateData.newTtcTxt || stateData.ttcTxt };
         await setConversationState(fromWa, "WAITING_DEVIS_CONTACT", intent, updatedData);
+        if ((updatedData._known_name || updatedData.saved_customer_name) &&
+            (updatedData._known_email || updatedData.saved_customer_email) &&
+            validateEmail(updatedData._known_email || updatedData.saved_customer_email)) {
+          log.info("Upsell confirmed → contact déjà connu, skip WAITING_DEVIS_CONTACT", { wa_id: fromWa });
+          const fakeConvState = { state: "WAITING_DEVIS_CONTACT", intent, data: updatedData };
+          return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, intent, null);
+        }
         await sendWhatsAppInteractiveButtons(fromWa, `Parfait ! 🎉\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         log.info("Upsell confirmed → asking for customer contact info", { wa_id: fromWa, intent, addedOptions: stateData.addedOptions });
         return true;
@@ -840,6 +857,12 @@ function createPrestationFlow(ctx) {
 
       if (t === "non" || t === "annuler" || buttonId === "upsell_confirm_no") {
         await setConversationState(fromWa, "WAITING_DEVIS_CONTACT", intent, stateData);
+        if ((stateData._known_name || stateData.saved_customer_name) &&
+            (stateData._known_email || stateData.saved_customer_email) &&
+            validateEmail(stateData._known_email || stateData.saved_customer_email)) {
+          const fakeConvState = { state: "WAITING_DEVIS_CONTACT", intent, data: stateData };
+          return handleLegacyPrestationStates(fromWa, "", rawMsg, fakeConvState, intent, null);
+        }
         await sendWhatsAppInteractiveButtons(fromWa, `Pas de souci ! 🙂\n\nPour finaliser et recevoir votre devis en PDF, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
