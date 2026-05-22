@@ -3,6 +3,7 @@ const { detectIntent } = require("../lib/intent-detector");
 const { lookupVehicleFromPlate, buildVehicleOnlyText } = require("../lib/vehicle-service");
 const { extractAndValidatePlate } = require("../lib/plate-extractor");
 const { isLikelyQuestion } = require("../lib/llm-service");
+const { buildAnalysisStartMessage } = require("../lib/vehicle-card");
 
 /**
  * Factory: creates the SAV flow handler.
@@ -174,6 +175,7 @@ function createSavFlow(ctx) {
         return true;
       }
 
+      await sendWhatsAppInteractiveButtons(fromWa, buildAnalysisStartMessage(plate), [{ id: "btn_back_menu", title: "🏠 Menu" }]);
       try {
         const vehicle = await lookupVehicleFromPlate(plate);
         await setConversationState(fromWa, "SAV_VEHICLE_CONFIRM", "SAV", { ...convState.data, plate, vehicle });

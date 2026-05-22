@@ -20,6 +20,11 @@ const {
   buildVehicleOnlyText,
 } = require("../lib/vehicle-service");
 const {
+  buildVehiclePerformanceCard,
+  buildAnalysisStartMessage,
+  buildAnalysisProgressMessage,
+} = require("../lib/vehicle-card");
+const {
   getPrestationTarif,
   createDevis,
   addUpsellOptionsToDevis,
@@ -374,10 +379,20 @@ function createPrestationFlow(ctx) {
       return true;
     }
 
+    // ── Effet "analyse en temps réel" : message immédiat avant la lookup ──
+    await sendWhatsAppText(fromWa, buildAnalysisStartMessage(plate));
+
     try {
       const vehicle = await lookupVehicleFromPlate(plate);
       await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", intent, { ...pickKnown(convState.data), plate, vehicle });
-      await sendWhatsAppInteractiveButtons(fromWa, buildVehicleOnlyText(vehicle), [
+
+      // ── Message intermédiaire : "Véhicule identifié" ──
+      await sendWhatsAppText(fromWa, buildAnalysisProgressMessage(vehicle));
+      await new Promise(r => setTimeout(r, 700));
+
+      // ── Fiche performance complète ──
+      const performanceCard = buildVehiclePerformanceCard(vehicle) || buildVehicleOnlyText(vehicle);
+      await sendWhatsAppInteractiveButtons(fromWa, performanceCard, [
         { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
         { id: "confirm_vehicle_no", title: "❌ Non" },
         { id: "btn_back_menu", title: "🏠 Menu" },
