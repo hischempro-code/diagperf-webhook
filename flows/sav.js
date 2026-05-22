@@ -2,6 +2,7 @@ const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDe
 const { detectIntent } = require("../lib/intent-detector");
 const { lookupVehicleFromPlate, buildVehicleOnlyText } = require("../lib/vehicle-service");
 const { extractAndValidatePlate } = require("../lib/plate-extractor");
+const { isLikelyQuestion } = require("../lib/llm-service");
 
 /**
  * Factory: creates the SAV flow handler.
@@ -225,6 +226,10 @@ function createSavFlow(ctx) {
         await sendWhatsAppInteractiveButtons(fromWa, "Merci d'indiquer le véhicule concerné (ex: Peugeot 308 2016).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
+      // Si le client pose une question hors-sujet, répondre intelligemment sans perdre le contexte
+      if (isLikelyQuestion(t)) {
+        return respondOrAnswerQuestion(fromWa, t, "Une fois votre question traitée, indiquez le véhicule concerné (ex: Peugeot 308 2016).", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+      }
       await setConversationState(fromWa, "SAV_DESCRIPTION", "SAV", {
         ...convState.data,
         vehicle: t,
@@ -238,6 +243,10 @@ function createSavFlow(ctx) {
       if (t.length < 5) {
         await sendWhatsAppInteractiveButtons(fromWa, "Merci de décrire le problème un peu plus en détail (au moins quelques mots).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
+      }
+      // Si le client pose une question en plein milieu, répondre sans créer le ticket
+      if (isLikelyQuestion(t)) {
+        return respondOrAnswerQuestion(fromWa, t, "Bien sûr ! Une fois répondu, décrivez votre problème en quelques lignes :", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
       }
 
       const customerName = convState.data?.customer_name || "";

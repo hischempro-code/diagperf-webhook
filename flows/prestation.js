@@ -370,7 +370,7 @@ function createPrestationFlow(ctx) {
           }
         } catch (llmErr) { log.warn("WAITING_PLATE LLM fallback error", { error: String(llmErr?.message || llmErr) }); }
       }
-      await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas reconnu la plaque 😅\nEnvoie-la au format AA 123 BB (avec ou sans tirets).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+      await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas reconnu la plaque 😅\nEnvoyez-la au format AA 123 BB (avec ou sans tirets).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
       return true;
     }
 
