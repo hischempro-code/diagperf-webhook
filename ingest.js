@@ -142,6 +142,8 @@ async function main() {
   const files = findMarkdownFiles(KB_DIR);
   console.log(`📄 ${files.length} fichiers trouvés\n`);
 
+  let embedCount = 0;
+
   if (files.length === 0) {
     console.error("❌ Aucun fichier .md trouvé dans knowledge_base/");
     process.exit(1);
@@ -181,8 +183,31 @@ async function main() {
       const chunk = chunks[i];
       const tokenCount = estimateTokens(chunk);
 
-      // Générer l'embedding via Google Gemini (aligné avec rag.js)
-      const embedding = await generateEmbedding(chunk);
+      // Throttle : free tier Google = 100 req/min — pause toutes les 90 requêtes
+      if (embedCount > 0 && embedCount % 90 === 0) {
+        console.log(`   ⏳ Pause 65s (quota Google free tier 100 req/min)...`);
+        await new Promise(r => setTimeout(r, 65000));
+      }
+      embedCount++;
+
+      // Générer l'embedding via Google Gemini (aligné avec rag.js) — retry sur 503/429
+      let embedding;
+      for (let attempt = 1; attempt <= 5; attempt++) {
+        try {
+          embedding = await generateEmbedding(chunk);
+          break;
+        } catch (embErr) {
+          const status = embErr?.status || 0;
+          const isRetryable = status === 503 || status === 429 || String(embErr?.message || "").includes("503") || String(embErr?.message || "").includes("429");
+          if (isRetryable && attempt < 5) {
+            const wait = status === 429 ? 65000 : 5000 * attempt;
+            console.log(`   ⏳ Erreur ${status}, retry ${attempt}/5 dans ${wait/1000}s...`);
+            await new Promise(r => setTimeout(r, wait));
+          } else {
+            throw embErr;
+          }
+        }
+      }
 
       const { error: insErr } = await supabase.from("kb_chunks").insert({
         file_path: relativePath,
