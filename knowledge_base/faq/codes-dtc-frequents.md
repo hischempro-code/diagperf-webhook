@@ -4,156 +4,76 @@ tags: [dtc, obd, code defaut, panne, voyant moteur, diagnostic, p0, p1, p2, u0, 
 intent: DIAG
 ---
 
-# Codes défauts OBD-II fréquents — Explication et solutions DiagPerf
+# Codes défauts OBD-II — Questions fréquentes
 
-## Codes FAP (Filtre à Particules)
+## c'est quoi le code P2002 ? / et pour le P2002 ? / P2002 ça veut dire quoi ? / code P2002 FAP
+Le code P2002 signifie que le filtre à particules (FAP) a une efficacité insuffisante : il est saturé ou encrassé. Le calculateur détecte que la régénération ne se fait plus. Symptômes : voyant moteur, perte de puissance, mode dégradé. Solution : suppression logicielle FAP (*260€ avant 2019, 300€ après*) ou diagnostic préalable (50€).
 
-### P2002 / P2003 — FAP efficacité insuffisante
-Le filtre à particules est encrassé ou saturé. Le calculateur détecte que la régénération ne se fait plus correctement. Symptômes : voyant moteur, perte de puissance, mode dégradé possible. Solution : suppression logicielle FAP (260€ avant 2019, 300€ après) ou diagnostic préalable (50€).
+## c'est quoi le code P242F ? / et pour le P242F ? / P2459 P244A P244B code FAP bouché
+Les codes P242F, P2459, P244A, P244B indiquent un FAP obstrué avec pression différentielle trop élevée. La régénération est impossible. Diagnostic d'abord pour confirmer, puis suppression FAP si nécessaire (*260€ ou 300€*).
 
-### P242F / P2459 / P244A / P244B — FAP bouché / pression différentielle FAP
-La pression en amont du FAP est trop élevée : le filtre est obstrué. Régénération impossible ou trop fréquente. Diagnostic d'abord pour confirmer, puis suppression FAP si nécessaire.
+## c'est quoi le code P0400 ? / et pour le P0401 ? / P0402 EGR débit défaut
+P0401 = vanne EGR avec débit insuffisant (coincée fermée). P0402 = débit excessif (coincée ouverte). Symptômes : à-coups, fumée noire, voyant. Solution : suppression logicielle EGR (*190€ TTC diesel*) ou diagnostic approfondi (80€).
 
-### P2458 — Durée de régénération FAP excessive
-Le moteur tente de régénérer le FAP sans succès. Souvent lié à des trajets urbains courts qui empêchent la montée en température. Suppression logicielle FAP recommandée si le filtre est définitivement saturé.
+## c'est quoi le code P0403 ? / P0404 P0405 P0406 circuit EGR défaut capteur
+Défaut électrique sur le circuit EGR (capteur position, alimentation). Diagnostic approfondi (80€) pour localiser le composant, ou suppression EGR directement (190€).
 
-### P20E8 / P20EF — Régénération FAP non complète
-Régénération interrompue avant la fin. Peut venir d'une conduite trop courte ou d'un FAP dégradé. Diagnostic pour confirmer.
+## c'est quoi le code P20EE ? / et pour le P20EE ? / P204F AdBlue SCR efficacité
+P20EE et P204F : le système AdBlue ne réduit plus suffisamment les émissions NOx. Doseur défaillant, pompe ou capteur NOx. Solution : suppression logicielle AdBlue (*260€ BlueHDi PSA, 300€ autres diesel*).
 
----
+## c'est quoi le code P2BAD ? / P2201 P2202 capteur NOx défaut AdBlue
+Capteur NOx défaillant (amont ou aval). Le moteur entre en comptage vers l'immobilisation. Intervention urgente : suppression AdBlue ou remplacement capteur.
 
-## Codes EGR (Vanne de Recirculation des Gaz)
+## c'est quoi le code P207F ? / qualité AdBlue mauvaise / niveau AdBlue insuffisant
+L'AdBlue est contaminé, dilué ou vide. Remplir avec de l'AdBlue certifié, ou opter pour la suppression logicielle si les pannes sont récurrentes (*260–300€*).
 
-### P0400 / P0401 / P0402 — Débit EGR insuffisant ou excessif
-La vanne EGR est encrassée ou défaillante. P0401 = débit trop faible (vanne coincée fermée). P0402 = débit trop élevé (vanne coincée ouverte). Symptômes : à-coups, fumée noire, voyant moteur. Solution : suppression logicielle EGR (190€ TTC diesel).
+## c'est quoi le code P0420 ? / et pour le P0420 ? / P0420 catalyseur dégradé
+P0420 : l'efficacité du catalyseur est inférieure au seuil (les sondes lambda détectent une combustion incomplète). Fréquent après 150 000 km. Diagnostic approfondi (*80€*) recommandé pour confirmer avant toute décision. Peut aussi indiquer une sonde lambda usée.
 
-### P0403 / P0404 / P0405 / P0406 — Capteur ou circuit EGR défaillant
-Défaut électrique sur le circuit de la vanne EGR (capteur position, alimentation). Diagnostic approfondi (80€) pour localiser le composant défaillant, ou suppression logicielle.
+## c'est quoi le code P0430 ? / P0430 catalyseur banc 2
+Identique à P0420 mais sur le deuxième banc du moteur (V6/V8/bi-turbo). Diagnostic complet requis (*130€*).
 
-### P0409 — Capteur EGR circuit A
-Défaut sur le capteur de position de la vanne EGR. Peut déclencher le mode dégradé sur diesel. Diagnostic ou suppression EGR.
+## c'est quoi le code P0011 ? / et pour le P0011 ? / P0012 P0013 arbre à cames VVT
+P0011 = calage VVT arbre à cames en avance. P0012 = en retard. P0013 = défaut circuit électrovanne VVT. Causes : huile encrassée, actuateur VVT défaillant, déphaseur usé. Diagnostic complet (*130€*) recommandé.
 
----
+## c'est quoi le code P0014 ? / et pour le P0014 ? / P0014 ça veut dire quoi ? / arbre à cames échappement avancé
+P0014 : le déphaseur d'arbre à cames côté échappement est bloqué en position trop avancée. Causes fréquentes : huile de mauvaise qualité, circuit d'huile encrassé, déphaseur usé. Symptômes : démarrage difficile, consommation accrue, voyant moteur. *Diagnostic complet recommandé : 130€* avant remplacement du déphaseur.
 
-## Codes AdBlue / SCR (Dépollution NOx Diesel)
+## c'est quoi le code P0015 ? / P0014 P0015 différence arbre à cames
+P0015 = arbre à cames échappement bloqué en position retardée (l'inverse du P0014). Même causes : filtre à huile colmaté, pression d'huile insuffisante. Diagnostic complet.
 
-### P20EE / P204F — Efficacité catalyseur SCR insuffisante
-Le système AdBlue ne réduit pas suffisamment les émissions de NOx. Peut venir d'un doseur défaillant, d'une pompe, ou d'un capteur NOx. Suppression logicielle AdBlue (260€ BlueHDi / 300€ autres diesel).
+## c'est quoi le code P0016 ? / P0016 P0017 P0018 P0019 désynchronisation
+Désynchronisation entre vilebrequin et arbre à cames. Peut indiquer une chaîne de distribution étirée ou un déphaseur défaillant. Diagnostic urgent — risque de casse mécanique si ignoré.
 
-### P2BAD / P2201 / P2202 — Capteur NOx défaillant
-Le capteur de NOx (amont ou aval) donne une lecture anormale. Le système entre en mode comptage vers l'immobilisation. Intervention urgente recommandée : suppression AdBlue ou remplacement capteur.
+## c'est quoi le code P0171 ? / P0172 P0174 P0175 mélange trop pauvre riche
+P0171/P0174 = mélange trop pauvre (trop d'air). P0172/P0175 = trop riche (trop de carburant). Causes : fuite admission, injecteur bouché ou qui fuit, sonde lambda, débitmètre. Diagnostic approfondi (*80€*).
 
-### P207F — Qualité réducteur AdBlue insuffisante
-L'AdBlue est contaminé, dilué ou absent. Remplir avec de l'AdBlue certifié, ou supprimer logiciellement le système si les pannes sont récurrentes.
+## c'est quoi le code P0130 ? / P0136 P0140 P0141 sonde lambda défaut
+Sonde lambda amont ou aval hors gamme ou non chauffée. Consommation accrue, ratés de combustion possibles. Diagnostic simple (50€) pour confirmer si remplacement nécessaire.
 
-### P2048 / P20BD — Doseur AdBlue défaillant
-Le doseur/injecteur d'AdBlue est en panne. Pièce coûteuse à remplacer : la suppression logicielle est souvent plus économique (260–300€).
+## c'est quoi le code P0234 ? / et pour le P0234 ? / surpression turbo
+P0234 : surpression turbo dépassant les valeurs max. Wastegate bloquée fermée ou électrovanne défaillante. Diagnostic complet (*130€*) avant tout ajustement cartographie.
 
----
+## c'est quoi le code P0299 ? / et pour le P0299 ? / sous-pression turbo manque de pression
+P0299 : le turbo ne monte pas assez en pression. Fuite admission, turbo usé ou wastegate bloquée ouverte. Diagnostic complet (*130€*) — la reprog n'est envisageable qu'avec un turbo sain.
 
-## Codes Catalyseur
+## c'est quoi le code P0087 ? / P0088 pression carburant
+P0087 = pression carburant trop basse (pompe en fin de vie, filtre colmaté). P0088 = pression trop élevée (régulateur défaillant). Diagnostic complet (*130€*) impératif.
 
-### P0420 / P0421 — Efficacité catalyseur inférieure au seuil (banc 1)
-Le catalyseur est vieilli ou dégradé, les sondes lambda détectent une combustion incomplète. Fréquent sur les véhicules de plus de 150 000 km. Diagnostic approfondi (80€) recommandé pour confirmer avant toute décision.
+## c'est quoi le code P0300 ? / ratés d'allumage tous cylindres P0300
+P0300 : ratés de combustion aléatoires sur tous cylindres. Bougies usées, bobines, injecteurs encrassés ou fuite de compression. Diagnostic urgent (*50–80€*) — les ratés endommagent le catalyseur.
 
-### P0430 / P0431 — Efficacité catalyseur inférieure au seuil (banc 2)
-Identique à P0420 mais sur le deuxième banc (moteurs V6/V8 ou bi-turbo). Diagnostic complet requis.
+## c'est quoi le code P0301 ? / P0301 P0302 P0303 P0304 raté cylindre spécifique
+Raté localisé sur un cylindre précis. Souvent une bougie ou une bobine d'allumage défaillante. Diagnostic simple (*50€*). Sur véhicule E85 : bougies adaptées (+170€) résolvent souvent les ratés à froid.
 
----
+## c'est quoi le code P0700 ? / P0730 boîte automatique défaut
+P0700/P0730 : défaut boîte de vitesses automatique. DiagPerf ne traite pas les boîtes auto — nous vous orientons vers un spécialiste BVA.
 
-## Codes Calage Arbre à Cames / VVT (Distribution Variable)
+## c'est quoi le code U0001 ? / U0100 U0101 réseau CAN communication perdue
+Perte de communication sur le bus CAN (réseau des calculateurs). Souvent électrique : batterie déchargée, faisceau endommagé. Diagnostic complet (*130€*) pour localiser l'origine.
 
-### P0011 — Calage arbre à cames admission trop avancé (banc 1)
-Le système de calage variable (VVT) maintient l'arbre à cames dans une position trop avancée. Causes : huile encrassée, actuateur VVT défaillant, déphaseur usé. Diagnostic complet (130€) recommandé.
+## c'est quoi un code P1 ? / codes constructeur P1 spécifiques marque
+Les codes P1xxx sont propres à chaque constructeur. Ils nécessitent une valise compatible avec la marque. DiagPerf dispose des outils adaptés pour Peugeot, Renault, Citroën, BMW, Mercedes, Audi, VW, Ford, Opel, Toyota.
 
-### P0012 — Calage arbre à cames admission trop retardé (banc 1)
-Le calage VVT est bloqué en position retardée. Mêmes causes que P0011. Vidange et diagnostic.
-
-### P0013 — Circuit commande arbre à cames échappement (banc 1)
-Défaut électrique sur l'électrovanne de commande du VVT côté échappement. Souvent une électrovanne encrassée ou défaillante.
-
-### P0014 — Calage arbre à cames échappement trop avancé (banc 1)
-Le déphaseur d'arbre à cames (côté échappement) est bloqué en position avancée. Causes fréquentes : huile de mauvaise qualité, circuit d'huile encrassé, déphaseur usé. Symptômes : démarrage difficile, consommation accrue, voyant moteur. Diagnostic complet (130€) pour confirmer avant remplacement du déphaseur.
-
-### P0015 — Calage arbre à cames échappement trop retardé (banc 1)
-Même problème que P0014 mais en position retardée. Peut venir d'un filtre à huile colmaté ou d'une pression d'huile insuffisante.
-
-### P0016 / P0017 / P0018 / P0019 — Corrélation arbre à cames / vilebrequin
-Désynchronisation entre la position du vilebrequin et celle de l'arbre à cames. Peut indiquer une chaîne de distribution étirée ou un déphaseur défaillant. Diagnostic urgent recommandé.
-
----
-
-## Codes Sonde Lambda / Richesse Mélange
-
-### P0171 / P0174 — Mélange trop pauvre (banc 1 / banc 2)
-Le moteur reçoit trop d'air par rapport à l'essence injectée. Causes : fuite admission, injecteur bouché, sonde lambda vieille, débit massique air défaillant. Diagnostic approfondi (80€).
-
-### P0172 / P0175 — Mélange trop riche (banc 1 / banc 2)
-Trop de carburant par rapport à l'air. Causes : injecteur qui fuit, pression carburant excessive, sonde lambda dérivée. Diagnostic approfondi.
-
-### P0130 / P0136 / P0140 / P0141 — Sonde lambda défaillante
-Sonde lambda amont ou aval hors gamme ou non chauffée. Entraîne une consommation accrue et des ratés de combustion. Remplacement de sonde ou diagnostic pour identifier la cause.
-
----
-
-## Codes Turbo / Suralimentation
-
-### P0234 — Surpression turbo dépassée
-La pression de suralimentation dépasse les valeurs maximales. Causes : wastegate bloquée fermée, électrovanne de régulation défaillante, cartographie agressive. Diagnostic complet (130€) avant toute reprogrammation.
-
-### P0299 — Sous-pression turbo (pression insuffisante)
-Le turbo ne monte pas suffisamment en pression. Causes : fuite sur le circuit d'admission, turbo usé, wastegate bloquée ouverte. Diagnostic complet recommandé — la reprogrammation n'est envisageable qu'après confirmation que le turbo est sain.
-
-### P0243 / P0245 — Électrovanne wastegate défaillante
-La vanne de régulation du turbo (wastegate) ne répond pas correctement. Diagnostic électrique et mécanique.
-
----
-
-## Codes Carburant / Pression
-
-### P0087 — Pression carburant insuffisante
-La pression dans le rail d'injection est trop basse. Causes : pompe carburant en fin de vie, filtre à carburant colmaté, régulateur de pression défaillant. Diagnostic complet (130€).
-
-### P0088 — Pression carburant excessive
-Pression trop élevée dans le circuit. Régulateur de pression défaillant. Diagnostic impératif avant toute intervention.
-
-### P0191 / P0192 / P0193 — Capteur pression rail carburant
-Le capteur de pression du rail d'injection donne une valeur anormale. Diagnostic pour distinguer un défaut capteur d'un vrai problème de pression.
-
----
-
-## Codes Ratés d'Allumage
-
-### P0300 — Ratés d'allumage aléatoires (tous cylindres)
-Des ratés de combustion sont détectés sans cylindre spécifique identifié. Causes : bougies usées, bobines défaillantes, injecteurs encrassés, fuite de compression. Diagnostic urgent — les ratés endommagent le catalyseur.
-
-### P0301 / P0302 / P0303 / P0304 — Ratés cylindre 1 / 2 / 3 / 4
-Raté localisé sur un cylindre précis. Souvent une bougie ou une bobine d'allumage. Diagnostic simple (50€) suffit pour localiser. Pour les véhicules convertis E85 : des bougies adaptées (+170€) résolvent souvent les ratés à froid.
-
----
-
-## Codes Boîte de Vitesses (non traités chez DiagPerf)
-
-### P0700 / P0730 / P0731 — Défauts boîte automatique
-Ces codes indiquent un problème sur la boîte de vitesses automatique ou le convertisseur. DiagPerf ne traite pas les boîtes auto — nous vous orientons vers un spécialiste BVA.
-
----
-
-## Codes Réseau CAN / Constructeur
-
-### U0001 / U0100 / U0101 — Perte de communication réseau CAN
-Le bus CAN (réseau des calculateurs) présente une rupture de communication. Souvent électrique (batterie déchargée, faisceau endommagé). Diagnostic complet (130€) pour identifier l'origine.
-
-### P1xxx — Codes constructeur spécifiques
-Les codes commençant par P1 sont propres à chaque marque. Ils nécessitent un diagnostic avec valise compatib le au constructeur. DiagPerf dispose des outils adaptés pour les principales marques (Peugeot, Renault, Citroën, BMW, Mercedes, Audi, VW, Ford, Opel, Toyota).
-
----
-
-## Que faire face à un code défaut ?
-
-1. **Ne pas ignorer le voyant moteur** — même si le véhicule roule encore normalement, le problème peut s'aggraver.
-2. **Diagnostic simple (50€)** — lecture et effacement des codes, 20 minutes. Idéal pour identifier rapidement le problème.
-3. **Diagnostic approfondi (80€)** — interprétation des codes, tests en conditions réelles, remise à zéro des compteurs.
-4. **Recherche de panne (130€)** — diagnostic électrique complet, tests en temps réel, analyse de données. Pour les pannes complexes ou intermittentes.
-
-Envoyez votre plaque d'immatriculation pour que nous identifions votre véhicule et vous proposions la solution adaptée.
+## que faire avec un code défaut ? / j ai un voyant moteur que faire ? / code défaut quelle prestation choisir ?
+Trois niveaux de diagnostic chez DiagPerf : simple *50€* (lecture + effacement, 20 min), approfondi *80€* (interprétation + tests, 35 min), recherche de panne *130€* (diagnostic complet, 1h). Envoyez votre plaque pour identifier votre véhicule.

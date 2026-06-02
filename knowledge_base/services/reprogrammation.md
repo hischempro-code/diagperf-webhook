@@ -4,24 +4,28 @@ tags: [reprog, reprogrammation, stage, puissance, couple, performance, moteur, c
 intent: REPROG
 ---
 
-# Reprogrammation moteur
+# Reprogrammation moteur — Questions fréquentes
 
-## Description
-La reprogrammation moteur consiste à optimiser la cartographie du calculateur moteur d'origine pour améliorer la puissance, le couple et la réponse à l'accélération. Chez DiagPerf, nous proposons plusieurs niveaux de reprogrammation (stages).
+## c'est quoi la reprogrammation moteur ? / qu'est-ce que vous faites en reprog ? / comment ça marche le stage 1 ?
+La reprogrammation consiste à modifier la cartographie du calculateur moteur pour libérer la puissance et le couple cachés par le constructeur. Chez DiagPerf, nous optimisons les paramètres d'injection, de turbo et d'allumage dans les marges de sécurité du moteur d'origine.
 
-## Stage 1
-Le Stage 1 est la reprogrammation de base, sans modification mécanique. On optimise les paramètres d'injection, de turbo et d'allumage dans les marges de sécurité du moteur d'origine.
+## c'est quoi le stage 1 ? / qu'est-ce que le stage 1 ? / stage 1 ça change quoi ?
+Le Stage 1 est la reprogrammation de base sans modification mécanique. On optimise uniquement le calculateur d'origine. Gains typiques : +20 à 40% de puissance et de couple selon le véhicule. Durée : 1h30 à 2h. Garantie 2 ans.
 
-- **Gains typiques** : +20 à 40% de puissance et de couple selon le véhicule
-- **Prix** : 390€ TTC (véhicules < 400ch et < 2018). Sur devis personnalisé pour les autres véhicules.
-- **Durée** : environ 1h30 à 2h
-- **Garantie** : 2 ans sur la prestation
+## combien coûte la reprogrammation ? / quel est le prix du stage 1 ? / tarif reprog moteur ?
+Stage 1 : **390€ TTC** pour les véhicules de moins de 400ch et avant 2018. Pour les véhicules plus récents (≥ 2018) ou plus puissants (≥ 400ch), c'est sur devis personnalisé.
 
-## Stages supérieurs (Stage 2, Stage 3, Stage 4)
-Les stages supérieurs nécessitent des modifications mécaniques (downpipe, intercooler, turbo, etc.) et sont proposés sur devis personnalisé après étude du véhicule.
+## c'est quoi le stage 2 ? / il y a un stage 2 ? / stage 2 c'est quoi comme différence ?
+Le Stage 2 et au-delà nécessitent des modifications mécaniques (downpipe, intercooler, turbo, etc.) et sont proposés sur devis personnalisé après étude du véhicule.
 
-## Marques couvertes
-Toutes marques et tous modèles : Peugeot, Renault, Citroën, BMW, Mercedes, Audi, Volkswagen, Ford, Opel, Toyota, Hyundai, Kia, etc. Notre base de données couvre plus de 24 000 motorisations.
+## ma voiture est compatible avec la reprog ? / vous faites quelle marque en reprog ? / vous faites BMW ? Peugeot ? Renault ?
+Toutes marques et tous modèles : Peugeot, Renault, Citroën, BMW, Mercedes, Audi, Volkswagen, Ford, Opel, Toyota, Hyundai, Kia, etc. Notre base de données couvre plus de 24 000 motorisations. Compatible essence ET diesel, turbo ou atmosphérique (gains plus importants sur turbo).
 
-## Compatibilité
-Compatible avec les véhicules essence ET diesel. Turbo ou atmosphérique (gains plus importants sur turbo).
+## est-ce que la reprog marche sur un diesel ? / reprog diesel possible ? / stage 1 diesel ça marche ?
+Oui, la reprogrammation fonctionne sur diesel et sur essence. Les gains sont souvent plus significatifs sur les moteurs turbo diesel (TDI, HDI, dCi, CDTI...).
+
+## quelle garantie sur la reprog ? / vous garantissez quoi sur le stage 1 ?
+DiagPerf offre une garantie de **2 ans** sur toutes ses prestations de reprogrammation, preuve de notre confiance dans la qualité du travail.
+
+## je veux faire une reprog, par où je commence ? / comment prendre rdv pour la reprog ?
+Envoyez votre plaque d'immatriculation — nous identifions votre véhicule, vérifions la compatibilité et vous donnons un devis instantané. La prise de rendez-vous se fait ensuite selon vos disponibilités.
