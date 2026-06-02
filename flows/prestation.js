@@ -1056,7 +1056,7 @@ function createPrestationFlow(ctx) {
         // Non-question (intent change, unexpected input) : try LLM fallback
         const fallback = await respondOrAnswerQuestion(fromWa, text, null, null, rawMsg);
         if (fallback) return true;
-        await sendWhatsAppList(fromWa, "Je n'ai pas compris votre choix \ud83d\ude05\nVeuillez s\u00e9lectionner une option :", "\ud83d\udd0d Voir les options", [
+        await sendWhatsAppList(fromWa, "Veuillez s\u00e9lectionner une option :", "\ud83d\udd0d Voir les options", [
           { title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) },
         ]);
         return true;
