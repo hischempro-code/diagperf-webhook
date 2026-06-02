@@ -88,14 +88,15 @@ const QUERY_SYNONYMS = {
 /**
  * Générer l'embedding d'un texte via Google gemini-embedding-001
  * @param {string} text — Le texte à encoder
+ * @param {string} [taskType] — "RETRIEVAL_DOCUMENT" pour indexation, "RETRIEVAL_QUERY" pour recherche
  * @returns {number[]} — Vecteur de 384 dimensions
  */
-async function generateEmbedding(text) {
+async function generateEmbedding(text, taskType = "RETRIEVAL_DOCUMENT") {
   const ai = getGoogleAI();
   const result = await ai.models.embedContent({
     model: "gemini-embedding-001",
     contents: text,
-    config: { outputDimensionality: 384 },
+    config: { outputDimensionality: 384, taskType },
   });
   return result.embeddings[0].values;
 }
@@ -151,8 +152,8 @@ async function retrieveContext(supabase, userQuery, options = {}) {
   // 1. Expansion de la requête pour améliorer le rappel vectoriel
   const expandedQuery = expandQuery(userQuery);
 
-  // 2. Générer l'embedding de la requête enrichie
-  const queryEmbedding = await generateEmbedding(expandedQuery);
+  // 2. Générer l'embedding de la requête enrichie (RETRIEVAL_QUERY pour aligner avec RETRIEVAL_DOCUMENT)
+  const queryEmbedding = await generateEmbedding(expandedQuery, "RETRIEVAL_QUERY");
 
   // 3. Recherche hybride (vector + full-text)
   let data, error;
