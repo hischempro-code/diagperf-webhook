@@ -1033,7 +1033,27 @@ function createPrestationFlow(ctx) {
       const selected = DIAG_OPTIONS.find(opt => listId === opt.id || text === opt.id || text === opt.title || text.toLowerCase().includes(opt.title.toLowerCase()));
 
       if (!selected) {
-        // Try LLM fallback for unexpected input (question or intent change)
+        // Questions (DTC codes, info requests, etc.) : answer via LLM then always re-show DIAG options
+        if (isLikelyQuestion(text)) {
+          let answered = false;
+          try {
+            const llmResult = await askLLM(text, fromWa);
+            if (llmResult?.type === "answer" && llmResult?.message) {
+              await sendWhatsAppText(fromWa, llmResult.message);
+              answered = true;
+            }
+          } catch (llmErr) {
+            log.warn("LLM fallback failed in DIAG_CHOOSE", { wa_id: fromWa, error: String(llmErr?.message || llmErr) });
+          }
+          await sendWhatsAppList(
+            fromWa,
+            answered ? "Choisissez maintenant le type de diagnostic souhait\u00e9 :" : "Voici nos options de diagnostic :",
+            "\ud83d\udd0d Voir les options",
+            [{ title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) }]
+          );
+          return true;
+        }
+        // Non-question (intent change, unexpected input) : try LLM fallback
         const fallback = await respondOrAnswerQuestion(fromWa, text, null, null, rawMsg);
         if (fallback) return true;
         await sendWhatsAppList(fromWa, "Je n'ai pas compris votre choix \ud83d\ude05\nVeuillez s\u00e9lectionner une option :", "\ud83d\udd0d Voir les options", [
