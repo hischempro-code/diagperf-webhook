@@ -1,4 +1,4 @@
-const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
+﻿const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
 const { detectIntent, intentToPrestationCode, intentToLabel } = require("../lib/intent-detector");
 const { isLikelyQuestion } = require("../lib/llm-service");
 const {
@@ -610,7 +610,7 @@ function createPrestationFlow(ctx) {
 
         await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort });
 
-        await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : 2h-4h\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
+        await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : 1h30 à 2h\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
           { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" },
         ]);
 
@@ -1123,7 +1123,7 @@ function createPrestationFlow(ctx) {
 
       if (!valid) {
         await sendWhatsAppInteractiveButtons(fromWa,
-          "Je n'ai pas reconnu la plaque 😅\nEnvoie-la au format AA 123 BB (avec ou sans tirets).",
+          "Je n'ai pas reconnu la plaque 😅\nEnvoyez-la au format AA 123 BB (avec ou sans tirets).",
           [{ id: "btn_back_menu", title: "🏠 Menu" }]
         );
         return true;
@@ -1231,7 +1231,7 @@ function createPrestationFlow(ctx) {
       } catch (emailErr) { log.error("Erreur envoi email notif diagnostic (garage)", { wa_id: fromWa, error: String(emailErr?.message || emailErr) }); }
 
       try {
-        await sendRdvClientEmail({ to: customerEmail, firstName: diagFirstName, lastName: diagLastName, vehicleDesc: diagVehicleDesc, prestationLabel: `${data.diagTitle} — ${data.diagDuration}`, devisRef: diagDevisRef, htTxt, ttcTxt, contactReason: "technicien" });
+        await sendRdvClientEmail({ to: customerEmail, firstName: diagFirstName, lastName: diagLastName, vehicleDesc: diagVehicleDesc, prestationLabel: `${data.diagTitle} — ${data.diagDuration}`, devisRef: diagDevisRef, htTxt, ttcTxt, contactReason: "devis" });
       } catch (emailErr) { log.error("Erreur envoi email confirmation client diagnostic", { wa_id: fromWa, error: String(emailErr?.message || emailErr) }); }
 
       try {
@@ -1254,3 +1254,4 @@ function createPrestationFlow(ctx) {
 }
 
 module.exports = { createPrestationFlow };
+

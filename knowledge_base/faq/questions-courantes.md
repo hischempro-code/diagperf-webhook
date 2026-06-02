@@ -36,10 +36,10 @@ Le FAP (Filtre à Particules) peut se colmater et causer des pertes de puissance
 L'AdBlue est un système de dépollution diesel (SCR) qui peut tomber en panne (pompe, capteur, injecteur). La suppression logicielle élimine ces problèmes. Prix : 260€ (BlueHDi) ou 300€ (autres diesel).
 
 ## "Vous faites les Stage 2 ?"
-Les stages 2, 3 et 4 nécessitent des modifications mécaniques (downpipe, intercooler, turbo...). On les propose sur devis personnalisé après étude du véhicule. Envoie ta plaque et on regarde ce qu'on peut faire.
+Les stages 2, 3 et 4 nécessitent des modifications mécaniques (downpipe, intercooler, turbo...). On les propose sur devis personnalisé après étude du véhicule. Envoyez votre plaque et on regarde ce qu'on peut faire.
 
 ## "Vous pouvez installer un CarPlay ?"
-Oui, on propose l'installation de CarPlay sans fil et Android Auto en rétrofit. Le prix dépend du véhicule et du système d'origine. Contacte-nous pour un devis.
+Oui, on propose l'installation de CarPlay sans fil et Android Auto en rétrofit. Le prix dépend du véhicule et du système d'origine. Contactez-nous pour un devis.
 
 ## "Vous faites le polissage ?"
 Oui, on propose le polissage et le traitement céramique. Prix sur devis personnalisé selon la taille du véhicule et le niveau de protection souhaité.

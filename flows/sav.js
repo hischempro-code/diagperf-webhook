@@ -1,4 +1,4 @@
-const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
+﻿const { extractInteractiveId, validatePlate, validateEmail, isConfirmation, isDenial, extractContactFromText } = require("../lib/text-helpers");
 const { detectIntent } = require("../lib/intent-detector");
 const { lookupVehicleFromPlate, buildVehicleOnlyText } = require("../lib/vehicle-service");
 const { extractAndValidatePlate } = require("../lib/plate-extractor");
@@ -263,7 +263,7 @@ function createSavFlow(ctx) {
         wa_id: fromWa,
         topic: convState.data?.topic || null,
         customer_name: customerName || null,
-        customer_phone: customerEmail || "",
+        customer_phone: fromWa || "",
         customer_email: customerEmail || null,
         vehicle: vehicleDesc || null,
         description: t,
@@ -348,3 +348,4 @@ function createSavFlow(ctx) {
 }
 
 module.exports = { createSavFlow };
+

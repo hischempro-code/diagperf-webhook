@@ -361,9 +361,21 @@ async function getOrCreateConversation(waPhone) {
 }
 
 async function resetConversationContext(conversationId) {
+  // Préserver le profil long-terme et le résumé — effacer uniquement les états éphémères
+  const { data } = await supabase
+    .from("conversations")
+    .select("contexte_json")
+    .eq("id", conversationId)
+    .maybeSingle();
+
+  const ctx = data?.contexte_json || {};
+  const preserved = {};
+  if (ctx.profile) preserved.profile = ctx.profile;
+  if (ctx.summary) preserved.summary = ctx.summary;
+
   const { error } = await supabase
     .from("conversations")
-    .update({ contexte_json: {} })
+    .update({ contexte_json: preserved })
     .eq("id", conversationId);
 
   if (error) throw error;

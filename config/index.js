@@ -48,9 +48,9 @@ const config = {
   
   // Location
   DIAGPERF_LOCATION: {
-    latitude: 48.945,
-    longitude: 2.853,
-    name: "DiagPerf",
+    latitude: 48.9583,
+    longitude: 2.8789,
+    name: "DiagPerf – Reprogrammation & Diagnostic",
     address: "38 Rue Jean Pierre Plicque, 77124 Villenoy",
   },
 };
@@ -107,7 +107,7 @@ const INTENT_LABELS = {
 };
 
 // ====== LLM Config ======
-const LLM_MODEL = process.env.LLM_MODEL || "claude-haiku-4-20250414";
+const LLM_MODEL = process.env.LLM_MODEL || "claude-haiku-4-5-20251001";
 
 module.exports = {
   config,

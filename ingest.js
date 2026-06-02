@@ -3,8 +3,11 @@
  * ingest.js — Pipeline d'ingestion de la base de connaissances DiagPerf
  *
  * Lit tous les fichiers Markdown de knowledge_base/,
- * les découpe en chunks, génère les embeddings locaux (all-MiniLM-L6-v2),
+ * les découpe en chunks, génère les embeddings via Google Gemini (gemini-embedding-001),
  * et les stocke dans la table kb_chunks de Supabase (pgvector).
+ *
+ * IMPORTANT : utilise le même modèle que rag.js (Google Gemini) pour que les
+ * espaces vectoriels soient alignés lors de la recherche.
  *
  * Usage : node ingest.js
  * Idempotent : peut être relancé à volonté (supprime les anciens chunks par fichier).
@@ -14,6 +17,7 @@ const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
+const { generateEmbedding } = require("./rag");
 
 dotenv.config();
 
@@ -143,12 +147,12 @@ async function main() {
     process.exit(1);
   }
 
-  // Charger le modèle d'embeddings local
-  console.log("🧠 Chargement du modèle d'embeddings (paraphrase-multilingual-MiniLM-L12-v2)...");
-  console.log("   (Premier lancement : téléchargement ~400MB, ensuite en cache)\n");
+  console.log("🧠 Utilisation de Google Gemini (gemini-embedding-001) — même modèle que rag.js\n");
 
-  const { pipeline } = await import("@xenova/transformers");
-  const embedder = await pipeline("feature-extraction", "Xenova/paraphrase-multilingual-MiniLM-L12-v2");
+  if (!process.env.GOOGLE_AI_API_KEY) {
+    console.error("❌ GOOGLE_AI_API_KEY absent — requis pour générer les embeddings");
+    process.exit(1);
+  }
 
   let totalChunks = 0;
   let totalTokens = 0;
@@ -177,9 +181,8 @@ async function main() {
       const chunk = chunks[i];
       const tokenCount = estimateTokens(chunk);
 
-      // Générer l'embedding
-      const output = await embedder(chunk, { pooling: "mean", normalize: true });
-      const embedding = Array.from(output.data);
+      // Générer l'embedding via Google Gemini (aligné avec rag.js)
+      const embedding = await generateEmbedding(chunk);
 
       const { error: insErr } = await supabase.from("kb_chunks").insert({
         file_path: relativePath,

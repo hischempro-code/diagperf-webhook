@@ -12,7 +12,7 @@ Reprogrammation Stage 1 : 390€ TTC pour les véhicules de moins de 400ch et av
 Toutes marques et tous modèles : Peugeot, Renault, Citroën, BMW, Mercedes, Audi, Volkswagen, Ford, Opel, Toyota, Hyundai, Kia, etc. Notre base de données couvre plus de 24 000 motorisations. Essence et diesel.
 
 ## "Je gagne combien de chevaux ?"
-En Stage 1, les gains typiques sont de +20 à 40% de puissance et de couple. Par exemple, un diesel de 150ch peut monter à 190-200ch. Les gains exacts dépendent du moteur — envoie ta plaque et on te donne les chiffres précis.
+En Stage 1, les gains typiques sont de +20 à 40% de puissance et de couple. Par exemple, un diesel de 150ch peut monter à 190-200ch. Les gains exacts dépendent du moteur — envoyez votre plaque et on vous donne les chiffres précis.
 
 ## "C'est garanti ?"
 Oui, garantie 2 ans sur toutes nos prestations de reprogrammation et conversion E85. En cas de problème lié à notre intervention, on intervient gratuitement pendant toute la durée de la garantie.
@@ -24,13 +24,13 @@ Mardi au vendredi : 10h à 18h. Samedi : 10h à 16h (sur rendez-vous). Fermé di
 On recommande de prendre rendez-vous pour garantir la disponibilité. Le délai de prise en charge est généralement de 2 à 5 jours ouvrés.
 
 ## "Vous faites les Peugeot / BMW / Audi / etc. ?"
-Oui, on travaille sur toutes les marques. Notre base de données couvre plus de 24 000 motorisations. Envoie ta plaque pour qu'on identifie ton véhicule et on te fait un devis instantané.
+Oui, on travaille sur toutes les marques. Notre base de données couvre plus de 24 000 motorisations. Envoyez votre plaque pour qu'on identifie votre véhicule et on vous fait un devis instantané.
 
 ## "Je peux rouler au SP95 après le E85 ?"
-Oui, après la conversion E85, ton véhicule devient flexfuel : tu peux rouler au E85, au SP95, au SP98 ou tout mélange des deux. Le calculateur s'adapte automatiquement.
+Oui, après la conversion E85, votre véhicule devient flexfuel : vous pouvez rouler au E85, au SP95, au SP98 ou tout mélange des deux. Le calculateur s'adapte automatiquement.
 
 ## "Mon voyant moteur est allumé"
-On propose 3 niveaux de diagnostic : simple (50€, lecture/effacement codes), approfondi (80€, interprétation détaillée), ou recherche de panne complète (130€, tests en temps réel). Envoie ta plaque et on regarde ça.
+On propose 3 niveaux de diagnostic : simple (50€, lecture/effacement codes), approfondi (80€, interprétation détaillée), ou recherche de panne complète (130€, tests en temps réel). Envoyez votre plaque et on regarde ça.
 
 ## "Ma caisse fait des à-coups" / "elle tremble" / "elle saccade"
 Des à-coups, tremblements ou saccades peuvent venir d'une bougie défectueuse, d'un injecteur encrassé, d'un capteur de cliquetis ou d'un FAP saturé. Un diagnostic approfondi (80€) permettra de cibler la cause exactement.
@@ -60,7 +60,7 @@ Une perte de puissance sur diesel peut venir du FAP, de l'EGR, du turbo ou d'un 
 Les pannes AdBlue (pompe, injecteur, capteur NOx) peuvent mettre le moteur en comptage pour immobilisation. La suppression logicielle AdBlue (260€ ou 300€ selon motorisation) élimine définitivement ces problèmes.
 
 ## "Elle démarre mal" / "démarrage difficile" / "long à démarrer"
-Un démarrage difficile peut venir de bougies usées (surtout après conversion E85), d'un injecteur encrassé ou d'une batterie faible. Si tu es en E85, des bougies adaptées (+170€) améliorent souvent le démarrage à froid.
+Un démarrage difficile peut venir de bougies usées (surtout après conversion E85), d'un injecteur encrassé ou d'une batterie faible. Si vous êtes en E85, des bougies adaptées (+170€) améliorent souvent le démarrage à froid.
 
 ## "Mon EGR est HS" / "vanne EGR bloquée"
-Une vanne EGR bloquée ouverte provoque des à-coups et de la fumée noire. Bloquée fermée, elle allume le voyant moteur. La suppression logicielle EGR (sur devis) règle le problème définitivement sans intervention mécanique.
+Une vanne EGR bloquée ouverte provoque des à-coups et de la fumée noire. Bloquée fermée, elle allume le voyant moteur. La suppression logicielle EGR (190€ TTC pour les diesels) règle le problème définitivement sans intervention mécanique.

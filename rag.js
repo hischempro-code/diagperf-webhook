@@ -3,6 +3,9 @@
  *
  * Utilise l'API Google gemini-embedding-001 (384 dims) et Supabase pgvector
  * pour retrouver les chunks de la base de connaissances les plus pertinents.
+ *
+ * IMPORTANT : ingest.js doit utiliser ce même modèle (generateEmbedding) pour que les
+ * espaces vectoriels soient alignés entre l'indexation et la recherche.
  */
 
 const { GoogleGenAI } = require("@google/genai");
@@ -16,7 +19,7 @@ function getGoogleAI() {
   return _googleAI;
 }
 
-// ====== Synonymes FR pour améliorer le match du modèle anglophone ======
+// ====== Synonymes FR/EN pour améliorer le rappel vectoriel (Gemini est multilingue) ======
 const QUERY_SYNONYMS = {
   // Prestations principales
   reprog: "reprogrammation engine tuning remap chip tuning stage performance puissance couple",
@@ -101,7 +104,7 @@ async function generateEmbedding(text) {
 
 /**
  * Enrichir la requête utilisateur avec des synonymes pour améliorer le rappel.
- * Le modèle all-MiniLM-L6-v2 est anglophone : on ajoute des termes EN + FR.
+ * Gemini est multilingue, mais l'expansion aide à couvrir les abréviations techniques.
  * @param {string} query — Message brut du client
  * @returns {string} — Requête enrichie pour l'embedding
  */

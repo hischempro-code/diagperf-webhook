@@ -18,7 +18,7 @@ tags: [prix, tarif, cout, combien, grille, devis, budget, euro]
 | Suppression FAP | Diesel ≥ 2019 | 300€ |
 | Suppression AdBlue | BlueHDi (Peugeot/Citroën) | 260€ |
 | Suppression AdBlue | Autres diesel | 300€ |
-| Suppression EGR | Tous | Sur devis personnalisé |
+| Suppression EGR | Diesel | 190€ |
 | Diagnostic simple | Tous | 50€ |
 | Diagnostic approfondi | Tous | 80€ |
 | Recherche de panne | Tous | 130€ |

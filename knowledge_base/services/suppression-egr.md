@@ -10,8 +10,8 @@ intent: EGR
 La suppression EGR consiste à désactiver logiciellement la vanne de recirculation des gaz d'échappement (EGR). La vanne EGR réinjecte une partie des gaz d'échappement dans l'admission, ce qui provoque un encrassement progressif du moteur.
 
 ## Prix
-Sur devis personnalisé (dépend du véhicule et de la complexité).
-Souvent proposée en option complémentaire avec la suppression FAP ou AdBlue à 90€ TTC.
+- **190€ TTC** pour les véhicules diesel
+- Proposée en option complémentaire avec la suppression FAP ou AdBlue à **+90€ TTC**
 
 ## Durée
 Environ 1h
