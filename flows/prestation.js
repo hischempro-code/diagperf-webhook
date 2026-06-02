@@ -1033,32 +1033,27 @@ function createPrestationFlow(ctx) {
       const selected = DIAG_OPTIONS.find(opt => listId === opt.id || text === opt.id || text === opt.title || text.toLowerCase().includes(opt.title.toLowerCase()));
 
       if (!selected) {
-        // Questions (DTC codes, info requests, etc.) : answer via LLM then always re-show DIAG options
-        if (isLikelyQuestion(text)) {
-          let answered = false;
-          try {
-            const llmResult = await askLLM(text, fromWa);
-            if (llmResult?.type === "answer" && llmResult?.message) {
-              await sendWhatsAppText(fromWa, llmResult.message);
-              answered = true;
-            }
-          } catch (llmErr) {
-            log.warn("LLM fallback failed in DIAG_CHOOSE", { wa_id: fromWa, error: String(llmErr?.message || llmErr) });
+        // Le LLM r\u00e9pond avec l'historique complet \u2014 jamais de menu en fallback
+        try {
+          const llmResult = await askLLM(text, fromWa);
+          if (llmResult?.type === "answer" && llmResult?.message) {
+            await sendWhatsAppText(fromWa, llmResult.message);
+            return true;
           }
-          await sendWhatsAppList(
-            fromWa,
-            answered ? "Choisissez maintenant le type de diagnostic souhait\u00e9 :" : "Voici nos options de diagnostic :",
-            "\ud83d\udd0d Voir les options",
-            [{ title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) }]
-          );
-          return true;
+          if (llmResult?.type === "intent" && llmResult?.intent && llmResult.intent !== "DIAG") {
+            // Le client change de prestation \u2192 rediriger proprement
+            await clearConversationState(fromWa);
+            const _menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+            const _mapped = _menuMap[llmResult.intent];
+            if (_mapped) {
+              const _handled = await handlePrestationFlow(fromWa, _mapped, rawMsg);
+              if (_handled) return true;
+            }
+          }
+        } catch (llmErr) {
+          log.warn("LLM fallback failed in DIAG_CHOOSE", { wa_id: fromWa, error: String(llmErr?.message || llmErr) });
         }
-        // Non-question (intent change, unexpected input) : try LLM fallback
-        const fallback = await respondOrAnswerQuestion(fromWa, text, null, null, rawMsg);
-        if (fallback) return true;
-        await sendWhatsAppList(fromWa, "Veuillez s\u00e9lectionner une option :", "\ud83d\udd0d Voir les options", [
-          { title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) },
-        ]);
+        await sendWhatsAppText(fromWa, "Je n'ai pas bien saisi votre demande \ud83e\udd14 Pourriez-vous pr\u00e9ciser ?");
         return true;
       }
 
