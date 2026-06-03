@@ -369,7 +369,9 @@ function createPrestationFlow(ctx) {
             }
             if (llmResult.type === "answer" && llmResult.message) {
               log.info("WAITING_PLATE → LLM answer", { wa_id: fromWa, msgLen: llmResult.message.length });
-              await sendWhatsAppInteractiveButtons(fromWa, llmResult.message, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+              await sendWhatsAppText(fromWa, llmResult.message);
+              // Re-demander la plaque pour ne pas laisser le client bloqué dans cet état
+              await sendWhatsAppInteractiveButtons(fromWa, "Pour continuer, envoyez votre plaque d'immatriculation (ex: AA 123 BB) :", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
               return true;
             }
           }
@@ -959,7 +961,7 @@ function createPrestationFlow(ctx) {
       const lastName = nameParts2[0] || "";
       const firstName = nameParts2.slice(1).join(" ") || "";
 
-      if (!email || nameParts2.length < 2) {
+      if (!email || nameParts2.length < 1) {
         await sendWhatsAppInteractiveButtons(fromWa, `Je n'ai pas compris 😅\nVeuillez envoyer vos coordonnées au format : *Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
@@ -1030,7 +1032,14 @@ function createPrestationFlow(ctx) {
     // --- DIAG_CHOOSE ---
     if (convState.state === "DIAG_CHOOSE" && intent === "DIAG") {
       const listId = rawMsg?.interactive?.list_reply?.id || null;
-      const selected = DIAG_OPTIONS.find(opt => listId === opt.id || text === opt.id || text === opt.title || text.toLowerCase().includes(opt.title.toLowerCase()));
+      const textLower = text.toLowerCase();
+      const selected = DIAG_OPTIONS.find(opt =>
+        listId === opt.id ||
+        text === opt.id ||
+        text === opt.title ||
+        // Match exact mot entier — évite les faux positifs sur phrases négatives
+        new RegExp(`(^|\\s)${opt.title.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(\\s|$)`).test(textLower)
+      );
 
       if (!selected) {
         // Le LLM r\u00e9pond avec l'historique complet \u2014 jamais de menu en fallback
@@ -1040,7 +1049,17 @@ function createPrestationFlow(ctx) {
             await sendWhatsAppText(fromWa, llmResult.message);
             return true;
           }
-          if (llmResult?.type === "intent" && llmResult?.intent && llmResult.intent !== "DIAG") {
+          if (llmResult?.type === "intent" && llmResult?.intent) {
+            if (llmResult.intent === "DIAG") {
+              // Client veut vraiment un diagnostic \u2192 re-afficher la liste
+              await sendWhatsAppList(
+                fromWa,
+                "\ud83d\udd0d Diagnostic complet\n\nChoisissez le type de diagnostic souhait\u00e9 :",
+                "\ud83d\udd0d Voir les options",
+                [{ title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) }]
+              );
+              return true;
+            }
             // Le client change de prestation \u2192 rediriger proprement
             await clearConversationState(fromWa);
             const _menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
@@ -1068,7 +1087,7 @@ function createPrestationFlow(ctx) {
     if (convState.state === "DIAG_DESCRIBE" && intent === "DIAG") {
       const description = String(text || "").trim();
 
-      if (description.length < 5) {
+      if (description.length < 10) {
         await sendWhatsAppInteractiveButtons(fromWa,
           "Merci de décrire votre problème en quelques mots 📝\n(ex: voyant moteur allumé, perte de puissance, code défaut...)",
           [{ id: "btn_back_menu", title: "🏠 Menu" }]
