@@ -1,4 +1,4 @@
-const { extractInboundText, extractInteractiveId, isGreetingOrReset } = require("../lib/text-helpers");
+const { extractInboundText, extractInteractiveId, isGreetingOrReset, isGreeting } = require("../lib/text-helpers");
 const { parseRoutingInstruction, createInitialStateFromRoute, isRoutingSafe } = require("../lib/intent-router");
 const { extractProfileSignals, updateClientProfile } = require("../lib/conversation-memory");
 
@@ -191,7 +191,7 @@ function createWebhookHandler(ctx) {
           if (isGreetingOrReset(text)) {
             await resetConversationContext(conversationId);
             await clearConversationState(fromWa);
-            await sendMenuList(fromWa, { showLogo: true });
+            await sendMenuList(fromWa, { showLogo: isGreeting(text) });
             continue;
           }
 
