@@ -266,6 +266,11 @@ function createWebhookHandler(ctx) {
                 log.info("LLM → réponse FAQ", { wa_id: fromWa, msgLen: llmResult.message.length });
                 await sendWhatsAppText(fromWa, llmResult.message);
                 if (llmResult.sendLocation) {
+                  // Envoyer le lien Google Maps cliquable si absent du message LLM
+                  const mapsUrl = `https://maps.google.com/?q=${DIAGPERF_LOCATION.latitude},${DIAGPERF_LOCATION.longitude}`;
+                  if (!llmResult.message.includes("maps.google.com")) {
+                    await sendWhatsAppText(fromWa, `📍 *Google Maps :* ${mapsUrl}`);
+                  }
                   sendWhatsAppLocation(fromWa, DIAGPERF_LOCATION.latitude, DIAGPERF_LOCATION.longitude, DIAGPERF_LOCATION.name, DIAGPERF_LOCATION.address).catch(locErr => {
                     log.debug("Location send failed (non-blocking)", { error: String(locErr?.message || locErr) });
                   });
