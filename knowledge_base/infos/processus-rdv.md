@@ -5,20 +5,19 @@ tags: [rendez-vous, rdv, processus, prise en charge, delai, etapes, comment, pro
 
 # Processus de prise en charge
 
-## Comment ça se passe ?
+## comment ça se passe ? / c'est quoi le processus ? / quelles sont les étapes pour faire une prestation ?
+1. **Choix de la prestation** via WhatsApp (ce chat)
+2. **Plaque d'immatriculation** → identification automatique du véhicule
+3. **Devis instantané** avec le prix TTC exact
+4. **Rendez-vous** : l'équipe vous recontacte pour fixer un créneau (délai : 2 à 5 jours ouvrés)
+5. **Intervention** au garage de Villenoy — plupart des prestations réalisées dans la journée
+6. **Restitution** : vous repartez avec votre véhicule le jour même
 
-1. **Choix de la prestation** : le client choisit sa prestation via WhatsApp (ce chat) ou nous contacte
-2. **Identification du véhicule** : envoi de la plaque d'immatriculation pour identifier le véhicule automatiquement
-3. **Devis instantané** : un devis est généré automatiquement avec le prix TTC
-4. **Prise de rendez-vous** : notre équipe vous recontacte pour fixer un créneau
-5. **Réalisation** : le véhicule est pris en charge au garage. La plupart des prestations sont réalisées dans la journée.
-6. **Restitution** : le client repart avec son véhicule le jour même
+## quel est le délai pour avoir un rendez-vous ? / combien de temps pour avoir un créneau ? / vous prenez les RDV comment ?
+En général **2 à 5 jours ouvrés** selon la disponibilité de l'atelier. Pour les cas urgents, contactez-nous directement par WhatsApp pour voir les créneaux disponibles.
 
-## Délai de prise en charge
-En général, nous pouvons prendre en charge votre véhicule sous **2 à 5 jours ouvrés** selon la disponibilité de l'atelier.
-
-## Modes de paiement
+## comment vous payez ? / quels moyens de paiement ? / vous acceptez la carte ? / vous prenez les espèces ?
 Nous acceptons :
-- Carte bancaire
-- Espèces
-- Virement bancaire
+- **Carte bancaire**
+- **Espèces**
+- **Virement bancaire**

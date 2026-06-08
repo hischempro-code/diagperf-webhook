@@ -6,19 +6,17 @@ intent: AUTRES
 
 # Polissage / Correction de peinture
 
-## Description
-Le polissage permet de corriger les défauts de peinture : micro-rayures, swirl marks (traces circulaires), oxydation, et traces de lavage. Nous proposons également la rénovation optique des phares ternis.
+## vous faites le polissage ? / c'est quoi le polissage ? / vous corrigez la peinture ?
+Le polissage corrige les défauts de peinture : micro-rayures, swirl marks (traces circulaires au soleil), oxydation et traces de lavage. On propose aussi la rénovation des phares ternis ou jaunis.
 
-## Prix
-Sur devis personnalisé selon l'état de la peinture et la taille du véhicule.
+## combien ça coûte le polissage ? / prix polissage ? / c'est quel tarif le polissage ?
+**Sur devis personnalisé** selon l'état de la peinture et la taille du véhicule. Deux niveaux disponibles : polissage simple ou correction approfondie multi-étapes.
 
-## Prestations
-- **Polissage simple** : correction des micro-rayures et swirl marks, restauration de la brillance
-- **Polissage approfondi** : correction multi-étapes pour les défauts plus marqués
-- **Rénovation optique des phares** : ponçage et polissage des phares ternis ou jaunis pour retrouver la transparence d'origine
+## vous faites les phares ? / vous rénovez les phares ternis ? / mes phares sont jaunis que faire ?
+Oui, on propose la **rénovation optique des phares** : ponçage et polissage des phares ternis ou jaunis pour retrouver la transparence d'origine. Prix sur devis.
 
-## Avantages
-- Retrouver une peinture lisse et brillante comme neuve
-- Suppression des micro-rayures visibles au soleil
+## ça change quoi le polissage ? / c'est quoi les avantages ? / ça enlève les rayures ?
+- Suppression des micro-rayures visibles au soleil (swirl marks)
+- Peinture lisse et brillante comme neuve
 - Phares clairs pour une meilleure visibilité de nuit
 - Idéal en préparation avant un traitement céramique

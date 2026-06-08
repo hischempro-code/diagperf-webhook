@@ -6,17 +6,17 @@ intent: AUTRES
 
 # Virtual Cockpit / Compteur numérique
 
-## Description
-Upgrade de votre tableau de bord classique vers un compteur numérique (Virtual Cockpit). L'écran numérique remplace les compteurs analogiques et offre un affichage personnalisable avec navigation, informations du véhicule et multimédia.
+## vous faites le Virtual Cockpit ? / c'est quoi le Virtual Cockpit ? / compteur numérique vous le faites ?
+Le Virtual Cockpit remplace votre tableau de bord classique par un écran numérique entièrement personnalisable. Affichage navigation, consommation, performances — dans le champ de vision du conducteur.
 
-## Prix
-Sur devis personnalisé selon le modèle du véhicule.
+## combien ça coûte le Virtual Cockpit ? / prix Virtual Cockpit ? / c'est quel prix ?
+**Sur devis personnalisé** selon votre modèle de véhicule. Envoyez votre plaque pour qu'on vérifie la faisabilité et vous donne un chiffrage.
 
-## Compatibilité
-Principalement les véhicules du groupe VAG : Audi, Volkswagen, Seat, Skoda. Nous étudions la faisabilité au cas par cas pour les autres marques.
+## c'est compatible avec quoi le Virtual Cockpit ? / vous le faites sur quelle marque ? / c'est pour quelle voiture ?
+Principalement les véhicules du **groupe VAG** : Audi, Volkswagen, Seat, Skoda. Faisabilité étudiée au cas par cas pour les autres marques.
 
-## Avantages
+## ça ressemble à quoi ? / c'est quoi les avantages du Virtual Cockpit ? / pourquoi passer au compteur numérique ?
 - Affichage moderne et personnalisable
 - Navigation intégrée dans le champ de vision du conducteur
 - Informations en temps réel (consommation, autonomie, performances)
-- Valorisation du véhicule
+- Valorisation du véhicule à la revente

@@ -6,15 +6,15 @@ intent: AUTRES
 
 # Installation GPS / Traceur
 
-## Description
-DiagPerf propose l'installation de traceurs GPS discrets sur votre véhicule. Suivez la position de votre véhicule en temps réel depuis une application sur votre smartphone.
+## vous installez des traceurs GPS ? / vous faites le GPS antivol ? / vous posez des trackers ?
+DiagPerf installe des traceurs GPS discrets sur votre véhicule. Suivez la position en temps réel depuis votre smartphone, consultez l'historique des trajets et recevez des alertes en cas de mouvement suspect.
 
-## Prix
-Sur devis personnalisé selon le modèle de traceur choisi et le véhicule.
+## combien ça coûte un traceur GPS ? / quel est le prix d'un GPS traceur ? / c'est cher un tracker ?
+**Sur devis personnalisé** selon le modèle de traceur et le véhicule. Contactez-nous pour un chiffrage rapide.
 
-## Avantages
+## ça marche comment un traceur GPS ? / c'est quoi les avantages d'un GPS traceur ?
 - Suivi en temps réel de la position du véhicule
-- Historique des trajets
+- Historique complet des trajets
 - Alertes en cas de mouvement suspect (antivol)
 - Géofencing : alerte si le véhicule sort d'une zone définie
 - Installation discrète et professionnelle

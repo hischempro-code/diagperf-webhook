@@ -6,15 +6,15 @@ intent: AUTRES
 
 # Installation alarme véhicule
 
-## Description
-DiagPerf installe des systèmes d'alarme sur votre véhicule pour renforcer sa sécurité. Protection contre le vol et les tentatives d'effraction.
+## vous installez des alarmes ? / vous faites les alarmes auto ? / vous posez des systèmes antivol ?
+DiagPerf installe des systèmes d'alarme pour renforcer la sécurité de votre véhicule : détection d'intrusion, sirène dissuasive, notification smartphone selon le modèle.
 
-## Prix
-Sur devis personnalisé selon le modèle d'alarme et le véhicule.
+## combien ça coûte une alarme ? / quel est le prix d'une alarme voiture ? / c'est cher une alarme ?
+**Sur devis personnalisé** selon le modèle d'alarme et le véhicule. Contactez-nous pour un chiffrage.
 
-## Avantages
+## ça sert à quoi une alarme ? / c'est quoi les avantages d'une alarme voiture ?
 - Détection d'intrusion et de mouvement
-- Sirène dissuasive
+- Sirène dissuasive contre le vol
 - Notification sur smartphone (selon modèle)
 - Verrouillage/déverrouillage centralisé
 - Installation professionnelle et discrète

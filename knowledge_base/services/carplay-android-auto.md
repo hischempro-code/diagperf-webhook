@@ -6,18 +6,18 @@ intent: AUTRES
 
 # Installation CarPlay / Android Auto
 
-## Description
-DiagPerf propose l'installation de systèmes CarPlay sans fil et Android Auto en rétrofit sur votre véhicule. Profitez de la navigation, de la musique et de vos applications directement sur l'écran de votre voiture, sans fil.
+## vous faites le CarPlay ? / c'est quoi le CarPlay ? / vous installez Android Auto ?
+DiagPerf installe CarPlay sans fil et Android Auto en rétrofit sur votre véhicule. Navigation, musique, appels et vos applis directement sur l'écran de votre voiture — sans câble.
 
-## Prix
-Sur devis personnalisé selon le modèle du véhicule et le système d'origine.
+## combien ça coûte le CarPlay ? / quel est le prix CarPlay Android Auto ? / c'est combien l'installation ?
+Le prix est **sur devis personnalisé** selon votre modèle de véhicule et le système multimédia d'origine. Envoyez votre plaque pour un chiffrage rapide.
 
-## Compatibilité
-Compatible avec la plupart des véhicules récents équipés d'un écran multimédia d'origine. Nous étudions la faisabilité au cas par cas.
+## c'est compatible avec ma voiture ? / quels véhicules sont compatibles CarPlay ? / ma voiture peut avoir le CarPlay ?
+Compatible avec la plupart des véhicules récents équipés d'un écran multimédia d'origine. Nous étudions la faisabilité au cas par cas selon la marque, le modèle et le système d'origine.
 
-## Avantages
+## ça change quoi le CarPlay ? / c'est quoi les avantages CarPlay ? / pourquoi installer CarPlay ?
 - Navigation GPS en temps réel (Waze, Google Maps, Plans Apple)
 - Musique en streaming (Spotify, Apple Music, etc.)
 - Appels mains libres et messages
-- Connexion sans fil (pas de câble)
-- Interface intuitive et moderne
+- Connexion sans fil — plus de câble USB
+- Interface intuitive et moderne sur l'écran de série
