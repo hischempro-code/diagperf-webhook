@@ -19,7 +19,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 /* HERO */
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);pointer-events:none}
+.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);pointer-events:none;z-index:2}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.hero-overlay{position:absolute;inset:0;background:rgba(6,6,17,.62);z-index:1}
+.hero .logo,.hero .tagline,.hero h1,.hero p,.hero .cta-group{position:relative;z-index:2}
 .logo{font-size:32px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
 .logo span{color:var(--accent)}
 .tagline{font-size:14px;color:var(--t3);margin-bottom:48px;font-weight:500;letter-spacing:1px;text-transform:uppercase}
@@ -137,6 +140,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <!-- HERO -->
 <div class="hero">
+  <video class="hero-video" autoplay muted loop playsinline>
+    <source src="bg.mp4" type="video/mp4">
+  </video>
+  <div class="hero-overlay"></div>
   <div class="logo">DIAG<span>PERF</span></div>
   <div class="tagline">Reprogrammation & Diagnostic automobile</div>
   <h1>Boostez votre véhicule avec un <span class="accent">devis gratuit</span> en 2 minutes</h1>

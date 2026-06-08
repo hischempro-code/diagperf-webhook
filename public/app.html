@@ -45,9 +45,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* ═══ LOGIN ═══ */
-.login-wrap{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.login-wrap{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.login-video-overlay{position:absolute;inset:0;background:rgba(6,6,17,.62);z-index:1}
 .login-wrap.hide{display:none}
-.login-card{width:400px;max-width:92vw;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 32px;text-align:center;box-shadow:0 0 60px rgba(59,130,246,.06)}
+.login-card{width:400px;max-width:92vw;background:rgba(17,24,39,.9);border:1px solid var(--border);border-radius:24px;padding:40px 32px;text-align:center;box-shadow:0 0 60px rgba(59,130,246,.06);position:relative;z-index:2;backdrop-filter:blur(10px)}
 .login-brand{font-size:28px;font-weight:900;letter-spacing:2px;margin-bottom:6px}
 .login-brand em{font-style:normal;color:var(--accent)}
 .login-sub{color:var(--t4);font-size:13px;margin-bottom:28px}
@@ -458,6 +460,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 <!-- ═══ LOGIN ═══ -->
 <div class="login-wrap" id="loginWrap">
+  <video class="login-bg-video" autoplay muted loop playsinline>
+    <source src="bg.mp4" type="video/mp4">
+  </video>
+  <div class="login-video-overlay"></div>
   <div class="login-card">
     <div class="login-brand">DIAG<em>PERF</em></div>
     <div class="login-sub">Connectez-vous à votre espace</div>
