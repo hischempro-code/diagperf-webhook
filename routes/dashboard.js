@@ -43,6 +43,43 @@ function createDashboardRouter({ supabase, log }) {
   }
 
   // ====== Client PWA API (public, auth by wa_id hash) ======
+  // Rate-limit anti brute-force : 5 essais / 15 min puis lockout 15 min par wa_id.
+  // Map en mémoire — perdu au restart, ce qui est OK pour ce cas d'usage.
+  const PIN_MAX_ATTEMPTS = 5;
+  const PIN_LOCKOUT_MS = 15 * 60 * 1000;
+  const pinAttempts = new Map(); // wa_id → { count, firstAt, lockedUntil }
+
+  function isPinLocked(wa) {
+    const rec = pinAttempts.get(wa);
+    if (!rec) return false;
+    if (rec.lockedUntil && Date.now() < rec.lockedUntil) return true;
+    // Fenêtre expirée → reset
+    if (rec.lockedUntil && Date.now() >= rec.lockedUntil) {
+      pinAttempts.delete(wa);
+      return false;
+    }
+    if (Date.now() - rec.firstAt > PIN_LOCKOUT_MS) {
+      pinAttempts.delete(wa);
+      return false;
+    }
+    return false;
+  }
+
+  function recordPinFailure(wa) {
+    const now = Date.now();
+    const rec = pinAttempts.get(wa) || { count: 0, firstAt: now, lockedUntil: 0 };
+    rec.count++;
+    if (rec.count >= PIN_MAX_ATTEMPTS) {
+      rec.lockedUntil = now + PIN_LOCKOUT_MS;
+      log.warn("PIN brute-force lockout", { wa_id: wa, attempts: rec.count });
+    }
+    pinAttempts.set(wa, rec);
+  }
+
+  function clearPinAttempts(wa) {
+    pinAttempts.delete(wa);
+  }
+
   // Auth helper : vérifie le PIN (client_pins en priorité, fallback 4 derniers chiffres)
   async function checkClientPin(wa, pin) {
     let validPin = wa.replace(/\D/g, "").slice(-4);
@@ -51,7 +88,10 @@ function createDashboardRouter({ supabase, log }) {
       if (error) throw error; // table inexistante → catch → reste sur last-4
       if (data?.pin) validPin = data.pin;
     } catch {}
-    return pin === validPin;
+    const ok = pin === validPin;
+    if (ok) clearPinAttempts(wa);
+    else recordPinFailure(wa);
+    return ok;
   }
 
   router.get("/api/client/devis", async (req, res) => {
@@ -59,6 +99,7 @@ function createDashboardRouter({ supabase, log }) {
       const wa = req.query.wa;
       const pin = req.query.pin;
       if (!wa || !pin) return res.status(400).json({ error: "wa et pin requis" });
+      if (isPinLocked(wa)) return res.status(429).json({ error: "Trop de tentatives, réessayez plus tard" });
       if (!(await checkClientPin(wa, pin))) return res.status(401).json({ error: "PIN incorrect" });
 
       const { data: devis, error } = await supabase
@@ -82,6 +123,7 @@ function createDashboardRouter({ supabase, log }) {
       const pin = req.body.pin;
       const statut = req.body.statut;
       if (!wa || !pin) return res.status(400).json({ error: "wa et pin requis" });
+      if (isPinLocked(wa)) return res.status(429).json({ error: "Trop de tentatives, réessayez plus tard" });
       if (!(await checkClientPin(wa, pin))) return res.status(401).json({ error: "PIN incorrect" });
       if (!["sent", "refused", "completed"].includes(statut)) return res.status(400).json({ error: "Statut invalide" });
 

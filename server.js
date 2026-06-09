@@ -1,9 +1,17 @@
-﻿const express = require("express");
+﻿// Sentry doit être initialisé AVANT les autres requires pour l'auto-instrumentation
+const { initSentry, captureException, setupExpressErrorHandler } = require("./lib/sentry");
+initSentry();
+
+const express = require("express");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
+const {
+  config: appConfig,
+  MENU_MAP,
+  NON_TEXT_TYPES,
+} = require("./config");
 const { retrieveContext, formatContextForPrompt, preloadEmbedder } = require("./rag");
 const { renderStageGainsVideo, renderPrestationVideo } = require("./lib/creatomateVideo");
 const { buildDiagnosticContext, detectDtcCodes, detectMileage, detectSymptoms } = require("./lib/diagnostic-helper");
@@ -151,7 +159,7 @@ const {
 const fetchFn = global.fetch || require("node-fetch");
 
 // ====== WhatsApp API version (centralized) ======
-const WA_API_VERSION = "v19.0";
+const WA_API_VERSION = appConfig.WA_API_VERSION;
 
 // ====== Retry utility (for transient API failures) ======
 async function withRetry(fn, { retries = 2, delayMs = 500, label = "API call" } = {}) {
@@ -170,21 +178,7 @@ async function withRetry(fn, { retries = 2, delayMs = 500, label = "API call" } 
   }
 }
 
-dotenv.config();
-
-// ====== Validation des variables d'environnement ======
-const REQUIRED_ENV = [
-  "SUPABASE_URL",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "WHATSAPP_TOKEN",
-  "WHATSAPP_PHONE_NUMBER_ID",
-  "WHATSAPP_VERIFY_TOKEN",
-];
-const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
-if (missing.length) {
-  console.error("❌ Variables d'environnement manquantes:", missing.join(", "));
-  process.exit(1);
-}
+// dotenv + validation REQUIRED_ENV centralisés dans config/index.js
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -216,6 +210,8 @@ const log = {
 };
 
 // ====== Init services ======
+if (process.env.SENTRY_DSN) log.info("Sentry actif", { environment: process.env.NODE_ENV || "production" });
+else log.info("Sentry désactivé (SENTRY_DSN absent)");
 initEmailService({ log });
 initVehicleService({ supabase, log, fetchFn });
 initDevisService({ supabase, log });
@@ -448,28 +444,28 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
 // ====== Non-text message types (media, calls, etc.) ======
 // VOICE_TYPES imported from lib/voice-handler
-const NON_TEXT_TYPES = new Set(["image", "video", "sticker", "location", "contacts", "unsupported", "order", "system", "reaction", "document"]);
+// NON_TEXT_TYPES imported from config
 
-// ====== Anti-spam for missed call / media auto-reply (5 min cooldown, persistent) ======
-const NON_TEXT_COOLDOWN_MS = 300000; // 5 min
+// ====== Anti-spam for missed call / media auto-reply (cooldown persistent) ======
+const NON_TEXT_COOLDOWN_MS = appConfig.NON_TEXT_COOLDOWN_MS;
 
-async function getNonTextCooldown(waId) {
-  try {
-    const convId = await getOrCreateConversation(waId);
-    const { data } = await supabase.from("conversations").select("contexte_json").eq("id", convId).single();
-    return data?.contexte_json?.last_non_text_reply_at || 0;
-  } catch { return 0; }
+// Cache mémoire : wa_id → timestamp du dernier auto-reply non-text.
+// Sur restart le cache est vide → on re-réponds une fois par client (acceptable).
+// Évite 2 round-trips Supabase à chaque image/sticker/audio reçu.
+const _nonTextCooldownCache = new Map();
+
+function getNonTextCooldown(waId) {
+  return _nonTextCooldownCache.get(waId) || 0;
 }
 
-async function setNonTextCooldown(waId) {
-  try {
-    const convId = await getOrCreateConversation(waId);
-    const { data } = await supabase.from("conversations").select("contexte_json").eq("id", convId).single();
-    const ctx = data?.contexte_json || {};
-    ctx.last_non_text_reply_at = Date.now();
-    await supabase.from("conversations").update({ contexte_json: ctx }).eq("id", convId);
-  } catch (err) {
-    log.warn("setNonTextCooldown failed", { waId, error: String(err?.message || err) });
+function setNonTextCooldown(waId) {
+  _nonTextCooldownCache.set(waId, Date.now());
+  // GC opportuniste : purge les entrées expirées si la Map grossit
+  if (_nonTextCooldownCache.size > 500) {
+    const cutoff = Date.now() - NON_TEXT_COOLDOWN_MS;
+    for (const [k, ts] of _nonTextCooldownCache) {
+      if (ts < cutoff) _nonTextCooldownCache.delete(k);
+    }
   }
 }
 
@@ -490,8 +486,7 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
   if (directIntent) {
     log.info("Mid-flow intent change detected (keyword)", { wa_id: fromWa, intent: directIntent });
     await clearConversationState(fromWa);
-    const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
-    const mapped = menuMap[directIntent] || text;
+    const mapped = MENU_MAP[directIntent] || text;
     const prestaHandled = await handlePrestationFlow(fromWa, mapped, rawMsg || {});
     if (prestaHandled) return { handled: true, redirected: true };
     const savHandled = await handleSavFlow(fromWa, mapped, rawMsg || {});
@@ -504,8 +499,7 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
 
     // LLM detected an intent change → redirect user to the correct flow
     if (llmResult.type === "intent" && llmResult.intent) {
-      const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
-      const mapped = menuMap[llmResult.intent];
+      const mapped = MENU_MAP[llmResult.intent];
       if (mapped) {
         log.info("Mid-flow intent change detected (LLM)", { wa_id: fromWa, intent: llmResult.intent });
         await clearConversationState(fromWa);
@@ -597,6 +591,9 @@ app.post("/webhook", createWebhookHandler({
   askLLM,
 }));
 
+// ====== Sentry Express error handler (doit être après toutes les routes) ======
+setupExpressErrorHandler(app);
+
 // ====== Start server ======
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
@@ -637,7 +634,9 @@ process.on("SIGINT",  () => gracefulShutdown("SIGINT"));
 // Capture les erreurs async non catchées (sinon silencieuses sur Render)
 process.on("unhandledRejection", (reason) => {
   log.error("Unhandled Promise rejection", { reason: String(reason?.message || reason) });
+  captureException(reason instanceof Error ? reason : new Error(String(reason)));
 });
 process.on("uncaughtException", (err) => {
   log.error("Uncaught exception", { error: String(err?.message || err), stack: err?.stack?.slice(0, 500) });
+  captureException(err);
 });
