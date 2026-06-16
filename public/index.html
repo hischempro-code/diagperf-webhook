@@ -4,297 +4,966 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DiagPerf — Reprogrammation moteur & Diagnostic automobile</title>
-<meta name="description" content="DiagPerf : reprogrammation moteur, conversion E85, suppression FAP/EGR/AdBlue, diagnostic complet. Devis gratuit par WhatsApp.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta name="description" content="DiagPerf : reprogrammation moteur, conversion E85, suppression FAP/EGR/AdBlue, diagnostic complet. Devis gratuit par WhatsApp en 2 minutes.">
+<meta name="theme-color" content="#0B0F1E">
+<meta property="og:title" content="DiagPerf — Reprogrammation moteur & Diagnostic">
+<meta property="og:description" content="Devis gratuit par WhatsApp en 2 minutes. Reprog Stage 1/2, E85, FAP, EGR, AdBlue.">
+<meta property="og:image" content="/og-preview.png">
+<meta property="og:url" content="https://webhook.diagperf.com">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0a0a0f;--surface:#111827;--surface2:#1f2937;--border:#1e293b;
-  --accent:#3b82f6;--green:#10b981;--red:#ef4444;
-  --t1:#f9fafb;--t2:#d1d5db;--t3:#9ca3af;--t4:#6b7280;
-  --wa-green:#25D366;
+  --bg:#070914;
+  --bg-2:#0B0F1E;
+  --surface:#0F1525;
+  --surface-2:#161D33;
+  --border:rgba(255,255,255,.08);
+  --border-strong:rgba(255,255,255,.16);
+  --accent:#3B82F6;
+  --accent-2:#00D9FF;
+  --red:#DC2626;
+  --red-glow:rgba(220,38,38,.4);
+  --green:#10B981;
+  --wa:#25D366;
+  --t1:#F8FAFC;
+  --t2:#CBD5E1;
+  --t3:#94A3B8;
+  --t4:#64748B;
+  --display:'Space Grotesk','Inter',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;
 }
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body);
+  background:var(--bg);
+  color:var(--t1);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  line-height:1.5;
+}
 
-/* HERO */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,rgba(59,130,246,.12) 0%,transparent 70%);pointer-events:none;z-index:2}
-.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.hero-overlay{position:absolute;inset:0;background:rgba(6,6,17,.62);z-index:1}
-.hero .logo,.hero .tagline,.hero h1,.hero p,.hero .cta-group{position:relative;z-index:2}
-.logo{font-size:32px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
-.logo span{color:var(--accent)}
-.tagline{font-size:14px;color:var(--t3);margin-bottom:48px;font-weight:500;letter-spacing:1px;text-transform:uppercase}
-.hero h1{font-size:clamp(28px,5vw,52px);font-weight:900;line-height:1.1;margin-bottom:20px;max-width:700px;letter-spacing:-.5px}
-.hero h1 .accent{background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
-.hero p{font-size:clamp(15px,2vw,18px);color:var(--t3);max-width:540px;line-height:1.6;margin-bottom:40px}
+/* ── Grain noise overlay ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.035;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.6'/></svg>");
+}
 
-/* CTA */
+/* ── Top Nav ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 32px;display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(7,9,20,.6);border-bottom:1px solid transparent;
+  transition:border-color .3s;
+}
+.nav.scrolled{border-bottom-color:var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--t1)}
+.nav-logo img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(59,130,246,.4))}
+.nav-logo span{font-family:var(--display);font-weight:700;font-size:18px;letter-spacing:-.3px}
+.nav-logo b{color:var(--accent-2)}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{
+  font-size:13px;color:var(--t3);text-decoration:none;padding:8px 14px;border-radius:8px;
+  transition:all .2s;font-weight:500;
+}
+.nav-link:hover{color:var(--t1);background:rgba(255,255,255,.04)}
+.nav-cta{
+  padding:9px 18px;background:linear-gradient(135deg,var(--wa),#1eb854);
+  color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;
+  transition:all .2s;display:inline-flex;align-items:center;gap:6px;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(37,211,102,.35)}
+.nav-cta svg{width:14px;height:14px}
+@media(max-width:720px){
+  .nav{padding:12px 16px}
+  .nav-links .nav-link{display:none}
+}
+
+/* ── HERO ── */
+.hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:120px 24px 80px;overflow:hidden;
+}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.7}
+.hero-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,246,.18) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(220,38,38,.12) 0%,transparent 70%),
+    linear-gradient(180deg,rgba(7,9,20,.55) 0%,rgba(7,9,20,.85) 100%);
+}
+.hero-grid{
+  position:absolute;inset:0;z-index:1;opacity:.4;pointer-events:none;
+  background-image:linear-gradient(rgba(59,130,246,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.07) 1px,transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 60% 50% at 50% 50%,#000 0%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse 60% 50% at 50% 50%,#000 0%,transparent 80%);
+}
+.hero-content{position:relative;z-index:2;max-width:900px;display:flex;flex-direction:column;align-items:center}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 14px;border-radius:100px;
+  background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);
+  color:var(--green);font-size:12px;font-weight:600;letter-spacing:.3px;
+  margin-bottom:28px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.hero-badge .pulse{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}
+  70%{box-shadow:0 0 0 10px rgba(16,185,129,0)}
+  100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}
+}
+.hero h1{
+  font-family:var(--display);
+  font-size:clamp(34px,6.5vw,72px);
+  font-weight:700;line-height:1.02;letter-spacing:-2px;
+  margin-bottom:24px;max-width:850px;
+}
+.hero h1 .rotating{
+  background:linear-gradient(135deg,var(--accent-2) 0%,var(--accent) 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  display:inline-block;position:relative;
+}
+.hero h1 .rotating::after{
+  content:'';position:absolute;left:0;right:0;bottom:-4px;height:3px;
+  background:linear-gradient(90deg,var(--accent-2),var(--accent));border-radius:2px;
+  transform:scaleX(0);transform-origin:left;animation:underline 3s ease-in-out infinite;
+}
+@keyframes underline{0%,15%{transform:scaleX(0)}30%,80%{transform:scaleX(1)}95%,100%{transform:scaleX(0);transform-origin:right}}
+.hero .sub{
+  font-size:clamp(15px,1.6vw,18px);color:var(--t2);
+  max-width:580px;margin-bottom:40px;line-height:1.65;
+}
 .cta-group{display:flex;flex-direction:column;align-items:center;gap:16px}
-.btn-wa{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;background:var(--wa-green);color:#fff;border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;font-family:inherit;box-shadow:0 4px 24px rgba(37,211,102,.3)}
-.btn-wa:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(37,211,102,.4)}
-.btn-wa svg{width:24px;height:24px}
-.cta-sub{font-size:12px;color:var(--t4)}
+.btn-wa{
+  display:inline-flex;align-items:center;gap:10px;padding:17px 36px;
+  background:linear-gradient(135deg,var(--wa),#1eb854);color:#fff;
+  border:none;border-radius:14px;font-size:17px;font-weight:700;cursor:pointer;
+  text-decoration:none;transition:all .25s cubic-bezier(.16,1,.3,1);font-family:inherit;
+  box-shadow:0 8px 32px rgba(37,211,102,.35),inset 0 1px 0 rgba(255,255,255,.2);
+  position:relative;overflow:hidden;
+}
+.btn-wa::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.35) 50%,transparent 100%);
+  transform:translateX(-100%);transition:transform .7s;
+}
+.btn-wa:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 16px 48px rgba(37,211,102,.5)}
+.btn-wa:hover::before{transform:translateX(100%)}
+.btn-wa svg{width:22px;height:22px}
+.cta-sub{font-size:12px;color:var(--t4);display:flex;align-items:center;gap:8px}
+.cta-sub::before,.cta-sub::after{content:'';width:24px;height:1px;background:var(--border)}
 
-/* QR SECTION */
-.qr-section{padding:80px 20px;text-align:center;background:var(--surface);border-top:1px solid var(--border)}
-.qr-section h2{font-size:28px;font-weight:800;margin-bottom:12px}
-.qr-section p{color:var(--t3);margin-bottom:32px;font-size:15px}
-.qr-wrap{display:inline-flex;flex-direction:column;align-items:center;gap:16px}
-.qr-card{background:#fff;padding:20px;border-radius:20px;display:inline-block;box-shadow:0 8px 32px rgba(0,0,0,.3)}
-.qr-card img{width:220px;height:220px;display:block}
-.qr-download{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .15s;font-family:inherit}
-.qr-download:hover{border-color:var(--accent);color:var(--accent)}
+/* Hero stats floating badges */
+.hero-stats{
+  display:flex;justify-content:center;gap:14px;margin-top:64px;flex-wrap:wrap;
+  max-width:780px;
+}
+.hero-stat{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 18px;border-radius:14px;
+  background:rgba(15,21,37,.6);border:1px solid var(--border);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  transition:all .25s;
+}
+.hero-stat:hover{border-color:var(--accent);transform:translateY(-2px)}
+.hero-stat-icon{font-size:20px}
+.hero-stat-text strong{display:block;font-size:16px;font-weight:700;line-height:1.1;color:var(--t1)}
+.hero-stat-text small{font-size:11px;color:var(--t3);font-weight:500}
+
+/* Hero scroll cue */
+.hero-scroll{
+  position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--t3);
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:600;z-index:3;
+  animation:floatScroll 2.5s ease-in-out infinite;
+}
+.hero-scroll svg{width:18px;height:18px}
+@keyframes floatScroll{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* ── BRAND MARQUEE ── */
+.marquee-section{
+  padding:36px 0;background:var(--bg-2);
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.marquee-label{
+  text-align:center;font-size:11px;color:var(--t4);font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;
+}
+.marquee{
+  display:flex;gap:60px;width:max-content;
+  animation:scroll-left 35s linear infinite;
+}
+.marquee-item{
+  font-family:var(--display);font-size:28px;font-weight:600;
+  color:var(--t4);white-space:nowrap;letter-spacing:-.5px;
+  transition:color .25s;
+}
+.marquee:hover .marquee-item{animation-play-state:paused}
+.marquee-item:hover{color:var(--t1)}
+@keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── SECTION COMMON ── */
+.section{padding:100px 24px;position:relative}
+.section-head{text-align:center;margin-bottom:56px;max-width:680px;margin-left:auto;margin-right:auto}
+.eyebrow{
+  display:inline-block;padding:5px 12px;border-radius:100px;
+  background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);
+  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--accent-2);margin-bottom:18px;
+}
+.section h2{
+  font-family:var(--display);font-size:clamp(28px,4vw,44px);
+  font-weight:700;letter-spacing:-1px;margin-bottom:14px;line-height:1.1;
+}
+.section .lead{font-size:16px;color:var(--t3);line-height:1.65}
+
+/* ── SERVICES GRID ── */
+.services-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:18px;max-width:1200px;margin:0 auto;
+}
+.scard{
+  position:relative;padding:32px 28px;border-radius:18px;
+  background:linear-gradient(180deg,rgba(15,21,37,.8),rgba(11,15,30,.8));
+  border:1px solid var(--border);overflow:hidden;
+  transition:all .3s cubic-bezier(.16,1,.3,1);
+  transform-style:preserve-3d;will-change:transform;
+}
+.scard::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(ellipse 100% 80% at 50% 0%,rgba(59,130,246,.18) 0%,transparent 70%);
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:0;
+}
+.scard:hover{border-color:var(--border-strong);transform:translateY(-4px)}
+.scard:hover::before{opacity:1}
+.scard>*{position:relative;z-index:1}
+.scard-icon{
+  width:52px;height:52px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(0,217,255,.08));
+  border:1px solid rgba(59,130,246,.2);
+  font-size:24px;margin-bottom:20px;
+  transform:translateZ(30px);
+}
+.scard h3{font-family:var(--display);font-size:19px;font-weight:600;margin-bottom:10px;transform:translateZ(20px)}
+.scard p{font-size:14px;color:var(--t3);line-height:1.6;margin-bottom:18px;transform:translateZ(10px)}
+.scard .tag{
+  display:inline-block;padding:5px 12px;border-radius:100px;font-size:10px;font-weight:700;
+  letter-spacing:.5px;background:rgba(59,130,246,.12);color:var(--accent-2);
+  border:1px solid rgba(59,130,246,.2);transform:translateZ(15px);
+}
+.scard .price{
+  position:absolute;top:24px;right:24px;font-family:var(--display);
+  font-size:20px;font-weight:700;color:var(--t1);transform:translateZ(20px);
+}
+.scard .price small{display:block;font-size:10px;color:var(--t4);font-weight:500;text-align:right}
+
+/* Tilt shine */
+.tilt-shine{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:5;opacity:0;transition:opacity .35s;mix-blend-mode:screen;background:radial-gradient(ellipse 65% 45% at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 40%,transparent 70%),linear-gradient(var(--ha,135deg),transparent 0%,rgba(0,217,255,.10) 30%,rgba(59,130,246,.10) 60%,transparent 90%)}
+
+/* ── DYNO CHART ── */
+.dyno-section{background:linear-gradient(180deg,var(--bg),var(--bg-2));border-top:1px solid var(--border)}
+.dyno-wrap{
+  max-width:1100px;margin:0 auto;display:grid;
+  grid-template-columns:1fr 1.2fr;gap:60px;align-items:center;
+}
+@media(max-width:880px){.dyno-wrap{grid-template-columns:1fr;gap:40px}}
+.dyno-text h2{margin-bottom:20px}
+.dyno-text .lead{margin-bottom:28px;font-size:15px}
+.dyno-bullets{list-style:none;display:flex;flex-direction:column;gap:14px}
+.dyno-bullets li{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--t2)}
+.dyno-bullets li::before{
+  content:'';flex:0 0 6px;width:6px;height:6px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent-2),var(--accent));margin-top:8px;
+}
+.dyno-chart-wrap{
+  position:relative;padding:24px;border-radius:20px;
+  background:linear-gradient(180deg,rgba(15,21,37,.8),rgba(11,15,30,.5));
+  border:1px solid var(--border);overflow:hidden;
+}
+.dyno-chart-wrap::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(220,38,38,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.dyno-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;position:relative;z-index:1}
+.dyno-header h4{font-family:var(--display);font-size:14px;font-weight:600;color:var(--t2)}
+.dyno-header .legend{display:flex;gap:14px;font-size:11px;color:var(--t3)}
+.legend-item{display:inline-flex;align-items:center;gap:6px}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.legend-orig{background:var(--t4)}
+.legend-stage{background:linear-gradient(135deg,var(--red),#ef4444)}
+.dyno-svg{width:100%;height:auto;display:block;position:relative;z-index:1}
+.gain-pill{
+  position:absolute;bottom:24px;right:24px;
+  padding:10px 18px;border-radius:12px;
+  background:linear-gradient(135deg,var(--red),#ef4444);color:#fff;
+  font-family:var(--display);font-size:14px;font-weight:700;letter-spacing:-.3px;
+  box-shadow:0 8px 28px var(--red-glow);z-index:2;
+}
+.gain-pill strong{display:block;font-size:24px;line-height:1}
+
+/* ── HOW IT WORKS ── */
+.steps-section{background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.steps-grid{
+  max-width:1000px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:18px;position:relative;
+}
+.steps-grid::before{
+  content:'';position:absolute;top:34px;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(59,130,246,.3) 20%,rgba(59,130,246,.3) 80%,transparent 100%);
+  z-index:0;
+}
+@media(max-width:760px){.steps-grid{grid-template-columns:repeat(2,1fr)}.steps-grid::before{display:none}}
+.step{position:relative;z-index:1;text-align:center;padding:0 8px}
+.step-num{
+  width:68px;height:68px;border-radius:18px;margin:0 auto 18px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:24px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--accent) 0%,#6366F1 100%);
+  box-shadow:0 12px 28px rgba(59,130,246,.35),inset 0 1px 0 rgba(255,255,255,.2);
+  position:relative;
+}
+.step-num::after{
+  content:'';position:absolute;inset:-6px;border-radius:24px;border:1px solid rgba(59,130,246,.3);
+  animation:ringPulse 2.5s ease-out infinite;
+}
+.step:nth-child(2) .step-num::after{animation-delay:.6s}
+.step:nth-child(3) .step-num::after{animation-delay:1.2s}
+.step:nth-child(4) .step-num::after{animation-delay:1.8s}
+@keyframes ringPulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.3);opacity:0}}
+.step h3{font-family:var(--display);font-size:15px;font-weight:600;margin-bottom:8px}
+.step p{font-size:13px;color:var(--t3);line-height:1.55}
+
+/* ── WHATSAPP PHONE MOCKUP ── */
+.phone-section{position:relative}
+.phone-wrap{
+  max-width:1100px;margin:0 auto;display:grid;
+  grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;
+}
+@media(max-width:880px){.phone-wrap{grid-template-columns:1fr;gap:40px}.phone{margin:0 auto}}
+.phone{
+  width:300px;height:600px;border-radius:42px;
+  background:linear-gradient(180deg,#1a1f2e,#0a0d18);
+  padding:14px;position:relative;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.06),inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.phone::before{
+  content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:90px;height:24px;background:#000;border-radius:0 0 14px 14px;z-index:5;
+}
+.phone-screen{
+  width:100%;height:100%;border-radius:30px;overflow:hidden;
+  background:linear-gradient(180deg,#0b141a,#202c33);
+  display:flex;flex-direction:column;
+}
+.phone-status{
+  height:36px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:#fff;font-weight:600;background:#0b141a;
+}
+.wa-header{
+  background:#202c33;padding:8px 12px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid #2a3942;
+}
+.wa-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,#3B82F6,#00D9FF);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.wa-avatar img{width:30px;height:30px;object-fit:contain}
+.wa-info strong{display:block;font-size:13px;color:#e9edef}
+.wa-info small{font-size:10px;color:#8696a0}
+.wa-online{display:inline-block;width:6px;height:6px;border-radius:50%;background:#25D366;margin-right:4px}
+.wa-chat{
+  flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:8px;overflow:hidden;
+  background:
+    radial-gradient(circle at 20% 30%,rgba(255,255,255,.02) 0%,transparent 50%),
+    radial-gradient(circle at 80% 70%,rgba(255,255,255,.02) 0%,transparent 50%),
+    #0b141a;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><circle cx='10' cy='10' r='1' fill='%23ffffff' opacity='.03'/><circle cx='50' cy='30' r='1' fill='%23ffffff' opacity='.02'/><circle cx='30' cy='60' r='1' fill='%23ffffff' opacity='.03'/></svg>");
+}
+.wa-bubble{
+  max-width:78%;padding:7px 11px;border-radius:8px;font-size:12px;line-height:1.4;
+  position:relative;animation:bubbleIn .4s ease-out backwards;
+}
+.wa-bubble.in{background:#202c33;color:#e9edef;align-self:flex-start;border-top-left-radius:2px}
+.wa-bubble.out{background:#005c4b;color:#e9edef;align-self:flex-end;border-top-right-radius:2px}
+.wa-bubble small{display:block;margin-top:3px;font-size:9px;color:rgba(233,237,239,.5);text-align:right}
+.wa-bubble:nth-child(1){animation-delay:.2s}
+.wa-bubble:nth-child(2){animation-delay:.8s}
+.wa-bubble:nth-child(3){animation-delay:1.4s}
+.wa-bubble:nth-child(4){animation-delay:2s}
+.wa-bubble:nth-child(5){animation-delay:2.6s}
+.wa-bubble:nth-child(6){animation-delay:3.2s}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.wa-typing{
+  align-self:flex-start;background:#202c33;padding:10px 14px;border-radius:8px;
+  display:inline-flex;gap:4px;border-top-left-radius:2px;
+  animation:bubbleIn .4s ease-out 3.8s backwards;
+}
+.wa-typing span{
+  width:6px;height:6px;border-radius:50%;background:#8696a0;
+  animation:typingDot 1.4s infinite;
+}
+.wa-typing span:nth-child(2){animation-delay:.2s}
+.wa-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+.phone-text h2{margin-bottom:16px}
+.phone-text .lead{margin-bottom:24px}
+.phone-features{display:flex;flex-direction:column;gap:14px}
+.phone-feature{display:flex;gap:14px;align-items:flex-start}
+.phone-feature-icon{
+  flex:0 0 36px;width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(0,217,255,.08));
+  border:1px solid rgba(59,130,246,.2);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.phone-feature-text strong{display:block;font-family:var(--display);font-size:14px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.phone-feature-text p{font-size:13px;color:var(--t3);line-height:1.5}
+
+/* ── STATS ── */
+.stats-section{padding:80px 24px;background:var(--bg)}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
+  max-width:1000px;margin:0 auto;
+}
+@media(max-width:680px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-item{
+  text-align:center;padding:30px 18px;border-radius:18px;
+  background:linear-gradient(180deg,rgba(15,21,37,.5),rgba(11,15,30,.3));
+  border:1px solid var(--border);
+  transition:all .3s cubic-bezier(.22,1,.36,1);
+}
+.stat-item:hover{transform:translateY(-6px);border-color:var(--border-strong)}
+.stat-num{
+  font-family:var(--display);font-size:clamp(36px,5vw,52px);font-weight:700;
+  background:linear-gradient(135deg,var(--accent-2) 0%,var(--accent) 60%,#6366F1 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1;letter-spacing:-1px;
+}
+.stat-label{font-size:12px;color:var(--t3);margin-top:8px;font-weight:500;letter-spacing:.3px}
+
+/* ── TESTIMONIALS ── */
+.testimonials{background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.testimonials-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:18px;max-width:1100px;margin:0 auto;
+}
+.testimonial-card{
+  position:relative;padding:30px 28px;border-radius:18px;
+  background:linear-gradient(180deg,rgba(15,21,37,.7),rgba(11,15,30,.7));
+  border:1px solid var(--border);overflow:hidden;
+  transition:all .3s cubic-bezier(.16,1,.3,1);
+  transform-style:preserve-3d;will-change:transform;
+}
+.testimonial-card:hover{border-color:var(--border-strong);transform:translateY(-3px)}
+.testimonial-card::before{
+  content:'"';position:absolute;top:-20px;right:14px;
+  font-family:Georgia,serif;font-size:120px;color:rgba(59,130,246,.08);line-height:1;
+}
+.testimonial-stars{font-size:14px;margin-bottom:14px;letter-spacing:2px;transform:translateZ(15px)}
+.testimonial-text{
+  font-size:14px;color:var(--t2);line-height:1.65;margin-bottom:18px;
+  position:relative;transform:translateZ(10px);
+}
+.testimonial-author{
+  display:flex;align-items:center;gap:12px;font-size:13px;
+  transform:translateZ(15px);padding-top:16px;border-top:1px solid var(--border);
+}
+.testimonial-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#6366F1);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:700;font-size:14px;color:#fff;
+}
+.testimonial-author-info strong{display:block;font-weight:600;color:var(--t1)}
+.testimonial-author-info small{font-size:11px;color:var(--t4)}
+
+/* ── QR / CTA SECTION ── */
+.qr-section{
+  background:linear-gradient(180deg,var(--bg-2) 0%,var(--bg) 100%);
+  text-align:center;position:relative;overflow:hidden;
+}
+.qr-section::before{
+  content:'';position:absolute;top:50%;left:50%;width:800px;height:800px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(37,211,102,.06) 0%,transparent 60%);
+  pointer-events:none;
+}
+.qr-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:24px;
+  position:relative;z-index:1;
+}
+.qr-card{
+  background:#fff;padding:24px;border-radius:24px;
+  box-shadow:0 32px 80px rgba(37,211,102,.25),0 0 0 1px rgba(37,211,102,.2);
+  display:inline-block;position:relative;
+  transform-style:preserve-3d;will-change:transform;
+}
+.qr-card img{width:220px;height:220px;display:block;border-radius:12px}
+.qr-card::after{
+  content:'WhatsApp';position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
+  padding:6px 14px;background:var(--wa);color:#fff;border-radius:100px;
+  font-size:11px;font-weight:700;letter-spacing:.5px;
+}
+.qr-download{
+  display:inline-flex;align-items:center;gap:8px;padding:11px 20px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;
+  transition:all .2s;font-family:inherit;
+}
+.qr-download:hover{border-color:var(--accent);color:var(--t1)}
 .qr-download svg{width:16px;height:16px}
 
-/* SERVICES */
-.services{padding:80px 20px;max-width:1000px;margin:0 auto}
-.services h2{text-align:center;font-size:28px;font-weight:800;margin-bottom:12px}
-.services .sub{text-align:center;color:var(--t3);margin-bottom:40px;font-size:15px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-.scard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;transition:border-color .2s}
-.scard:hover{border-color:var(--accent)}
-.scard-icon{font-size:28px;margin-bottom:14px}
-.scard h3{font-size:16px;font-weight:700;margin-bottom:8px}
-.scard p{font-size:13px;color:var(--t3);line-height:1.5}
-.scard .tag{display:inline-block;margin-top:12px;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;background:rgba(59,130,246,.1);color:var(--accent)}
+/* ── FOOTER ── */
+.footer{
+  padding:60px 24px 30px;border-top:1px solid var(--border);
+  background:var(--bg);text-align:center;
+}
+.footer-logo-wrap{display:inline-flex;align-items:center;gap:10px;margin-bottom:16px}
+.footer-logo-wrap img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(59,130,246,.3))}
+.footer-logo{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:-.5px}
+.footer-logo b{color:var(--accent-2)}
+.footer-tagline{font-size:13px;color:var(--t3);margin-bottom:24px}
+.footer-meta{font-size:12px;color:var(--t4);margin-bottom:24px}
+.footer-meta a{color:var(--t2);text-decoration:none}
+.footer-meta a:hover{color:var(--accent-2)}
+.footer-links{display:flex;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap}
+.footer-link{
+  display:inline-flex;align-items:center;gap:7px;padding:9px 18px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  color:var(--t2);font-size:13px;font-weight:600;text-decoration:none;
+  transition:all .2s;
+}
+.footer-link:hover{border-color:var(--accent);color:var(--t1);transform:translateY(-1px)}
+.footer-link svg{width:14px;height:14px}
+.footer-copy{font-size:11px;color:var(--t4);padding-top:24px;border-top:1px solid var(--border)}
 
-/* STEPS */
-.steps{padding:80px 20px;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.steps h2{text-align:center;font-size:28px;font-weight:800;margin-bottom:40px}
-.steps-grid{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;max-width:900px;margin:0 auto}
-.step{text-align:center;max-width:200px}
-.step-num{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
-.step h3{font-size:14px;font-weight:700;margin-bottom:6px}
-.step p{font-size:12px;color:var(--t3);line-height:1.5}
+/* ── FLOATING FAB ── */
+.fab{
+  position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;
+  background:linear-gradient(135deg,var(--wa),#1eb854);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(37,211,102,.45);cursor:pointer;text-decoration:none;
+  transition:all .25s;z-index:50;
+}
+.fab::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  box-shadow:0 0 0 0 rgba(37,211,102,.7);animation:pulse 2s infinite;
+}
+.fab:hover{transform:scale(1.1) rotate(-8deg);box-shadow:0 12px 40px rgba(37,211,102,.6)}
+.fab svg{width:28px;height:28px;position:relative;z-index:1}
 
-/* FOOTER */
-.footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border)}
-.footer-logo{font-size:20px;font-weight:800;margin-bottom:8px}
-.footer-logo span{color:var(--accent)}
-.footer p{font-size:12px;color:var(--t4);margin-bottom:4px}
-.footer a{color:var(--accent);text-decoration:none}
-.footer-links{display:flex;gap:16px;justify-content:center;margin-top:16px}
-.footer-link{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--t2);font-size:12px;font-weight:600;text-decoration:none;transition:all .15s}
-.footer-link:hover{border-color:var(--accent);color:var(--accent)}
-
-/* FLOATING CTA */
-.fab{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:var(--wa-green);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,.4);cursor:pointer;text-decoration:none;transition:all .2s;z-index:1000}
-.fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,.5)}
-.fab svg{width:28px;height:28px}
-
-/* STATS */
-.stats-section{padding:60px 20px;background:var(--bg)}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:900px;margin:0 auto}
-.stat-item{text-align:center;padding:24px 16px}
-.stat-num{font-size:clamp(32px,5vw,48px);font-weight:900;background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.stat-label{font-size:12px;color:var(--t3);margin-top:6px;font-weight:500}
-
-/* TESTIMONIALS */
-.testimonials{padding:80px 20px;background:var(--surface);border-top:1px solid var(--border)}
-.testimonials h2{text-align:center;font-size:28px;font-weight:800;margin-bottom:8px}
-.testimonials-sub{text-align:center;color:var(--t3);font-size:14px;margin-bottom:40px}
-.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:1000px;margin:0 auto}
-.testimonial-card{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:24px;transition:border-color .2s}
-.testimonial-card:hover{border-color:var(--accent)}
-.testimonial-stars{font-size:14px;margin-bottom:12px}
-.testimonial-text{font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:12px;font-style:italic}
-.testimonial-author{font-size:12px;color:var(--t4);font-weight:600}
-
-/* ── 3D TILT ── */
-.scard,.testimonial-card{transform-style:preserve-3d;will-change:transform;position:relative}
-.qr-card{transform-style:preserve-3d;will-change:transform;position:relative;cursor:default}
-.tilt-shine{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:5;opacity:0;transition:opacity .35s;mix-blend-mode:screen;background:radial-gradient(ellipse 65% 45% at var(--sx,50%) var(--sy,50%),rgba(255,255,255,.22) 0%,rgba(255,255,255,.05) 40%,transparent 70%),linear-gradient(var(--ha,135deg),transparent 0%,rgba(255,0,128,.13) 15%,rgba(255,200,0,.13) 30%,rgba(0,255,100,.13) 45%,rgba(0,200,255,.13) 60%,rgba(150,0,255,.13) 75%,transparent 90%)}
-.scard-icon{display:inline-block;transform:translateZ(26px)}
-.scard h3{transform:translateZ(18px)}
-.scard .tag{transform:translateZ(12px)}
-.testimonial-stars{display:inline-block;transform:translateZ(20px)}
-.testimonial-text{transform:translateZ(12px)}
-/* Steps float */
-.step-num{animation:floatBob 3s ease-in-out infinite}
-.step:nth-child(2) .step-num{animation-delay:.6s}
-.step:nth-child(3) .step-num{animation-delay:1.2s}
-.step:nth-child(4) .step-num{animation-delay:1.8s}
-@keyframes floatBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.08)}}
-/* Stats lift */
-.stat-item{transition:transform .3s cubic-bezier(.22,1,.36,1);cursor:default}
-.stat-item:hover{transform:translateY(-8px) scale(1.06)}
-/* Hero parallax */
-.hero::before{transform:translateX(calc(-50% + var(--px,0px))) translateY(var(--py,0px));transition:transform .15s ease}
-
-/* Scroll animations */
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+/* ── Scroll reveal ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 
-@media(max-width:600px){
-  .hero{padding:30px 16px}
-  .steps-grid{gap:20px}
-  .grid{grid-template-columns:1fr}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .testimonials-grid{grid-template-columns:1fr}
+@media(max-width:520px){
+  .section{padding:70px 18px}
+  .hero{padding:100px 18px 60px}
+  .hero-stat{padding:10px 14px}
 }
 </style>
 </head>
 <body>
 
-<!-- HERO -->
-<div class="hero">
+<!-- ── TOP NAV ── -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">
+    <img src="/logo.png" alt="DiagPerf">
+    <span>DIAG<b>PERF</b></span>
+  </a>
+  <div class="nav-links">
+    <a href="#prestations" class="nav-link">Prestations</a>
+    <a href="#dyno" class="nav-link">Gains</a>
+    <a href="#avis" class="nav-link">Avis</a>
+    <a href="/app.html" class="nav-link">Espace client</a>
+    <a href="https://wa.me/33756812795?text=Bonjour%20DiagPerf" class="nav-cta" target="_blank">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+      Devis WhatsApp
+    </a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
   <video class="hero-video" autoplay muted loop playsinline>
-    <source src="bg.mp4" type="video/mp4">
+    <source src="/bg.mp4" type="video/mp4">
   </video>
   <div class="hero-overlay"></div>
-  <div class="logo">DIAG<span>PERF</span></div>
-  <div class="tagline">Reprogrammation & Diagnostic automobile</div>
-  <h1>Boostez votre véhicule avec un <span class="accent">devis gratuit</span> en 2 minutes</h1>
-  <p>Envoyez simplement votre plaque d'immatriculation sur WhatsApp et recevez un devis personnalisé instantanément — 100% automatisé.</p>
-  <div class="cta-group">
-    <a class="btn-wa" href="https://wa.me/33756812795?text=Bonjour%20DiagPerf" target="_blank">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
-      Obtenir mon devis gratuit
-    </a>
-    <span class="cta-sub">Réponse instantanée - Aucun engagement</span>
-  </div>
-</div>
+  <div class="hero-grid"></div>
 
-<!-- QR CODE -->
-<div class="qr-section" id="qrcode">
-  <h2>Scannez pour nous contacter</h2>
-  <p>Ouvrez l'appareil photo de votre téléphone et scannez ce QR code</p>
-  <div class="qr-wrap">
-    <div class="qr-card">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F33756812795%3Ftext%3DBonjour%2520DiagPerf&format=png&color=0-0-0&bgcolor=255-255-255&margin=0" alt="QR Code WhatsApp DiagPerf">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      Devis WhatsApp instantané — Garage ouvert
     </div>
-    <a class="qr-download" href="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=https%3A%2F%2Fwa.me%2F33756812795%3Ftext%3DBonjour%2520DiagPerf&format=png&color=0-0-0&bgcolor=255-255-255&margin=20" download="diagperf-qrcode.png">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Télécharger le QR code (HD)
-    </a>
+
+    <h1>
+      <span class="rotating">Boostez</span><br>
+      votre véhicule en<br>
+      toute sécurité
+    </h1>
+
+    <p class="sub">
+      Reprogrammation moteur, conversion E85, suppression FAP, diagnostic complet —
+      envoyez votre plaque sur WhatsApp et recevez votre devis personnalisé en 2 minutes.
+    </p>
+
+    <div class="cta-group">
+      <a class="btn-wa" href="https://wa.me/33756812795?text=Bonjour%20DiagPerf" target="_blank">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+        Obtenir mon devis gratuit
+      </a>
+      <span class="cta-sub">Réponse en moins de 2 min — Aucun engagement</span>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-icon">⚡</span>
+        <div class="hero-stat-text"><strong>+35%</strong><small>Puissance moyenne</small></div>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-icon">⭐</span>
+        <div class="hero-stat-text"><strong>4.8/5</strong><small>500+ avis Google</small></div>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-icon">🛡️</span>
+        <div class="hero-stat-text"><strong>Garantie</strong><small>Travail certifié</small></div>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-icon">⏱️</span>
+        <div class="hero-stat-text"><strong>2h</strong><small>Durée moyenne</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    Découvrir
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ── BRAND MARQUEE ── -->
+<div class="marquee-section">
+  <div class="marquee-label">Compatible avec toutes les marques</div>
+  <div class="marquee">
+    <span class="marquee-item">AUDI</span>
+    <span class="marquee-item">BMW</span>
+    <span class="marquee-item">VOLKSWAGEN</span>
+    <span class="marquee-item">MERCEDES</span>
+    <span class="marquee-item">RENAULT</span>
+    <span class="marquee-item">PEUGEOT</span>
+    <span class="marquee-item">CITROËN</span>
+    <span class="marquee-item">FORD</span>
+    <span class="marquee-item">OPEL</span>
+    <span class="marquee-item">SEAT</span>
+    <span class="marquee-item">SKODA</span>
+    <span class="marquee-item">MINI</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="marquee-item">AUDI</span>
+    <span class="marquee-item">BMW</span>
+    <span class="marquee-item">VOLKSWAGEN</span>
+    <span class="marquee-item">MERCEDES</span>
+    <span class="marquee-item">RENAULT</span>
+    <span class="marquee-item">PEUGEOT</span>
+    <span class="marquee-item">CITROËN</span>
+    <span class="marquee-item">FORD</span>
+    <span class="marquee-item">OPEL</span>
+    <span class="marquee-item">SEAT</span>
+    <span class="marquee-item">SKODA</span>
+    <span class="marquee-item">MINI</span>
   </div>
 </div>
 
-<!-- SERVICES -->
-<div class="services" id="prestations">
-  <h2>Nos prestations</h2>
-  <p class="sub">Un savoir-faire technique au service de la performance</p>
-  <div class="grid">
-    <div class="scard">
+<!-- ── SERVICES ── -->
+<section class="section" id="prestations">
+  <div class="section-head reveal">
+    <div class="eyebrow">Nos prestations</div>
+    <h2>Un savoir-faire technique au service de la performance</h2>
+    <p class="lead">Reprogrammation moteur certifiée, conversions E85, diagnostic complet — tarifs transparents, devis en 2 minutes.</p>
+  </div>
+  <div class="services-grid">
+    <div class="scard reveal">
       <div class="scard-icon">⚡</div>
       <h3>Reprogrammation moteur</h3>
-      <p>Optimisation de la cartographie moteur pour un gain significatif de puissance et de couple, en toute sécurité.</p>
-      <span class="tag">Stage 1 - Stage 2</span>
+      <p>Optimisation de la cartographie moteur. Gain significatif de puissance et de couple, en toute sécurité, sur banc.</p>
+      <span class="tag">Stage 1 · Stage 2</span>
+      <div class="price">390€<small>TTC</small></div>
     </div>
-    <div class="scard">
+    <div class="scard reveal">
       <div class="scard-icon">🌿</div>
       <h3>Conversion E85</h3>
-      <p>Passez au bioéthanol et réduisez votre budget carburant de 40% tout en préservant la planète.</p>
+      <p>Passez au bioéthanol et réduisez votre budget carburant jusqu'à 40%. Boîtier homologué + reprog optimisée.</p>
       <span class="tag">Essence uniquement</span>
+      <div class="price">490€<small>TTC</small></div>
     </div>
-    <div class="scard">
+    <div class="scard reveal">
       <div class="scard-icon">🔧</div>
       <h3>Suppression FAP / EGR / AdBlue</h3>
-      <p>Suppression logicielle des systèmes antipollution défaillants. Solution définitive et fiable.</p>
-      <span class="tag">Diesel - Sur devis</span>
+      <p>Suppression logicielle des systèmes antipollution défaillants. Fin des voyants, solution définitive.</p>
+      <span class="tag">Diesel · Sur devis</span>
+      <div class="price">dès 190€<small>TTC</small></div>
     </div>
-    <div class="scard">
+    <div class="scard reveal">
       <div class="scard-icon">🔍</div>
       <h3>Diagnostic complet</h3>
-      <p>Lecture complète des calculateurs, identification des défauts et recommandations personnalisées.</p>
+      <p>Lecture complète des calculateurs, identification des défauts, recommandations personnalisées par un pro.</p>
       <span class="tag">Tous véhicules</span>
+      <div class="price">dès 50€<small>TTC</small></div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- STEPS -->
-<div class="steps">
-  <h2>Comment ça marche ?</h2>
+<!-- ── DYNO CHART ── -->
+<section class="section dyno-section" id="dyno">
+  <div class="dyno-wrap">
+    <div class="dyno-text reveal">
+      <div class="eyebrow">Stage 1 typique</div>
+      <h2>Jusqu'à +30% de puissance,<br>+40% de couple</h2>
+      <p class="lead">Une reprogrammation Stage 1 optimise l'injection, la suralimentation et la cartographie sans toucher au matériel d'origine. Résultat : plus de réponse, plus de souplesse, et souvent moins de consommation.</p>
+      <ul class="dyno-bullets">
+        <li>Gain réel mesuré sur banc de puissance</li>
+        <li>Conservation des sécurités moteur d'origine</li>
+        <li>Compatible avec un retour cartographie d'usine</li>
+        <li>Garantie sur la prestation</li>
+      </ul>
+    </div>
+    <div class="dyno-chart-wrap reveal">
+      <div class="dyno-header">
+        <h4>Courbe de puissance — Stage 1</h4>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot legend-orig"></span>Origine</span>
+          <span class="legend-item"><span class="legend-dot legend-stage"></span>Stage 1</span>
+        </div>
+      </div>
+      <svg class="dyno-svg" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="origFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#64748B" stop-opacity=".25"/>
+            <stop offset="100%" stop-color="#64748B" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="stageFill" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#DC2626" stop-opacity=".4"/>
+            <stop offset="100%" stop-color="#DC2626" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid -->
+        <g stroke="rgba(255,255,255,.04)" stroke-width="1">
+          <line x1="40" y1="60" x2="480" y2="60"/>
+          <line x1="40" y1="120" x2="480" y2="120"/>
+          <line x1="40" y1="180" x2="480" y2="180"/>
+          <line x1="40" y1="240" x2="480" y2="240"/>
+        </g>
+        <!-- Y axis labels -->
+        <g fill="#475569" font-size="10" font-family="Inter,sans-serif" text-anchor="end">
+          <text x="34" y="64">300</text>
+          <text x="34" y="124">230</text>
+          <text x="34" y="184">160</text>
+          <text x="34" y="244">90</text>
+        </g>
+        <!-- X axis labels -->
+        <g fill="#475569" font-size="10" font-family="Inter,sans-serif" text-anchor="middle">
+          <text x="100" y="262">1500</text>
+          <text x="220" y="262">2500</text>
+          <text x="340" y="262">3500</text>
+          <text x="460" y="262">4500 rpm</text>
+        </g>
+        <!-- Origine curve (filled) -->
+        <path id="origPath" d="M 40 230 Q 130 200, 220 170 T 480 130 L 480 250 L 40 250 Z" fill="url(#origFill)"/>
+        <path id="origLine" d="M 40 230 Q 130 200, 220 170 T 480 130" fill="none" stroke="#94A3B8" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="900" stroke-dashoffset="900"/>
+        <!-- Stage 1 curve (filled) -->
+        <path id="stagePath" d="M 40 220 Q 130 170, 220 120 T 480 70 L 480 250 L 40 250 Z" fill="url(#stageFill)" opacity="0"/>
+        <path id="stageLine" d="M 40 220 Q 130 170, 220 120 T 480 70" fill="none" stroke="#DC2626" stroke-width="3" stroke-linecap="round" stroke-dasharray="900" stroke-dashoffset="900"/>
+      </svg>
+      <div class="gain-pill"><strong>+62 ch</strong>Gain Stage 1</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="section steps-section">
+  <div class="section-head reveal">
+    <div class="eyebrow">En 4 étapes</div>
+    <h2>Du devis au rendez-vous, tout sur WhatsApp</h2>
+    <p class="lead">Pas d'appel, pas de formulaire interminable. Une conversation simple avec notre assistant et c'est plié.</p>
+  </div>
   <div class="steps-grid">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h3>Scannez le QR code</h3>
-      <p>Ouvrez WhatsApp et envoyez votre plaque d'immatriculation</p>
+    <div class="step reveal"><div class="step-num">1</div><h3>Scannez le QR code</h3><p>Ouvrez WhatsApp et envoyez votre plaque d'immatriculation</p></div>
+    <div class="step reveal"><div class="step-num">2</div><h3>Choisissez la prestation</h3><p>Le bot détecte votre véhicule et propose les prestations adaptées</p></div>
+    <div class="step reveal"><div class="step-num">3</div><h3>Recevez votre devis</h3><p>Gain de puissance estimé et tarif, en quelques secondes</p></div>
+    <div class="step reveal"><div class="step-num">4</div><h3>Prenez rendez-vous</h3><p>Confirmez le devis et planifiez votre passage à l'atelier</p></div>
+  </div>
+</section>
+
+<!-- ── PHONE MOCKUP ── -->
+<section class="section phone-section">
+  <div class="phone-wrap">
+    <div class="phone reveal">
+      <div class="phone-screen">
+        <div class="phone-status"><span>11:24</span><span>● ●</span></div>
+        <div class="wa-header">
+          <div class="wa-avatar"><img src="/logo.png" alt=""></div>
+          <div class="wa-info">
+            <strong>DiagPerf</strong>
+            <small><span class="wa-online"></span>en ligne</small>
+          </div>
+        </div>
+        <div class="wa-chat">
+          <div class="wa-bubble out">Salut, je voudrais reprog ma Golf <small>11:23</small></div>
+          <div class="wa-bubble in">Bonjour 👋 Quelle est votre plaque ?<small>11:23</small></div>
+          <div class="wa-bubble out">AB-123-CD <small>11:23</small></div>
+          <div class="wa-bubble in">Golf 7 GTD 184ch détectée ✅<br>Stage 1 dispo : 184 → 246 ch<small>11:24</small></div>
+          <div class="wa-bubble in">Tarif : <b>390€ TTC</b><br>Durée : 2h sur banc<small>11:24</small></div>
+          <div class="wa-bubble out">Top ! Je prends RDV samedi 👍<small>11:24</small></div>
+          <div class="wa-typing"><span></span><span></span><span></span></div>
+        </div>
+      </div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h3>Choisissez la prestation</h3>
-      <p>Le bot détecte votre véhicule et vous propose les prestations adaptées</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h3>Recevez votre devis</h3>
-      <p>Devis détaillé avec gains de puissance et tarif, en quelques secondes</p>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <h3>Prenez rendez-vous</h3>
-      <p>Confirmez le devis et planifiez votre intervention</p>
+    <div class="phone-text reveal">
+      <div class="eyebrow">Comme une discussion entre potes</div>
+      <h2>Un vrai pro derrière chaque devis</h2>
+      <p class="lead">Notre assistant détecte votre véhicule automatiquement, calcule les gains spécifiques à votre motorisation, et propose un créneau adapté.</p>
+      <div class="phone-features">
+        <div class="phone-feature">
+          <div class="phone-feature-icon">🚗</div>
+          <div class="phone-feature-text"><strong>Détection véhicule auto</strong><p>Votre plaque suffit, on récupère marque/modèle/motorisation</p></div>
+        </div>
+        <div class="phone-feature">
+          <div class="phone-feature-icon">📊</div>
+          <div class="phone-feature-text"><strong>Gains calculés sur banc</strong><p>Données réelles issues de centaines de reprogs</p></div>
+        </div>
+        <div class="phone-feature">
+          <div class="phone-feature-icon">🛡️</div>
+          <div class="phone-feature-text"><strong>Garantie sur la prestation</strong><p>On reste joignables après l'intervention, en cas de question</p></div>
+        </div>
+        <div class="phone-feature">
+          <div class="phone-feature-icon">💳</div>
+          <div class="phone-feature-text"><strong>Espace client en ligne</strong><p>Devis, RDV, paiement — tout suivi depuis votre téléphone</p></div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- STATS -->
-<div class="stats-section" id="stats">
+<!-- ── STATS ── -->
+<section class="stats-section" id="stats">
   <div class="stats-grid">
-    <div class="stat-item"><div class="stat-num" data-target="500">0</div><div class="stat-label">Véhicules reprogrammés</div></div>
-    <div class="stat-item"><div class="stat-num" data-target="4.8" data-decimals="1">0</div><div class="stat-label">⭐ Note Google</div></div>
-    <div class="stat-item"><div class="stat-num" data-target="98" data-suffix="%">0</div><div class="stat-label">Clients satisfaits</div></div>
-    <div class="stat-item"><div class="stat-num" data-target="24" data-suffix="h">0</div><div class="stat-label">Délai moyen de prise en charge</div></div>
+    <div class="stat-item reveal"><div class="stat-num" data-target="500" data-suffix="+">0</div><div class="stat-label">Véhicules reprogrammés</div></div>
+    <div class="stat-item reveal"><div class="stat-num" data-target="4.8" data-decimals="1">0</div><div class="stat-label">⭐ Note Google</div></div>
+    <div class="stat-item reveal"><div class="stat-num" data-target="98" data-suffix="%">0</div><div class="stat-label">Clients satisfaits</div></div>
+    <div class="stat-item reveal"><div class="stat-num" data-target="2" data-suffix=" min">0</div><div class="stat-label">Délai de devis</div></div>
   </div>
-</div>
+</section>
 
-<!-- TESTIMONIALS -->
-<div class="testimonials" id="avis">
-  <h2>Ce que disent nos clients</h2>
-  <p class="testimonials-sub">Avis vérifiés Google</p>
+<!-- ── TESTIMONIALS ── -->
+<section class="section testimonials" id="avis">
+  <div class="section-head reveal">
+    <div class="eyebrow">Avis vérifiés Google</div>
+    <h2>Ce que disent nos clients</h2>
+  </div>
   <div class="testimonials-grid">
-    <div class="testimonial-card">
+    <div class="testimonial-card reveal">
       <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
       <p class="testimonial-text">"Reprog Stage 1 sur ma Golf 7 GTD. Résultat bluffant, le couple est impressionnant. Youcef est très pro et explique tout clairement."</p>
-      <div class="testimonial-author">— Mehdi K.</div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">MK</div>
+        <div class="testimonial-author-info"><strong>Mehdi K.</strong><small>Volkswagen Golf 7 GTD</small></div>
+      </div>
     </div>
-    <div class="testimonial-card">
+    <div class="testimonial-card reveal">
       <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
       <p class="testimonial-text">"Conversion E85 sur Mégane 3 RS. Économie carburant au top et la voiture n'a jamais aussi bien tourné. Je recommande à 100%."</p>
-      <div class="testimonial-author">— Julien R.</div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">JR</div>
+        <div class="testimonial-author-info"><strong>Julien R.</strong><small>Renault Mégane 3 RS</small></div>
+      </div>
     </div>
-    <div class="testimonial-card">
+    <div class="testimonial-card reveal">
       <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
       <p class="testimonial-text">"Diagnostic complet + suppression FAP sur mon Peugeot 308. Plus de voyant, plus de problème. Travail rapide et soigné."</p>
-      <div class="testimonial-author">— Sarah L.</div>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">SL</div>
+        <div class="testimonial-author-info"><strong>Sarah L.</strong><small>Peugeot 308 HDi</small></div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- FOOTER -->
-<div class="footer">
-  <div class="footer-logo">DIAG<span>PERF</span></div>
-  <p>Reprogrammation moteur & Diagnostic automobile</p>
-  <p style="margin-top:8px">Ile-de-France | 06 75 54 70 85 | contact@diagperf.com</p>
+<!-- ── QR CTA ── -->
+<section class="section qr-section" id="qrcode">
+  <div class="section-head reveal">
+    <div class="eyebrow">Démarrer maintenant</div>
+    <h2>Scannez et obtenez votre devis</h2>
+    <p class="lead">Ouvrez l'appareil photo de votre téléphone, scannez ce QR code et discutez avec notre assistant en moins de 2 minutes.</p>
+  </div>
+  <div class="qr-wrap reveal">
+    <div class="qr-card">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fwa.me%2F33756812795%3Ftext%3DBonjour%2520DiagPerf&format=png&color=11-15-30&bgcolor=255-255-255&margin=0" alt="QR Code WhatsApp DiagPerf">
+    </div>
+    <a class="qr-download" href="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=https%3A%2F%2Fwa.me%2F33756812795%3Ftext%3DBonjour%2520DiagPerf&format=png&color=11-15-30&bgcolor=255-255-255&margin=20" download="diagperf-qrcode.png">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Télécharger le QR code HD
+    </a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <div class="footer-logo-wrap">
+    <img src="/logo.png" alt="DiagPerf">
+    <span class="footer-logo">DIAG<b>PERF</b></span>
+  </div>
+  <p class="footer-tagline">Reprogrammation moteur & Diagnostic automobile</p>
+  <p class="footer-meta">
+    38 Rue Jean Pierre Plicque, 77124 Villenoy · <a href="tel:+33756812795">06 75 54 70 85</a> · <a href="mailto:contact@diagperf.com">contact@diagperf.com</a>
+  </p>
   <div class="footer-links">
     <a class="footer-link" href="https://wa.me/33756812795?text=Bonjour%20DiagPerf" target="_blank">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
       WhatsApp
     </a>
     <a class="footer-link" href="/app.html">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
       Espace client
     </a>
   </div>
-  <p style="margin-top:20px;font-size:11px;color:var(--t4)">&copy; 2026 DiagPerf</p>
-</div>
+  <p class="footer-copy">&copy; 2026 DiagPerf · Tous droits réservés</p>
+</footer>
 
-<!-- FLOATING WHATSAPP BUTTON -->
+<!-- ── FAB ── -->
 <a class="fab" href="https://wa.me/33756812795?text=Bonjour%20DiagPerf" target="_blank" title="Nous contacter sur WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
 </a>
 
 <script>
-// Animated counters
+// ── Nav scrolled state ──
+const nav = document.getElementById("nav");
+window.addEventListener("scroll", () => {
+  nav.classList.toggle("scrolled", window.scrollY > 30);
+}, {passive:true});
+
+// ── Animated counters ──
 function animateCounters() {
   document.querySelectorAll(".stat-num").forEach(el => {
     const target = parseFloat(el.dataset.target);
     const decimals = parseInt(el.dataset.decimals || "0");
     const suffix = el.dataset.suffix || "";
-    const duration = 2000;
+    const duration = 2200;
     const start = performance.now();
     function update(now) {
       const progress = Math.min((now - start) / duration, 1);
@@ -307,49 +976,49 @@ function animateCounters() {
   });
 }
 
-// Scroll reveal + counter trigger
+// ── Dyno chart reveal ──
+function animateDyno() {
+  const orig = document.getElementById("origLine");
+  const stage = document.getElementById("stageLine");
+  const stageFill = document.getElementById("stagePath");
+  if (orig) orig.animate([{strokeDashoffset:900},{strokeDashoffset:0}],{duration:1600,fill:"forwards",easing:"cubic-bezier(.22,1,.36,1)"});
+  if (stage) stage.animate([{strokeDashoffset:900},{strokeDashoffset:0}],{duration:1800,delay:400,fill:"forwards",easing:"cubic-bezier(.22,1,.36,1)"});
+  if (stageFill) stageFill.animate([{opacity:0},{opacity:1}],{duration:1000,delay:1400,fill:"forwards"});
+}
+
+// ── Scroll reveal + triggers ──
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.add("visible");
-      if (entry.target.id === "stats") animateCounters();
+      if (entry.target.closest("#stats")) animateCounters();
+      if (entry.target.classList.contains("dyno-chart-wrap")) animateDyno();
       observer.unobserve(entry.target);
     }
   });
-}, { threshold: 0.2 });
+}, { threshold: 0.15 });
+document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
 
-document.querySelectorAll(".services, .steps, .stats-section, .testimonials, .qr-section").forEach(el => {
-  el.classList.add("reveal");
-  observer.observe(el);
-});
-document.getElementById("stats") && observer.observe(document.getElementById("stats"));
-
-// ── 3D Tilt cards ─────────────────────────────────────────────
+// ── 3D Tilt cards ──
 (function() {
   function initTilt(selector, maxAngle) {
     document.querySelectorAll(selector).forEach(card => {
       const shine = document.createElement('div');
       shine.className = 'tilt-shine';
       card.prepend(shine);
-
       let tRx=0, tRy=0, cRx=0, cRy=0, rafId=null;
       const lerp = (a,b,t) => a+(b-a)*t;
-
       const apply = (rx, ry) => {
         const i = Math.sqrt(rx*rx+ry*ry)/maxAngle;
-        const s = (1+i*0.04).toFixed(4);
-        card.style.transform = `perspective(800px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale3d(${s},${s},1)`;
-        const sx=ry*1.8, sy=-rx*1.8, b=18+i*42, a=(0.06+i*0.26).toFixed(2);
-        card.style.boxShadow = `${sx}px ${sy}px ${b}px rgba(59,130,246,${a}),0 ${5+i*14}px ${14+i*24}px rgba(0,0,0,.38)`;
+        const s = (1+i*0.03).toFixed(4);
+        card.style.transform = `perspective(900px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale3d(${s},${s},1)`;
       };
-
       const tick = () => {
-        cRx=lerp(cRx,tRx,.1); cRy=lerp(cRy,tRy,.1);
+        cRx=lerp(cRx,tRx,.12); cRy=lerp(cRy,tRy,.12);
         apply(cRx, cRy);
         if(Math.abs(cRx-tRx)>.04||Math.abs(cRy-tRy)>.04) { rafId=requestAnimationFrame(tick); }
-        else { cRx=tRx; cRy=tRy; apply(tRx,tRy); rafId=null; if(!tRx&&!tRy) card.style.boxShadow=''; }
+        else { cRx=tRx; cRy=tRy; apply(tRx,tRy); rafId=null; }
       };
-
       const onMove = (x,y,w,h) => {
         tRx=((y/h)-.5)*-maxAngle; tRy=((x/w)-.5)*maxAngle;
         if(!rafId) rafId=requestAnimationFrame(tick);
@@ -358,32 +1027,26 @@ document.getElementById("stats") && observer.observe(document.getElementById("st
         shine.style.setProperty('--ha',Math.atan2(y-h/2,x-w/2)*(180/Math.PI)+180+'deg');
         shine.style.opacity='1';
       };
-      const onLeave = () => {
-        tRx=0; tRy=0; if(!rafId) rafId=requestAnimationFrame(tick);
-        shine.style.opacity='0';
-      };
-
+      const onLeave = () => { tRx=0; tRy=0; if(!rafId) rafId=requestAnimationFrame(tick); shine.style.opacity='0'; };
       card.addEventListener('mousemove', e => { const r=card.getBoundingClientRect(); onMove(e.clientX-r.left,e.clientY-r.top,r.width,r.height); });
       card.addEventListener('mouseleave', onLeave);
     });
   }
-
-  initTilt('.scard', 16);
-  initTilt('.testimonial-card', 14);
-  initTilt('.qr-card', 10);
-
-  // Hero parallax on mouse
-  const hero = document.querySelector('.hero');
-  if (hero) {
-    hero.addEventListener('mousemove', e => {
-      hero.style.setProperty('--px', ((e.clientX/window.innerWidth-.5)*28)+'px');
-      hero.style.setProperty('--py', ((e.clientY/window.innerHeight-.5)*28)+'px');
-    }, {passive:true});
-    hero.addEventListener('mouseleave', () => {
-      hero.style.setProperty('--px','0px'); hero.style.setProperty('--py','0px');
-    });
-  }
+  initTilt('.scard', 12);
+  initTilt('.testimonial-card', 10);
+  initTilt('.qr-card', 8);
 })();
+
+// ── Magnetic CTA button ──
+document.querySelectorAll('.btn-wa, .nav-cta').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    const x = (e.clientX - r.left - r.width/2) * .15;
+    const y = (e.clientY - r.top - r.height/2) * .15;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+});
 </script>
 </body>
 </html>

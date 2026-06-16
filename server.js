@@ -241,45 +241,59 @@ app.get("/og-preview.png", async (req, res) => {
       res.set({ "Content-Type": "image/png", "Cache-Control": "public, max-age=86400" });
       return res.send(_ogImageCache);
     }
+    // OG image branded — courbe de gain dyno + titre, couleurs alignées sur le logo
     const chart = {
-      type: "bar",
+      type: "line",
       data: {
-        labels: ["Suivi devis", "Validation", "Notifications"],
-        datasets: [{
-          data: [100, 100, 100],
-          backgroundColor: ["#3b82f6", "#6366f1", "#8b5cf6"],
-          barThickness: 50,
-          borderRadius: 8,
-        }],
+        labels: ["", "", "", "", "", "", "", "", "", "", "", ""],
+        datasets: [
+          {
+            label: "Origine",
+            data: [90, 95, 105, 120, 135, 148, 158, 165, 170, 172, 173, 170],
+            borderColor: "#64748B",
+            backgroundColor: "rgba(100,116,139,0.08)",
+            borderWidth: 4,
+            tension: 0.45,
+            pointRadius: 0,
+            fill: true,
+          },
+          {
+            label: "Stage 1",
+            data: [100, 115, 138, 162, 188, 210, 228, 240, 248, 252, 250, 245],
+            borderColor: "#DC2626",
+            backgroundColor: "rgba(220,38,38,0.18)",
+            borderWidth: 5,
+            tension: 0.45,
+            pointRadius: 0,
+            fill: true,
+          },
+        ],
       },
       options: {
-        indexAxis: "y",
-        layout: { padding: { top: 40, bottom: 30, left: 40, right: 40 } },
+        layout: { padding: { top: 80, bottom: 60, left: 60, right: 60 } },
         plugins: {
           title: {
             display: true,
-            text: ["🏁 DIAGPERF", "━━━━━━━━━━━━━━━━━━━━━━━━━", "Votre Espace Client"],
-            font: { size: 32, weight: "bold", family: "Arial" },
-            color: "#f9fafb",
-            padding: { bottom: 16 },
+            text: ["DIAGPERF", "Reprogrammation moteur — Devis WhatsApp en 2 min"],
+            font: { size: [44, 20], weight: "bold", family: "Arial" },
+            color: "#F8FAFC",
+            padding: { bottom: 20 },
           },
-          subtitle: {
+          legend: {
             display: true,
-            text: ["📊 Suivi en temps réel  •  ✅ Validation en 1 clic  •  🔔 Alertes", "", "Reprogrammation & Diagnostic Automobile"],
-            font: { size: 15, weight: "bold", family: "Arial" },
-            color: "#94a3b8",
-            padding: { bottom: 12 },
+            position: "top",
+            align: "end",
+            labels: { color: "#CBD5E1", font: { size: 14, weight: "bold" }, boxWidth: 18, padding: 12 },
           },
-          legend: { display: false },
         },
         scales: {
-          x: { display: false, max: 100 },
-          y: { grid: { display: false }, ticks: { font: { size: 14, weight: "bold" }, color: "#d1d5db" } },
+          x: { display: false },
+          y: { display: false, suggestedMin: 70, suggestedMax: 280 },
         },
       },
     };
     const encoded = encodeURIComponent(JSON.stringify(chart));
-    const url = `https://quickchart.io/chart?c=${encoded}&w=1200&h=630&bkg=%23060611&v=4&f=png`;
+    const url = `https://quickchart.io/chart?c=${encoded}&w=1200&h=630&bkg=%230B0F1E&v=4&f=png`;
     const imgResp = await fetchFn(url);
     if (!imgResp.ok) throw new Error(`QuickChart ${imgResp.status}`);
     const buffer = Buffer.from(await imgResp.arrayBuffer());
