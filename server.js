@@ -307,16 +307,6 @@ app.get("/webhook", (req, res) => {
 
 app.get("/health", (_req, res) => res.status(200).send("OK"));
 
-// ====== Sentry test route (TEMPORAIRE — à retirer après validation) ======
-// Protégée par DASHBOARD_TOKEN pour empêcher tout déclenchement public.
-app.get("/sentry-test", (req, res) => {
-  const expected = process.env.DASHBOARD_TOKEN || "diagperf_admin_2026";
-  if (req.query.token !== expected) return res.sendStatus(403);
-  log.info("Sentry test triggered manually");
-  // Erreur sync + async pour tester les deux chemins
-  throw new Error("Sentry test error — déclenchée manuellement depuis /sentry-test");
-});
-
 // ====== Dashboard & Client API routes (extracted) ======
 const { router: dashboardRouter, broadcastDashboardEvent } = createDashboardRouter({ supabase, log });
 app.use(dashboardRouter);
