@@ -454,7 +454,11 @@ function createDashboardRouter({ supabase, log }) {
   // ====== WhatsApp healthcheck route ======
   // Vérifie token + PHONE_NUMBER_ID en interrogeant l'API Meta. Protégé par DASHBOARD_TOKEN.
   // Usage : GET /whatsapp-health?token=...
-  router.get("/whatsapp-health", requireDashboardAuth, async (_req, res) => {
+  // Cache 60s : protège l'API Meta si la route est appelée en boucle (onglet qui rafraîchit).
+  const HEALTH_CACHE_TTL_MS = 60 * 1000;
+  let _healthCache = null; // { at, status, payload }
+
+  async function computeWhatsAppHealth() {
     const WA = config.WA_API_VERSION;
     const token = process.env.WHATSAPP_TOKEN;
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
@@ -515,11 +519,26 @@ function createDashboardRouter({ supabase, log }) {
 
     const allOk = checks.every((c) => c.ok !== false);
     log.info("WhatsApp healthcheck", { allOk, phone: phoneInfo?.display_phone_number });
-    res.status(allOk ? 200 : 503).json({
-      ok: allOk,
-      summary: allOk ? "✅ Configuration WhatsApp opérationnelle" : "❌ Problème détecté — voir les checks",
-      checks,
-    });
+    return {
+      status: allOk ? 200 : 503,
+      payload: {
+        ok: allOk,
+        summary: allOk ? "✅ Configuration WhatsApp opérationnelle" : "❌ Problème détecté — voir les checks",
+        checks,
+      },
+    };
+  }
+
+  router.get("/whatsapp-health", requireDashboardAuth, async (req, res) => {
+    const now = Date.now();
+    const fresh = req.query.fresh === "1"; // ?fresh=1 force un appel Meta immédiat
+    if (!fresh && _healthCache && (now - _healthCache.at) < HEALTH_CACHE_TTL_MS) {
+      const ageSec = Math.round((now - _healthCache.at) / 1000);
+      return res.status(_healthCache.status).json({ ..._healthCache.payload, cached: true, cache_age_s: ageSec });
+    }
+    const result = await computeWhatsAppHealth();
+    _healthCache = { at: now, status: result.status, payload: result.payload };
+    res.status(result.status).json({ ...result.payload, cached: false });
   });
 
   return { router, broadcastDashboardEvent, sseClients };
