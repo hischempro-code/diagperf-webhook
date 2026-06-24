@@ -1,4 +1,5 @@
 const express = require("express");
+const { config } = require("../config");
 
 /**
  * Dashboard & Client API routes.
@@ -448,6 +449,77 @@ function createDashboardRouter({ supabase, log }) {
       log.error("test-email: échec envoi", { to, error: String(err?.message || err) });
       return res.status(500).json({ error: "Échec envoi email", details: String(err?.message || err) });
     }
+  });
+
+  // ====== WhatsApp healthcheck route ======
+  // Vérifie token + PHONE_NUMBER_ID en interrogeant l'API Meta. Protégé par DASHBOARD_TOKEN.
+  // Usage : GET /whatsapp-health?token=...
+  router.get("/whatsapp-health", requireDashboardAuth, async (_req, res) => {
+    const WA = config.WA_API_VERSION;
+    const token = process.env.WHATSAPP_TOKEN;
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const wabaId = process.env.WHATSAPP_BUSINESS_ACCOUNT_ID; // optionnel
+
+    const checks = [];
+    const add = (ok, label, detail) => checks.push({ ok, label, ...(detail ? { detail } : {}) });
+
+    // 1) Présence des variables d'env (check local, sans appel réseau)
+    add(!!token, "WHATSAPP_TOKEN présent", token ? undefined : "Variable absente sur Render");
+    add(!!phoneNumberId, "WHATSAPP_PHONE_NUMBER_ID présent", phoneNumberId ? undefined : "Variable absente sur Render");
+    add(!!process.env.WHATSAPP_VERIFY_TOKEN, "WHATSAPP_VERIFY_TOKEN présent");
+    add(!!process.env.META_APP_SECRET, "META_APP_SECRET présent (signature webhook)");
+
+    // 2) Token + numéro valides : un seul GET sur le node du numéro
+    let phoneInfo = null;
+    if (token && phoneNumberId) {
+      try {
+        const url = `https://graph.facebook.com/${WA}/${phoneNumberId}?fields=display_phone_number,verified_name,quality_rating,code_verification_status,platform_type`;
+        const r = await fetchFn(url, { headers: { Authorization: `Bearer ${token}` } });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && !j.error) {
+          phoneInfo = j;
+          add(true, "Token valide", "Authentifié auprès de l'API Meta");
+          add(true, `Numéro : ${j.display_phone_number || "?"} (${j.verified_name || "nom non vérifié"})`,
+            `qualité: ${j.quality_rating || "n/a"} · vérif: ${j.code_verification_status || "n/a"} · type: ${j.platform_type || "n/a"}`);
+        } else {
+          const code = j?.error?.code;
+          const msg = j?.error?.message || `HTTP ${r.status}`;
+          if (code === 190) {
+            add(false, "Token INVALIDE ou expiré", msg + " — régénère un token System User permanent");
+          } else if (code === 100) {
+            add(false, "PHONE_NUMBER_ID invalide", msg + " — vérifie l'ID dans WhatsApp → API Setup");
+          } else {
+            add(false, "Échec validation token/numéro", msg);
+          }
+        }
+      } catch (err) {
+        add(false, "Erreur réseau vers l'API Meta", String(err?.message || err));
+      }
+    }
+
+    // 3) Webhook abonné (optionnel — nécessite WHATSAPP_BUSINESS_ACCOUNT_ID)
+    if (token && wabaId) {
+      try {
+        const url = `https://graph.facebook.com/${WA}/${wabaId}/subscribed_apps`;
+        const r = await fetchFn(url, { headers: { Authorization: `Bearer ${token}` } });
+        const j = await r.json().catch(() => ({}));
+        const subs = Array.isArray(j?.data) ? j.data.length : 0;
+        add(subs > 0, subs > 0 ? `Webhook abonné (${subs} app)` : "Aucune app abonnée au webhook",
+          subs > 0 ? undefined : "Abonne-toi au champ 'messages' dans WhatsApp → Configuration");
+      } catch (err) {
+        add(false, "Erreur check abonnement webhook", String(err?.message || err));
+      }
+    } else if (token && phoneNumberId) {
+      checks.push({ ok: null, label: "Check webhook ignoré", detail: "Définis WHATSAPP_BUSINESS_ACCOUNT_ID pour l'activer (optionnel)" });
+    }
+
+    const allOk = checks.every((c) => c.ok !== false);
+    log.info("WhatsApp healthcheck", { allOk, phone: phoneInfo?.display_phone_number });
+    res.status(allOk ? 200 : 503).json({
+      ok: allOk,
+      summary: allOk ? "✅ Configuration WhatsApp opérationnelle" : "❌ Problème détecté — voir les checks",
+      checks,
+    });
   });
 
   return { router, broadcastDashboardEvent, sseClients };
