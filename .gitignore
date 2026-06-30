@@ -2,3 +2,9 @@ node_modules/
 .env
 *.log
 .DS_Store
+
+# Binaires & gros médias source (ne pas déployer sur Render)
+# NB: public/bg.mp4 reste tracké — c'est la vidéo de fond servie par la landing page
+*.exe
+cloudflared.exe
+/12698164_4070_2160_24fps.mp4
