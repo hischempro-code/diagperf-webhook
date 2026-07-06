@@ -405,7 +405,7 @@ function createPrestationFlow(ctx) {
       log.error("Erreur lookup véhicule", { wa_id: fromWa, intent, error: emsg });
       if (emsg.includes("VEHICLE_NOT_FOUND")) {
         await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas trouvé ce véhicule 😕\nVeuillez vérifier la plaque et la renvoyer (format AA 123 BB).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
-      } else if (emsg.includes("OUT_OF_CREDIT") || emsg.includes("IMMATRICULATION_API_FAILED") || emsg.includes("NOT_CONFIGURED") || emsg.includes("INVALID_TOKEN")) {
+      } else if (emsg.includes("OUT_OF_CREDIT") || emsg.includes("IMMATRICULATION_API_FAILED") || emsg.includes("NOT_CONFIGURED") || emsg.includes("INVALID_TOKEN") || emsg.includes("IMMATRICULATION_API_NETWORK")) {
         await setConversationState(fromWa, "WAITING_VEHICLE_MANUAL", intent, { plate });
         await sendWhatsAppInteractiveButtons(fromWa, "Je n'arrive pas à identifier le véhicule automatiquement 😕\nVeuillez indiquer : Marque / Modèle / Année (ex: Peugeot 308 2016).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
       } else {

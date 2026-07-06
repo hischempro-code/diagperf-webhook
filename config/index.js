@@ -19,6 +19,22 @@ if (missing.length) {
   process.exit(1);
 }
 
+// Variables utiles mais NON bloquantes : leur absence ne doit pas tuer le bot
+// (SAV, diagnostic, chat continuent de tourner), mais elle casse silencieusement
+// une fonctionnalité précise. On alerte FORT dans les logs pour rendre le bug visible.
+const RECOMMENDED_ENV = [
+  ["IMMATRICULATION_API_URL", "recherche véhicule par plaque"],
+  ["IMMATRICULATION_API_TOKEN", "recherche véhicule par plaque"],
+];
+const missingRecommended = RECOMMENDED_ENV.filter(([k]) => !process.env[k]);
+if (missingRecommended.length) {
+  console.warn(
+    "⚠️  Variables recommandées manquantes:",
+    missingRecommended.map(([k, usage]) => `${k} (${usage})`).join(", "),
+    "\n   → La recherche véhicule par plaque échouera tant qu'elles ne sont pas définies (ex: sur Render → Environment)."
+  );
+}
+
 // ====== Configuration ======
 const config = {
   // API Versions
