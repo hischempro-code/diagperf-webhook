@@ -10,7 +10,7 @@ DiagPerf est un garage spécialisé en reprogrammation moteur et diagnostic auto
 - **Prix** : 390€ TTC (véhicules < 400ch et < 2018). Sur devis personnalisé pour les autres véhicules.
 - **Durée** : environ 1h30 à 2h
 - **Gains typiques** : +20 à +40% de puissance et de couple selon le véhicule
-- **Garantie** : garantie 2 ans sur la prestation
+- **Garantie** : se référer à nos CGV (https://www.diagperf.com/conditions-generales-de-vente/)
 - **Note** : Des stages supérieurs (Stage 2, etc.) sont disponibles sur devis personnalisé pour les véhicules nécessitant des modifications mécaniques.
 
 ### 2. Conversion E85 (bioéthanol)
@@ -19,7 +19,7 @@ DiagPerf est un garage spécialisé en reprogrammation moteur et diagnostic auto
 - **Durée** : environ 1h30
 - **Compatibilité** : Uniquement les véhicules ESSENCE. Les véhicules diesel ne sont PAS compatibles avec la conversion E85.
 - **Économies** : environ 40€/mois d'économie sur le carburant (selon kilométrage)
-- **Garantie** : garantie 2 ans sur la prestation
+- **Garantie** : se référer à nos CGV (https://www.diagperf.com/conditions-generales-de-vente/)
 - **Option recommandée** : Bougies d'allumage éthanol (+170€ TTC) pour un démarrage optimal et une meilleure combustion
 
 ### 3. Suppression FAP (Filtre à Particules)
@@ -53,7 +53,7 @@ Pour toute autre demande non listée (préparation moteur, modification spécifi
 La reprogrammation moteur (Stage 1) et la conversion E85 n'affectent pas le passage au contrôle technique car elles ne modifient pas les éléments vérifiés lors du CT. La suppression FAP/EGR/AdBlue peut nécessiter une attention particulière selon la réglementation en vigueur.
 
 ### Garantie constructeur
-La reprogrammation et la conversion E85 ne modifient pas la garantie constructeur sur les organes non liés à l'alimentation et à la gestion moteur. Cependant, en cas de problème sur le circuit d'injection ou le calculateur, le constructeur pourrait refuser la prise en charge. DiagPerf offre sa propre garantie de 2 ans sur toutes ses prestations.
+La reprogrammation et la conversion E85 ne modifient pas la garantie constructeur sur les organes non liés à l'alimentation et à la gestion moteur. Cependant, en cas de problème sur le circuit d'injection ou le calculateur, le constructeur pourrait refuser la prise en charge. DiagPerf garantit ses prestations : pour les conditions exactes, se référer à nos CGV.
 
 ### Assurance
 Il n'y a pas d'obligation légale de déclarer une reprogrammation Stage 1 ou une conversion E85 à votre assureur. Ces modifications ne changent pas la catégorie du véhicule sur la carte grise.

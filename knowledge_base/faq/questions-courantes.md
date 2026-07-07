@@ -9,7 +9,7 @@ tags: [question, courante, frequente, demande, client, whatsapp, conversationnel
 La reprogrammation moteur consiste à modifier la cartographie du calculateur pour optimiser la puissance, le couple et la consommation. On reste dans les marges mécaniques du moteur. Résultat : +20 à 40% de puissance et de couple, sans modification mécanique (Stage 1).
 
 ## "Ça abîme le moteur ?"
-Non. Le Stage 1 reste dans les tolérances mécaniques du constructeur. On optimise les pressions de turbo, les temps d'injection et le rapport air/carburant sans dépasser les limites du moteur d'origine. Garantie 2 ans incluse.
+Non. Le Stage 1 reste dans les tolérances mécaniques du constructeur. On optimise les pressions de turbo, les temps d'injection et le rapport air/carburant sans dépasser les limites du moteur d'origine. Prestation garantie (conditions : se référer à nos CGV).
 
 ## "C'est légal ?"
 La reprogrammation Stage 1 et la conversion E85 ne nécessitent pas de changement de carte grise. Le contrôle technique se passe normalement. Pas d'obligation de déclarer à l'assureur.

@@ -19,7 +19,7 @@ Concrètement, lors de la reprogrammation :
 Un moteur en bon état est indispensable avant toute reprogrammation. L'entretien régulier doit être à jour (vidanges, filtres, etc.). Nous recommandons un diagnostic pré-reprog pour vérifier l'état du moteur si vous avez un doute.
 
 ## la reprog c'est fiable ? / vous garantissez votre travail ? / quelle garantie sur le stage 1 ?
-DiagPerf offre une **garantie de 2 ans** sur toutes ses prestations, y compris le Stage 1. Cette garantie témoigne de notre confiance dans la qualité et la sécurité de notre travail.
+DiagPerf garantit ses prestations, y compris le Stage 1 — c'est le signe de notre confiance dans la qualité et la sécurité de notre travail. Pour la durée et les conditions exactes de la garantie, se référer à nos CGV : https://www.diagperf.com/conditions-generales-de-vente/
 
 ## la reprog annule la garantie constructeur ? / est-ce que la reprog impacte la garantie de ma voiture ?
 La reprogrammation peut techniquement affecter la garantie constructeur si la marque est en mesure de détecter la modification. Pour les véhicules encore sous garantie constructeur, nous vous conseillons d'en discuter avec notre équipe avant toute intervention.

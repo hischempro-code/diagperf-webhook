@@ -34,4 +34,4 @@ Le E85 est compatible avec les moteurs essence à partir du moment où la conver
 Non. Notre conversion E85 par reprogrammation **ne nécessite pas de changement de carte grise**. Le véhicule reste dans sa configuration administrative d'origine.
 
 ## quelle garantie sur la conversion E85 ?
-**2 ans de garantie** sur la prestation de conversion E85.
+La conversion E85 est garantie. Pour la durée et les conditions exactes, se référer à nos CGV : https://www.diagperf.com/conditions-generales-de-vente/

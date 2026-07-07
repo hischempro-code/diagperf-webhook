@@ -15,7 +15,7 @@ Toutes marques et tous modèles : Peugeot, Renault, Citroën, BMW, Mercedes, Aud
 En Stage 1, les gains typiques sont de +20 à 40% de puissance et de couple. Par exemple, un diesel de 150ch peut monter à 190-200ch. Les gains exacts dépendent du moteur — envoyez votre plaque et on vous donne les chiffres précis.
 
 ## "C'est garanti ?"
-Oui, garantie 2 ans sur toutes nos prestations de reprogrammation et conversion E85. En cas de problème lié à notre intervention, on intervient gratuitement pendant toute la durée de la garantie.
+Oui, nos prestations de reprogrammation et conversion E85 sont garanties. En cas de problème lié à notre intervention, on intervient. Pour la durée et les conditions exactes, se référer à nos CGV : https://www.diagperf.com/conditions-generales-de-vente/
 
 ## "Vous êtes ouvert quand ?"
 Mardi au vendredi : 10h à 18h. Samedi : 10h à 16h (sur rendez-vous). Fermé dimanche et lundi.

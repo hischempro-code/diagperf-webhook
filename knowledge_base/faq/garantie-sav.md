@@ -7,13 +7,15 @@ tags: [garantie, sav, réclamation, remboursement, reprog, e85, après-vente, pr
 # Garantie et SAV DiagPerf
 
 ## quelle est la garantie DiagPerf ? / vous avez une garantie sur vos prestations ? / c'est garanti combien de temps ?
-**Garantie 2 ans** sur toutes les reprogrammations moteur (Stage 1 à 4) et les conversions E85. Tout dysfonctionnement directement lié à notre intervention est couvert.
+Toutes les reprogrammations moteur (Stage 1 à 4) et les conversions E85 sont garanties. Tout dysfonctionnement directement lié à notre intervention est couvert. Pour la durée et les conditions exactes, **se référer à nos CGV** : https://www.diagperf.com/conditions-generales-de-vente/
 
 ## qu'est-ce que couvre la garantie ? / la garantie couvre quoi exactement ? / c'est couvert quoi ?
 - Toute perte de performance consécutive à la reprogrammation
 - Tout problème moteur directement causé par la cartographie installée
 - Reconversion au fichier original si nécessaire (gratuite, sous garantie)
 - Réintervention gratuite si le problème est lié à notre prestation
+
+Les conditions détaillées de la garantie figurent dans nos CGV : https://www.diagperf.com/conditions-generales-de-vente/
 
 ## qu'est-ce que ne couvre pas la garantie ? / c'est pas couvert quoi ? / qu'est-ce qui est exclu ?
 - Les pannes mécaniques préexistantes (FAP colmaté, injection, pompe à carburant...)
