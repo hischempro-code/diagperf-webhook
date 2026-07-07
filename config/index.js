@@ -25,14 +25,22 @@ if (missing.length) {
 const RECOMMENDED_ENV = [
   ["IMMATRICULATION_API_URL", "recherche véhicule par plaque"],
   ["IMMATRICULATION_API_TOKEN", "recherche véhicule par plaque"],
+  ["GOOGLE_AI_API_KEY", "embeddings RAG — source unique des prix/compatibilités pour le LLM"],
+  ["DASHBOARD_TOKEN", "auth du dashboard admin — sans elle le dashboard est inaccessible"],
 ];
 const missingRecommended = RECOMMENDED_ENV.filter(([k]) => !process.env[k]);
 if (missingRecommended.length) {
   console.warn(
     "⚠️  Variables recommandées manquantes:",
     missingRecommended.map(([k, usage]) => `${k} (${usage})`).join(", "),
-    "\n   → La recherche véhicule par plaque échouera tant qu'elles ne sont pas définies (ex: sur Render → Environment)."
+    "\n   → Les fonctionnalités listées échoueront tant qu'elles ne sont pas définies (ex: sur Render → Environment)."
   );
+}
+
+// Sécurité : sans VERIFY_SIGNATURE=true, n'importe qui peut POSTer sur /webhook
+// en se faisant passer pour Meta (injection de faux messages clients).
+if ((process.env.VERIFY_SIGNATURE || "false").toLowerCase() !== "true") {
+  console.warn("⚠️  VERIFY_SIGNATURE désactivé — la signature HMAC des webhooks Meta n'est PAS vérifiée. Définir VERIFY_SIGNATURE=true + META_APP_SECRET en production.");
 }
 
 // ====== Configuration ======
@@ -44,7 +52,8 @@ const config = {
   PORT: process.env.PORT || 3000,
   
   // Tokens & Keys
-  DASHBOARD_TOKEN: process.env.DASHBOARD_TOKEN || "diagperf_admin_2026",
+  // Pas de token par défaut : un fallback hardcodé committé sur GitHub = dashboard admin ouvert
+  DASHBOARD_TOKEN: process.env.DASHBOARD_TOKEN || "",
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
   GROQ_API_KEY: process.env.GROQ_API_KEY || "",
   

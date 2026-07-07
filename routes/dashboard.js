@@ -15,7 +15,8 @@ function createDashboardRouter({ supabase, log }) {
 
   router.get("/api/dashboard/events", (req, res) => {
     const token = req.query.token;
-    if (token !== (process.env.DASHBOARD_TOKEN || "diagperf_admin_2026")) return res.status(401).end();
+    // Refus explicite si DASHBOARD_TOKEN absent : sans ce garde, token undefined === undefined passerait
+    if (!DASHBOARD_TOKEN || token !== DASHBOARD_TOKEN) return res.status(401).end();
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
@@ -35,10 +36,13 @@ function createDashboardRouter({ supabase, log }) {
   }
 
   // ====== Dashboard auth middleware ======
-  const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN || "diagperf_admin_2026";
+  // Pas de fallback hardcodé (l'ancien défaut "diagperf_admin_2026" était committé sur GitHub).
+  // Si la variable manque, on refuse TOUT accès plutôt que d'ouvrir le dashboard.
+  const DASHBOARD_TOKEN = process.env.DASHBOARD_TOKEN || null;
 
   function requireDashboardAuth(req, res, next) {
     const token = req.query.token || req.headers["x-dashboard-token"];
+    if (!DASHBOARD_TOKEN) return res.status(503).json({ error: "DASHBOARD_TOKEN non configuré" });
     if (token !== DASHBOARD_TOKEN) return res.status(401).json({ error: "Non autorisé" });
     next();
   }
@@ -172,11 +176,6 @@ function createDashboardRouter({ supabase, log }) {
         supabase.from("devis").select("id", { count: "exact", head: true }).gte("created_at", monthStart),
       ]);
 
-      // Chiffre d'affaires (somme TTC)
-      const { data: revenueData } = await supabase
-        .from("devis")
-        .select("total_ttc_centimes, created_at");
-
       let revenueTotalCents = 0, revenueMonthCents = 0, revenueWeekCents = 0, revenueTodayCents = 0;
       const dailyRevenue = {};
       const dailyDevisCount = {};
@@ -212,9 +211,12 @@ function createDashboardRouter({ supabase, log }) {
       const { count: totalConversations } = await supabase
         .from("conversations").select("id", { count: "exact", head: true });
 
-      // Messages aujourd'hui
+      // Messages aujourd'hui — messages.ts est un epoch en SECONDES (numérique),
+      // pas un timestamp ISO : comparer avec un string ISO renvoyait une erreur
+      // Postgres silencieuse et le compteur restait à 0.
+      const todayStartEpoch = Math.floor(new Date(todayStart).getTime() / 1000);
       const { count: todayMessages } = await supabase
-        .from("messages").select("id", { count: "exact", head: true }).gte("ts", todayStart);
+        .from("messages").select("id", { count: "exact", head: true }).gte("ts", todayStartEpoch);
 
       // Avis clients
       const { data: reviews } = await supabase
@@ -416,7 +418,8 @@ function createDashboardRouter({ supabase, log }) {
   });
 
   // ====== Test email route ======
-  router.get("/test-email", async (req, res) => {
+  // Auth obligatoire : sans elle, n'importe qui peut envoyer des emails depuis le compte Brevo
+  router.get("/test-email", requireDashboardAuth, async (req, res) => {
     const to = req.query.to;
     if (!to) {
       return res.status(400).json({ error: "Paramètre ?to=email@example.com requis" });
