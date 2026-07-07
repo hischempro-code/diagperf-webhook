@@ -60,9 +60,9 @@ function createWebhookHandler(ctx) {
           const timestamp = msg.timestamp;
           let text = extractInboundText(msg);
 
-          // ✅ Mark message as read (blue ticks) + typing indicator
-          markAsRead(waMessageId).catch(() => {});
-          sendTypingIndicator(fromWa).catch(() => {});
+          // ✅ Coches bleues + "en train d'écrire" — un seul appel (le payload
+          // typing_indicator officiel inclut status:"read")
+          sendTypingIndicator(waMessageId).catch(() => {});
 
           // Map interactive list menu selections to menu numbers for detectIntent
           const listId = msg.interactive?.list_reply?.id || null;
@@ -236,8 +236,21 @@ function createWebhookHandler(ctx) {
                 }
                 // Si c'est un routing avancé avec état cible et data → créer l'état directement
                 if (routeInstruction && routeInstruction.type === "route" && routeInstruction.target) {
+                  // Les états "profonds" (devis, upsell, contact…) supposent des données créées
+                  // par le flow lui-même (devisId, prix calculés, véhicule vérifié par l'API
+                  // plaques) que le routing LLM ne peut pas fournir → on rabat sur un état
+                  // d'entrée sûr. La plaque détectée est conservée (_known_plate) pour que
+                  // le flow saute quand même l'étape de saisie.
+                  const SAFE_ROUTE_TARGETS = new Set(["WAITING_PLATE", "SAV_TOPIC"]);
+                  if (!SAFE_ROUTE_TARGETS.has(routeInstruction.target)) {
+                    const downgraded = routeInstruction.intent === "SAV" ? "SAV_TOPIC" : "WAITING_PLATE";
+                    log.info("LLM routing → cible profonde rabattue sur état d'entrée", { wa_id: fromWa, from: routeInstruction.target, to: downgraded });
+                    routeInstruction.target = downgraded;
+                  }
                   const initialState = createInitialStateFromRoute(routeInstruction);
-                  await setConversationState(fromWa, initialState);
+                  if (initialState.data?.plate) initialState.data._known_plate = initialState.data.plate;
+                  // setConversationState prend (waId, state, intent, data) — pas un objet unique
+                  await setConversationState(fromWa, initialState.state, initialState.intent, initialState.data);
                   log.info("LLM → routing avancé", { wa_id: fromWa, intent: routeInstruction.intent, target: routeInstruction.target, confidence: routeInstruction.confidence });
 
                   // Dispatcher vers le bon handler selon l'intent

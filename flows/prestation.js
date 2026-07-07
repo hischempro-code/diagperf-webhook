@@ -717,7 +717,8 @@ function createPrestationFlow(ctx) {
             else { log.info("Devis refused by client", { devisId: stateData.devisId, wa_id: fromWa }); broadcastDashboardEvent("devis_refused", { devisId: stateData.devisId, wa_id: fromWa, plate: stateData.plate || "" }); }
           });
         }
-        await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, { plate, vehicle });
+        // Conserver tout le state (devisId, coordonnées connues…) — sinon la notif garage affiche "DEV-N/A"
+        await setConversationState(fromWa, "WAITING_POST_QUOTE_CHOICE", intent, { ...stateData });
         await sendWhatsAppInteractiveButtons(fromWa, "Nous comprenons. Comment pouvons-nous vous aider ?", [
           { id: "post_quote_technicien", title: "Contacter technicien" }, { id: "post_quote_accueil", title: "Retour accueil" },
         ]);
