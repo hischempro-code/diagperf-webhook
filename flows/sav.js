@@ -80,7 +80,16 @@ function createSavFlow(ctx) {
         "2": "Garantie",
         "3": "Autre",
       };
-      const topic = topicMap[buttonId] || topicMap[t] || null;
+      // Accepter aussi les libellés tapés en texte (avec ou sans accents)
+      const tNorm = t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+      const textTopicMap = {
+        "apres prestation": "Problème après prestation",
+        "probleme apres prestation": "Problème après prestation",
+        "garantie": "Garantie",
+        "autre": "Autre",
+        "autres": "Autre",
+      };
+      const topic = topicMap[buttonId] || topicMap[t] || textTopicMap[tNorm] || null;
 
       if (!topic) {
         return respondOrAnswerQuestion(fromWa, t, "Veuillez choisir une option dans la liste.", [
