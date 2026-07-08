@@ -143,7 +143,6 @@ const {
 } = require("./lib/media-builders");
 const {
   initWhatsAppClient,
-  markAsRead,
   sendTypingIndicator,
   sendWhatsAppText,
   sendWhatsAppInteractiveButtons,
@@ -161,22 +160,7 @@ const fetchFn = global.fetch || require("node-fetch");
 // ====== WhatsApp API version (centralized) ======
 const WA_API_VERSION = appConfig.WA_API_VERSION;
 
-// ====== Retry utility (for transient API failures) ======
-async function withRetry(fn, { retries = 2, delayMs = 500, label = "API call" } = {}) {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      const isLast = attempt === retries;
-      const status = err?.status || err?.response?.status;
-      const isRetryable = !status || status >= 500 || status === 429;
-      if (isLast || !isRetryable) throw err;
-      const wait = delayMs * Math.pow(2, attempt);
-      log.warn(`${label}: retry ${attempt + 1}/${retries} in ${wait}ms`, { error: String(err?.message || err) });
-      await new Promise(r => setTimeout(r, wait));
-    }
-  }
-}
+// Retry logic vit dans lib/whatsapp-client.js et lib/llm-service.js (par appel API).
 
 // dotenv + validation REQUIRED_ENV centralisés dans config/index.js
 
@@ -495,10 +479,15 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
   if (/^(oui|non|yes|no|ok|okay|d['']accord|confirmer|annuler|suivant|passer|skip|ajouter|menu|\d{1,2})\.?$/i.test(t)) return false;
 
   // Check for direct intent keywords first (e.g. user types "reprog" mid-SAV)
+  // Ne JAMAIS rediriger vers l'intent du flow déjà en cours : ça effaçait l'état
+  // et redémarrait le même flow de zéro (ex: client en SAV_TOPIC qui décrit son
+  // problème → re-détection SAV → le bot reposait "Quel est le sujet ?" en boucle).
+  let currentIntent = null;
+  try { currentIntent = (await getConversationState(fromWa))?.intent || null; } catch { /* non bloquant */ }
   const { detectIntent } = require("./lib/intent-detector");
   const directIntent = detectIntent(text);
-  if (directIntent) {
-    log.info("Mid-flow intent change detected (keyword)", { wa_id: fromWa, intent: directIntent });
+  if (directIntent && directIntent !== currentIntent) {
+    log.info("Mid-flow intent change detected (keyword)", { wa_id: fromWa, from: currentIntent, intent: directIntent });
     await clearConversationState(fromWa);
     const mapped = MENU_MAP[directIntent] || text;
     const prestaHandled = await handlePrestationFlow(fromWa, mapped, rawMsg || {});
@@ -512,7 +501,8 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
     if (!llmResult) return false;
 
     // LLM detected an intent change → redirect user to the correct flow
-    if (llmResult.type === "intent" && llmResult.intent) {
+    // (même garde-fou : pas de redirection vers le flow déjà en cours)
+    if (llmResult.type === "intent" && llmResult.intent && llmResult.intent !== currentIntent) {
       const mapped = MENU_MAP[llmResult.intent];
       if (mapped) {
         log.info("Mid-flow intent change detected (LLM)", { wa_id: fromWa, intent: llmResult.intent });
@@ -592,7 +582,7 @@ app.post("/webhook", createWebhookHandler({
   supabase, log,
   verifyMetaSignature,
   sendWhatsAppText, sendWhatsAppInteractiveButtons, sendWhatsAppLocation,
-  markAsRead, sendTypingIndicator,
+  sendTypingIndicator,
   getConversationState, setConversationState, clearConversationState,
   getOrCreateConversation, insertInboundMessage, resetConversationContext,
   sendMenuList, DIAGPERF_LOCATION,

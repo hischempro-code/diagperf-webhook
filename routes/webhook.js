@@ -13,7 +13,7 @@ function createWebhookHandler(ctx) {
     verifyMetaSignature,
     // WhatsApp send functions
     sendWhatsAppText, sendWhatsAppInteractiveButtons, sendWhatsAppLocation,
-    markAsRead, sendTypingIndicator,
+    sendTypingIndicator,
     // Conversation helpers
     getConversationState, setConversationState, clearConversationState,
     getOrCreateConversation, insertInboundMessage, resetConversationContext,
