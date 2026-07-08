@@ -868,6 +868,13 @@ function createPrestationFlow(ctx) {
       const stateData = convState.data || {};
       if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
 
+      // Question posée au milieu de la collecte ("Il est gentil le mécano ?") :
+      // répondre puis re-demander — sinon la phrase entière devenait le NOM du client
+      // sur le devis/emails (constaté en prod sur DEV-230).
+      if (isLikelyQuestion(String(text || ""))) {
+        return respondOrAnswerQuestion(fromWa, text, buildContactRequestMsg(stateData), [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+      }
+
       // Coordonnées — merge: sources connues + compléter depuis le message actuel
       const { customerName, customerEmail } = resolveContactFromState(stateData, text);
       log.info("WAITING_DEVIS_CONTACT: contact resolved", { wa_id: fromWa, customerName, hasEmail: !!validateEmail(customerEmail) });
@@ -1295,6 +1302,10 @@ function createPrestationFlow(ctx) {
     // --- DIAG_EMAIL ---
     if (convState.state === "DIAG_EMAIL" && intent === "DIAG") {
       const diagData = convState.data || {};
+      // Même garde-fou que WAITING_DEVIS_CONTACT : une question n'est pas un nom
+      if (isLikelyQuestion(String(text || ""))) {
+        return respondOrAnswerQuestion(fromWa, text, buildContactRequestMsg(diagData), [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+      }
       const { customerName, customerEmail } = resolveContactFromState(diagData, text);
       log.info("DIAG_EMAIL: contact resolved", { wa_id: fromWa, customerName, hasEmail: !!validateEmail(customerEmail) });
 

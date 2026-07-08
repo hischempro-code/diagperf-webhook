@@ -2,6 +2,31 @@ const { extractInboundText, extractInteractiveId, isGreetingOrReset, isGreeting 
 const { parseRoutingInstruction, createInitialStateFromRoute, isRoutingSafe } = require("../lib/intent-router");
 const { extractProfileSignals, updateClientProfile } = require("../lib/conversation-memory");
 
+// ====== Verrou de traitement par utilisateur ======
+// Deux messages rapprochés du même client arrivent dans deux POST Meta concurrents :
+// sans verrou, les deux lisent le MÊME conversation_state et rejouent le même état
+// (constaté en prod : double PDF + double email, question du client prise comme nom).
+// Borné à 60s pour ne jamais bloquer définitivement un utilisateur.
+const _userProcessingLocks = new Map(); // wa_id → Promise du traitement en cours
+async function acquireUserLock(waId) {
+  const deadline = Date.now() + 60_000;
+  while (_userProcessingLocks.has(waId) && Date.now() < deadline) {
+    await Promise.race([
+      _userProcessingLocks.get(waId).catch(() => {}),
+      new Promise(r => setTimeout(r, 5_000)),
+    ]);
+  }
+  let release;
+  const lockP = new Promise(resolve => {
+    release = () => {
+      if (_userProcessingLocks.get(waId) === lockP) _userProcessingLocks.delete(waId);
+      resolve();
+    };
+  });
+  _userProcessingLocks.set(waId, lockP);
+  return release;
+}
+
 /**
  * Factory: creates the webhook POST route handler.
  * @param {object} ctx - All dependencies from server.js
@@ -56,6 +81,8 @@ function createWebhookHandler(ctx) {
       if (Array.isArray(messages) && messages.length > 0) {
         for (const msg of messages) {
           const fromWa = msg.from;
+          const releaseUserLock = await acquireUserLock(fromWa);
+          try {
           const waMessageId = msg.id;
           const timestamp = msg.timestamp;
           let text = extractInboundText(msg);
@@ -300,6 +327,9 @@ function createWebhookHandler(ctx) {
             fromWa,
             "Je n'ai pas bien saisi votre message 🤔 Pourriez-vous me donner un peu plus de détails ? Par exemple, s'agit-il d'un problème sur votre véhicule, d'un tarif, ou d'autre chose ?"
           );
+          } finally {
+            releaseUserLock();
+          }
         }
         return;
       }

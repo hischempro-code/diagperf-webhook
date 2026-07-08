@@ -124,6 +124,11 @@ function createSavFlow(ctx) {
     if (convState.state === "SAV_COORDINATES") {
       const stateData = convState.data || {};
 
+      // Une question au milieu de la collecte n'est pas un nom : répondre puis re-demander
+      if (isLikelyQuestion(t)) {
+        return respondOrAnswerQuestion(fromWa, t, "Pour continuer, envoyez vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+      }
+
       // Merge: use what's already known + fill gaps from current message
       let customerName = stateData._known_name || null;
       let email = (stateData._known_email && validateEmail(stateData._known_email)) ? stateData._known_email : null;
