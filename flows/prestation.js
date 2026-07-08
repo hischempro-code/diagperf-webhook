@@ -29,6 +29,8 @@ const {
   createDevis,
   addUpsellOptionsToDevis,
 } = require("../lib/devis-service");
+// Source unique des options de diagnostic (évite la divergence avec une copie locale).
+const { DIAG_OPTIONS } = require("../config");
 
 // ====== Universal info accumulator ======
 // Extracts name/email/plate/stage from any message and merges into state data silently.
@@ -101,12 +103,6 @@ function resolveContactFromState(stateData, text) {
 // ====== Constants ======
 const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DIAG", "AUTRES"]);
 const MANUAL_QUOTE_INTENTS = new Set(["AUTRES"]);
-
-const DIAG_OPTIONS = [
-  { id: "diag_1", title: "Diagnostic simple", description: "Lecture & effacement défauts", detail: "Lecture et effacement des codes défaut", priceTtcCents: 5000, duration: "20 min" },
-  { id: "diag_2", title: "Diag approfondi", description: "Interprétation + remise à zéro", detail: "Lecture, interprétation des défauts et remise à zéros des compteurs", priceTtcCents: 8000, duration: "35 min" },
-  { id: "diag_3", title: "Recherche de panne", description: "Diag, test, analyse données", detail: "Recherche de panne électrique (diagnostic, test, analyse de données)", priceTtcCents: 13000, duration: "1h" },
-];
 
 const STAGE1_PRICE_LABEL = `${STAGE1_FIXED_PRICE_CENTS / 100}€`;
 const STAGE1_PRICE_LABEL_TTC = `${STAGE1_FIXED_PRICE_CENTS / 100}€ TTC`;
@@ -416,7 +412,80 @@ function createPrestationFlow(ctx) {
   }
   registerPrestationState("WAITING_PLATE", handleWaitingPlate);
 
+  // ====== Handler: WAITING_VEHICLE_MANUAL ======
+  // Fallback quand l'API plaques échoue : le client tape "Marque Modèle Année".
+  // Cet état était créé (handleWaitingPlate) mais AUCUN handler ne le traitait →
+  // le client restait bloqué sans réponse après avoir décrit son véhicule.
+  async function handleWaitingVehicleManual(fromWa, text, rawMsg, convState, intent, buttonId) {
+    if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
+    const desc = String(text || "").trim();
+    if (desc.length < 4 || isLikelyQuestion(desc)) {
+      return respondOrAnswerQuestion(fromWa, desc, "Merci d'indiquer votre véhicule : Marque Modèle Année (ex: Peugeot 308 2016).", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+    }
+    await setConversationState(fromWa, "WAITING_COORDINATES", intent, { ...(convState.data || {}), vehicle_manual_desc: desc });
+    await sendWhatsAppInteractiveButtons(
+      fromWa,
+      `Merci ! 👍 Un conseiller va vérifier les possibilités pour votre *${desc}*.\n\nPour recevoir votre devis, envoyez vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`,
+      [{ id: "btn_back_menu", title: "🏠 Menu" }]
+    );
+    log.info("WAITING_VEHICLE_MANUAL → véhicule saisi manuellement", { wa_id: fromWa, intent, desc: desc.slice(0, 60) });
+    return true;
+  }
+  registerPrestationState("WAITING_VEHICLE_MANUAL", handleWaitingVehicleManual);
 
+  // ====== Handler: WAITING_COORDINATES / WAITING_CONTACT_MANUAL ======
+  // Chemins "sur devis personnalisé" (stage 2+, prestation AUTRES, véhicule saisi à la
+  // main, tarif introuvable) : collecte Nom + Email, notifie le garage, confirme au client.
+  // Ces deux états étaient créés à 4 endroits mais jamais traités (impasse).
+  async function handleWaitingCoordinates(fromWa, text, rawMsg, convState, intent, buttonId) {
+    if (buttonId === "btn_back_menu") { await clearConversationState(fromWa); await sendMenuList(fromWa); return true; }
+    const stateData = convState.data || {};
+    const { customerName, customerEmail } = resolveContactFromState(stateData, text);
+
+    if (!customerEmail || !validateEmail(customerEmail)) {
+      return respondOrAnswerQuestion(fromWa, text,
+        "Pour être recontacté, merci d'envoyer vos coordonnées :\n*Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com",
+        [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+    }
+    const name = (customerName && customerName.length >= 2) ? customerName : "Client WhatsApp";
+    const nameTokens = name.split(/\s+/);
+    const lastName = nameTokens[0] || "";
+    const firstName = nameTokens.slice(1).join(" ") || "";
+
+    const v = stateData.vehicle || {};
+    const vehicleDesc = stateData.vehicle_manual_desc
+      || [[v.make, v.model].filter(Boolean).join(" "), v.fuel, v.year].filter(Boolean).join(" — ")
+      || "Non renseigné";
+    const prestationLabel = stateData.stageLabel
+      ? `Reprogrammation ${stateData.stageLabel} (sur devis personnalisé)`
+      : `${intentToLabel(intent)} (sur devis personnalisé)`;
+
+    try {
+      await sendContactRecapEmail({
+        lastName, firstName,
+        contact: `${customerEmail} / WhatsApp ${fromWa}`,
+        prestation: prestationLabel,
+        plate: stateData.plate || "N/A",
+        vehicleDesc,
+      });
+    } catch (emailErr) {
+      log.error("WAITING_COORDINATES: envoi email récap garage échoué", { wa_id: fromWa, error: String(emailErr?.message || emailErr) });
+    }
+    notifyGarage(
+      `📝 DEMANDE DEVIS PERSONNALISÉ\nPrestation : ${prestationLabel}\nVéhicule : ${vehicleDesc}\nPlaque : ${stateData.plate || "N/A"}\nClient : ${name}\nEmail : ${customerEmail}\nWhatsApp : ${fromWa}`
+    ).catch(() => {});
+
+    await clearConversationState(fromWa);
+    await sendWhatsAppInteractiveButtons(
+      fromWa,
+      `Merci ${name} ! ✅\n\nVotre demande de devis personnalisé est enregistrée :\n🛠️ ${prestationLabel}\n🚗 ${vehicleDesc}\n\nNotre équipe vous recontactera sous 24h ouvrées.\n📞 Vous pouvez aussi joindre *Youcef* au *06 75 54 70 85*`,
+      [{ id: "btn_back_menu", title: "🏠 Menu" }]
+    );
+    log.info("Devis personnalisé → coordonnées collectées, garage notifié", { wa_id: fromWa, intent, customerEmail });
+    return true;
+  }
+  registerPrestationState("WAITING_COORDINATES", handleWaitingCoordinates);
+  registerPrestationState("WAITING_CONTACT_MANUAL", handleWaitingCoordinates);
 
   // ====== Main Prestation Flow Handler ======
   async function handlePrestationFlow(fromWa, text, rawMsg) {
@@ -427,11 +496,18 @@ function createPrestationFlow(ctx) {
     if (!convState || !convState.state) return handleNoState(fromWa, text, rawMsg, convState, intent, buttonId);
     if (!PRESTATION_INTENTS.has(intent)) return false;
 
-    // Accumulate any info from this message (name, email, plate) into state — silently, non-blocking
+    // Accumulate any info from this message (name, email, plate) into state.
+    // On AWAIT l'écriture avant de dispatcher : sinon cette écriture (fire-and-forget)
+    // pouvait atterrir APRÈS le setConversationState du handler et écraser un état plus
+    // récent avec un snapshot périmé (race sur conversation_state).
     const enrichedData = accumulateInfoIntoState(text, convState.data, extractAndValidatePlate);
     if (enrichedData !== convState.data) {
       convState.data = enrichedData;
-      setConversationState(fromWa, convState.state, convState.intent, enrichedData).catch(() => {});
+      try {
+        await setConversationState(fromWa, convState.state, convState.intent, enrichedData);
+      } catch (err) {
+        log.debug("accumulateInfoIntoState persist failed", { wa_id: fromWa, error: String(err?.message || err) });
+      }
     }
 
     const handled = await dispatchPrestationState(fromWa, text, rawMsg, convState, intent, buttonId);
