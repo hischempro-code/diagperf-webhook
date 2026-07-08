@@ -193,7 +193,7 @@ function createPrestationFlow(ctx) {
   async function dispatchPrestationState(fromWa, text, rawMsg, convState, intent, buttonId) {
     const handler = PRESTATION_STATE_HANDLERS[convState.state];
     if (!handler) {
-      log.warn("No handler registered for state", { state: convState.state, wa_id: fromWa });
+      log.debug("No handler registered for state", { state: convState.state, wa_id: fromWa });
       return false;
     }
     return handler(fromWa, text, rawMsg, convState, intent, buttonId);
