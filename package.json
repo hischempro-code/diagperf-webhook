@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/helpers.test.js"
+    "test": "node tests/helpers.test.js && node tests/intent-detector.test.js"
   },
   "keywords": [],
   "author": "",
