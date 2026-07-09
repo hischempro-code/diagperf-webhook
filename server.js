@@ -472,6 +472,27 @@ function setNonTextCooldown(waId) {
 // - Si le LLM détecte un intent → redirige vers le flow approprié (clear state + dispatch)
 // - Si le LLM répond à une question FAQ → envoie la réponse + re-propose les boutons
 // - Sinon retourne false → l'appelant re-propose les boutons normalement.
+// Redirige un client qui change de prestation en cours de flow.
+// Si le véhicule est DÉJÀ identifié et que la cible passe par WAITING_VEHICLE_CONFIRM
+// (REPROG/E85/FAP/EGR/ADBLUE), on conserve le véhicule → pas de re-saisie de plaque.
+// Sinon, on efface l'état et on relance proprement le flow ciblé.
+const _CONFIRM_FLOW_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE"]);
+async function redirectMidFlow(fromWa, newIntent, currentConv, rawMsg) {
+  const data = currentConv?.data || {};
+  if (_CONFIRM_FLOW_INTENTS.has(newIntent) && data.vehicle && data.plate && switchIntentKeepingVehicle) {
+    log.info("Mid-flow switch → véhicule conservé", { wa_id: fromWa, to: newIntent, plate: data.plate });
+    const handled = await switchIntentKeepingVehicle(fromWa, newIntent, data, rawMsg || {});
+    if (handled) return true;
+  }
+  await clearConversationState(fromWa);
+  const mapped = MENU_MAP[newIntent] || newIntent;
+  const prestaHandled = await handlePrestationFlow(fromWa, mapped, rawMsg || {});
+  if (prestaHandled) return true;
+  const savHandled = await handleSavFlow(fromWa, mapped, rawMsg || {});
+  if (savHandled) return true;
+  return false;
+}
+
 async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, rawMsg }) {
   const t = String(text || "").trim();
   // Ne pas appeler le LLM pour les réponses courtes de type bouton (oui/non/chiffre/menu)
@@ -482,18 +503,17 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
   // Ne JAMAIS rediriger vers l'intent du flow déjà en cours : ça effaçait l'état
   // et redémarrait le même flow de zéro (ex: client en SAV_TOPIC qui décrit son
   // problème → re-détection SAV → le bot reposait "Quel est le sujet ?" en boucle).
-  let currentIntent = null;
-  try { currentIntent = (await getConversationState(fromWa))?.intent || null; } catch { /* non bloquant */ }
+  let currentConv = null;
+  try { currentConv = await getConversationState(fromWa); } catch { /* non bloquant */ }
+  const currentIntent = currentConv?.intent || null;
   const { detectIntent } = require("./lib/intent-detector");
   const directIntent = detectIntent(text);
   if (directIntent && directIntent !== currentIntent) {
     log.info("Mid-flow intent change detected (keyword)", { wa_id: fromWa, from: currentIntent, intent: directIntent });
-    await clearConversationState(fromWa);
-    const mapped = MENU_MAP[directIntent] || text;
-    const prestaHandled = await handlePrestationFlow(fromWa, mapped, rawMsg || {});
-    if (prestaHandled) return { handled: true, redirected: true };
-    const savHandled = await handleSavFlow(fromWa, mapped, rawMsg || {});
-    if (savHandled) return { handled: true, redirected: true };
+    // Si le véhicule est déjà identifié et qu'on bascule vers une prestation à devis,
+    // garder le véhicule (ne PAS redemander la plaque). Sinon, restart classique.
+    const redirected = await redirectMidFlow(fromWa, directIntent, currentConv, rawMsg);
+    if (redirected) return { handled: true, redirected: true };
   }
 
   try {
@@ -503,14 +523,10 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
     // LLM detected an intent change → redirect user to the correct flow
     // (même garde-fou : pas de redirection vers le flow déjà en cours)
     if (llmResult.type === "intent" && llmResult.intent && llmResult.intent !== currentIntent) {
-      const mapped = MENU_MAP[llmResult.intent];
-      if (mapped) {
+      if (MENU_MAP[llmResult.intent]) {
         log.info("Mid-flow intent change detected (LLM)", { wa_id: fromWa, intent: llmResult.intent });
-        await clearConversationState(fromWa);
-        const prestaHandled = await handlePrestationFlow(fromWa, mapped, rawMsg || {});
-        if (prestaHandled) return { handled: true, redirected: true };
-        const savHandled = await handleSavFlow(fromWa, mapped, rawMsg || {});
-        if (savHandled) return { handled: true, redirected: true };
+        const redirected = await redirectMidFlow(fromWa, llmResult.intent, currentConv, rawMsg);
+        if (redirected) return { handled: true, redirected: true };
       }
     }
 
@@ -552,8 +568,8 @@ async function respondOrAnswerQuestion(fromWa, text, retryMessage, retryButtons,
 }
 
 // ====== Prestation flow (extracted to flows/prestation.js) ======
-let handlePrestationFlow, PRESTATION_INTENTS, handleSavFlow;
-({ handlePrestationFlow, PRESTATION_INTENTS } = createPrestationFlow({
+let handlePrestationFlow, PRESTATION_INTENTS, handleSavFlow, switchIntentKeepingVehicle;
+({ handlePrestationFlow, PRESTATION_INTENTS, switchIntentKeepingVehicle } = createPrestationFlow({
   supabase, log,
   sendWhatsAppText, sendWhatsAppInteractiveButtons, sendWhatsAppList: sendWhatsAppList,
   sendWhatsAppImage, sendWhatsAppVideo, sendWhatsAppLocation,

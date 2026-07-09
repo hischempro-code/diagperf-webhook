@@ -1427,7 +1427,7 @@ function createPrestationFlow(ctx) {
     return false;
   }
 
-  return { handlePrestationFlow, PRESTATION_INTENTS };
+  return { handlePrestationFlow, PRESTATION_INTENTS, switchIntentKeepingVehicle };
 }
 
 module.exports = { createPrestationFlow };
