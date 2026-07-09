@@ -69,10 +69,17 @@ console.log("✅ Confirmed:", state2.data.confirmed);
 console.log("✅ Prix:", state2.data.price_cents / 100, "€");
 console.log();
 
-// Cible invalide (n'existe pas dans VALID_STATES) → doit être rejetée (null)
-const rejected = parseRoutingInstruction({ type: "route", target: "QUOTE_CONFIRMED", intent: "REPROG", confidence: 0.9 });
-if (rejected !== null) { console.error("❌ Scénario 2b: cible invalide non rejetée"); process.exit(1); }
-console.log("✅ Cible invalide 'QUOTE_CONFIRMED' correctement rejetée (null)");
+// Cible INVENTÉE par le LLM mais intent VALIDE → rabattue sur l'état d'entrée sûr
+// (WAITING_PLATE), PAS null. Sinon le client finissait en "je n'ai pas bien saisi"
+// alors que le LLM avait compris l'intent (fix 2adec4a).
+const invented = parseRoutingInstruction({ type: "route", target: "QUOTE_CONFIRMED", intent: "REPROG", confidence: 0.9 });
+if (!invented || invented.target !== "WAITING_PLATE") { console.error("❌ Scénario 2b: cible inventée + intent valide devrait être rabattue sur WAITING_PLATE, obtenu:", invented); process.exit(1); }
+console.log("✅ Cible inventée 'QUOTE_CONFIRMED' rabattue sur WAITING_PLATE (intent REPROG conservé)");
+
+// Intent INVALIDE → là on rejette vraiment (null)
+const rejected = parseRoutingInstruction({ type: "route", target: "WAITING_PLATE", intent: "BOGUS", confidence: 0.9 });
+if (rejected !== null) { console.error("❌ Scénario 2c: intent invalide non rejeté"); process.exit(1); }
+console.log("✅ Intent invalide 'BOGUS' correctement rejeté (null)");
 console.log();
 
 // ====== Scénario 3: Format legacy (type=intent) ======

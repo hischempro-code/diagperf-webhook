@@ -68,5 +68,30 @@ check("message sans plaque → filet inactif", () => {
   assert(!(p?.valid && p?.plate));
 });
 
+console.log("🧪 detectIntentLoose — filet dégradé quand le LLM est indisponible (capture 09/07)");
+
+const { detectIntentLoose } = require("../lib/intent-detector");
+
+// Bug prod : "j'ai un problème d'AD blue" → askLLM null (réseau) → 2x "je n'ai pas
+// bien saisi". Le filet souple route désormais vers le flow AdBlue.
+check("'Bonjour j'ai un problème d'AD blue…' → ADBLUE (souple)", () => {
+  assert.strictEqual(detectIntentLoose("Bonjour j'ai un problème d'AD blue. Est-ce que vous pouvez m'aider ?"), "ADBLUE");
+});
+check("… mais detectIntent STRICT reste null (une question va au LLM en temps normal)", () => {
+  assert.strictEqual(detectIntent("Bonjour j'ai un problème d'AD blue. Est-ce que vous pouvez m'aider ?"), null);
+});
+check("'la reprog c'est fiable ?' → REPROG en souple (route si LLM mort)", () => {
+  assert.strictEqual(detectIntentLoose("la reprog c'est fiable ?"), "REPROG");
+});
+check("anti-overfitting : 'ma voiture est en panne' → null même en souple", () => {
+  assert.strictEqual(detectIntentLoose("ma voiture est en panne"), null);
+});
+check("anti-overfitting : 'bonjour' → null en souple", () => {
+  assert.strictEqual(detectIntentLoose("bonjour"), null);
+});
+check("SAV préservé en souple : 'problème depuis la reprog' → SAV", () => {
+  assert.strictEqual(detectIntentLoose("j'ai un problème depuis la reprog"), "SAV");
+});
+
 console.log(`\n${failed === 0 ? "✅" : "❌"} ${passed} réussis, ${failed} échoués`);
 process.exit(failed === 0 ? 0 : 1);

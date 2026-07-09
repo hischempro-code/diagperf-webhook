@@ -2,6 +2,7 @@ const { extractInboundText, extractInteractiveId, isGreetingOrReset, isGreeting 
 const { parseRoutingInstruction, createInitialStateFromRoute, isRoutingSafe } = require("../lib/intent-router");
 const { extractProfileSignals, updateClientProfile } = require("../lib/conversation-memory");
 const { extractAndValidatePlate } = require("../lib/plate-extractor");
+const { detectIntentLoose } = require("../lib/intent-detector");
 
 // ====== Verrou de traitement par utilisateur ======
 // Deux messages rapprochés du même client arrivent dans deux POST Meta concurrents :
@@ -343,6 +344,25 @@ function createWebhookHandler(ctx) {
             await sendWhatsAppText(fromWa, `J'ai bien noté votre plaque *${plateNet.plate}* ✅\n\nPour quelle prestation souhaitez-vous un devis ?`);
             await sendMenuList(fromWa);
             continue;
+          }
+
+          // Filet déterministe #2 : le LLM a échoué (réseau/parse/rate limit) mais le
+          // message mentionne CLAIREMENT une prestation ("problème d'AdBlue",
+          // "conversion e85") → router vers le flow au lieu de "je n'ai pas saisi".
+          // detectIntentLoose = mots-clés SANS le filtre "question" (réservé à ce cas
+          // dégradé). Constaté en prod le 09/07 : "j'ai un problème d'AD blue" → double
+          // "je n'ai pas bien saisi" car askLLM avait renvoyé null.
+          const looseIntent = detectIntentLoose(text);
+          if (looseIntent) {
+            const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+            const mapped = menuMap[looseIntent];
+            if (mapped) {
+              log.info("Fallback déterministe → intent détecté (LLM indispo)", { wa_id: fromWa, intent: looseIntent });
+              const prestaNet = await handlePrestationFlow(fromWa, mapped, msg);
+              if (prestaNet) continue;
+              const savNet = await handleSavFlow(fromWa, mapped, msg);
+              if (savNet) continue;
+            }
           }
 
           // fallback final → le LLM a échoué (erreur réseau, parse, rate limit) → clarification sans menu
