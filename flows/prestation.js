@@ -386,6 +386,15 @@ function createPrestationFlow(ctx) {
       const t = String(text || "").trim().toLowerCase();
       const newIntent = detectIntent(t);
       if (newIntent && newIntent !== intent) {
+        // Prestation à devis (même entrée WAITING_PLATE) → basculer en place en gardant
+        // les infos déjà connues (nom/email/plaque), sans repartir de zéro.
+        const CONFIRM_FLOW = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE"]);
+        if (CONFIRM_FLOW.has(newIntent)) {
+          log.info("WAITING_PLATE → changement d'intent (infos conservées)", { wa_id: fromWa, from: intent, to: newIntent });
+          await setConversationState(fromWa, "WAITING_PLATE", newIntent, pickKnown(convState.data));
+          await sendWhatsAppInteractiveButtons(fromWa, `${intentToLabel(newIntent)} ✅\nVeuillez envoyer votre plaque d'immatriculation (ex: AA 123 BB).`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+          return true;
+        }
         await clearConversationState(fromWa);
         log.info("WAITING_PLATE → changement d'intent", { wa_id: fromWa, from: intent, to: newIntent });
         const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
@@ -646,7 +655,11 @@ function createPrestationFlow(ctx) {
       }
 
       if (buttonId === "confirm_vehicle_no" || isDenial(t)) {
-        await setConversationState(fromWa, "WAITING_PLATE", intent, {});
+        // Véhicule refusé → oublier la plaque/véhicule erronés, MAIS conserver le
+        // nom/email éventuellement déjà fournis (ne pas les redemander plus tard).
+        const keep = pickKnown(stateData);
+        delete keep._known_plate; // ne pas réutiliser la plaque qui a donné le mauvais véhicule
+        await setConversationState(fromWa, "WAITING_PLATE", intent, keep);
         await sendWhatsAppInteractiveButtons(fromWa, "Pas de souci ! Veuillez renvoyer votre plaque (format AA 123 BB).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }

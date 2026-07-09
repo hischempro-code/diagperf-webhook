@@ -52,7 +52,7 @@ function makeFlow() {
     sendWhatsAppInteractiveButtons: async (to, body, buttons) => { sent.push(String(body) + " ||BTNS:" + JSON.stringify(buttons)); },
     sendWhatsAppList: async (to, body) => { sent.push(String(body)); },
     sendWhatsAppImage: asyncNoop, sendWhatsAppVideo: asyncNoop, sendWhatsAppLocation: asyncNoop,
-    setConversationState: async (waId, state, intent) => { states.push({ state, intent }); },
+    setConversationState: async (waId, state, intent, data) => { states.push({ state, intent, data: data || {} }); },
     clearConversationState: asyncNoop,
     getConversationState: async () => makeFlow._state,
     sendMenuList: async () => { menuShown = true; },
@@ -109,6 +109,28 @@ const hasPlatePrompt = (sent) => sent.some(m => /plaque|immatriculation/i.test(m
       const incompatMsg = f.sent.find(m => /non applicable|non compatible/i.test(m)) || "";
       assert.ok(/vehicle_incompat_reprog/.test(incompatMsg));
     });
+  }
+
+  console.log("🧪 Refus véhicule (❌ Non) : garde nom/email, oublie la plaque erronée");
+  {
+    const f = makeFlow();
+    makeFlow._state = { state: "WAITING_VEHICLE_CONFIRM", intent: "REPROG", data: { plate: "AA-111-BB", vehicle: DIESEL_A4, _known_name: "Dupont Jean", _known_email: "jean@gmail.com", _known_plate: "AA-111-BB" } };
+    await f.handlePrestationFlow("33600000000", "❌ Non", btnMsg("confirm_vehicle_no", "Non"));
+    const last = f.states[f.states.length - 1];
+    await check("repasse en WAITING_PLATE", () => assert.strictEqual(last.state, "WAITING_PLATE"));
+    await check("nom + email conservés", () => assert.ok(last.data._known_name === "Dupont Jean" && last.data._known_email === "jean@gmail.com", "data: " + JSON.stringify(last.data)));
+    await check("plaque erronée oubliée", () => assert.ok(!last.data._known_plate, "plaque encore présente: " + JSON.stringify(last.data)));
+  }
+
+  console.log("🧪 Changement d'intent à WAITING_PLATE : garde les infos, bascule en place");
+  {
+    const f = makeFlow();
+    makeFlow._state = { state: "WAITING_PLATE", intent: "REPROG", data: { _known_name: "Dupont Jean", _known_email: "jean@gmail.com" } };
+    await f.handlePrestationFlow("33600000000", "en fait je veux une suppression fap", { type: "text", text: { body: "en fait je veux une suppression fap" } });
+    const last = f.states[f.states.length - 1];
+    await check("reste WAITING_PLATE sous le nouvel intent FAP", () => assert.ok(last.state === "WAITING_PLATE" && last.intent === "FAP", JSON.stringify(last)));
+    await check("nom + email conservés au changement d'intent", () => assert.ok(last.data._known_name === "Dupont Jean" && last.data._known_email === "jean@gmail.com"));
+    await check("ne redemande pas via un restart menu", () => assert.ok(!f.menu()));
   }
 
   console.log(`\n${failed === 0 ? "✅" : "❌"} ${passed} réussis, ${failed} échoués`);
