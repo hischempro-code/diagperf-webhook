@@ -67,6 +67,20 @@ function pickKnown(data) {
   return k;
 }
 
+// Ne garder que les prestations alternatives réellement compatibles avec le véhicule
+// (ex: ne pas proposer "Conversion E85" à un diesel). btn_back_menu toujours conservé.
+const ALT_ID_TO_INTENT = { vehicle_incompat_reprog: "REPROG", vehicle_incompat_e85: "E85" };
+function filterAlternativesForVehicle(alternatives, vehicle, validateFn) {
+  const filtered = (alternatives || []).filter(alt => {
+    const it = ALT_ID_TO_INTENT[alt.id];
+    if (!it) return true; // btn_back_menu, etc.
+    return !validateFn(it, vehicle); // compatible = validateFn ne renvoie pas d'objet incompat
+  });
+  // Toujours garantir un accès au menu si le filtrage a tout retiré sauf des prestations
+  if (!filtered.some(a => a.id === "btn_back_menu")) filtered.push({ id: "btn_back_menu", title: "🏠 Menu" });
+  return filtered;
+}
+
 // Builds the "please provide your contact" message asking ONLY for what is still missing.
 function buildContactRequestMsg(stateData, prefix) {
   const d = stateData || {};
@@ -292,20 +306,38 @@ function createPrestationFlow(ctx) {
     return true;
   }
 
+  // Bascule vers une autre prestation en CONSERVANT le véhicule déjà identifié, pour ne
+  // PAS redemander la plaque (bug : depuis "véhicule incompatible", choisir Reprog/E85
+  // relançait le flow à zéro). Re-valide la compatibilité du nouvel intent (ex: E85 sur
+  // diesel → re-rejeté proprement, sans re-saisie de plaque).
+  async function switchIntentKeepingVehicle(fromWa, newIntent, stateData, rawMsg) {
+    const plate = stateData?.plate;
+    const vehicle = stateData?.vehicle;
+    if (plate && vehicle) {
+      const data = { ...pickKnown(stateData), plate, vehicle };
+      await setConversationState(fromWa, "WAITING_VEHICLE_CONFIRM", newIntent, data);
+      const fakeConvState = { state: "WAITING_VEHICLE_CONFIRM", intent: newIntent, data };
+      // Véhicule déjà confirmé → auto-confirmation (saute plaque + confirmation véhicule)
+      return handleLegacyPrestationStates(fromWa, "oui", rawMsg, fakeConvState, newIntent, "confirm_vehicle_yes");
+    }
+    // Sans véhicule connu → repli sur l'entrée normale du flow (redemande la plaque)
+    await clearConversationState(fromWa);
+    const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7" };
+    return handlePrestationFlow(fromWa, menuMap[newIntent] || newIntent, rawMsg);
+  }
+
   // ====== Handler: VEHICLE_INCOMPATIBLE ======
   async function handleVehicleIncompatible(fromWa, text, rawMsg, convState, intent, buttonId) {
     const stateData = convState.data || {};
     const origIntent = stateData.originalIntent || intent;
 
     if (buttonId === "vehicle_incompat_reprog") {
-      await clearConversationState(fromWa);
-      log.info("Véhicule incompat → bascule vers REPROG", { wa_id: fromWa, from: origIntent });
-      return handlePrestationFlow(fromWa, "1", rawMsg);
+      log.info("Véhicule incompat → bascule REPROG (véhicule conservé)", { wa_id: fromWa, from: origIntent });
+      return switchIntentKeepingVehicle(fromWa, "REPROG", stateData, rawMsg);
     }
     if (buttonId === "vehicle_incompat_e85") {
-      await clearConversationState(fromWa);
-      log.info("Véhicule incompat → bascule vers E85", { wa_id: fromWa, from: origIntent });
-      return handlePrestationFlow(fromWa, "2", rawMsg);
+      log.info("Véhicule incompat → bascule E85 (véhicule conservé)", { wa_id: fromWa, from: origIntent });
+      return switchIntentKeepingVehicle(fromWa, "E85", stateData, rawMsg);
     }
     if (buttonId === "btn_back_menu") {
       await clearConversationState(fromWa);
@@ -314,6 +346,12 @@ function createPrestationFlow(ctx) {
     }
     const detected = detectIntent(text);
     if (detected) {
+      // Prestations passant par WAITING_VEHICLE_CONFIRM → garder le véhicule connu
+      const CONFIRM_FLOW = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE"]);
+      if (CONFIRM_FLOW.has(detected) && stateData.plate && stateData.vehicle) {
+        log.info("Véhicule incompat → changement d'intent par texte (véhicule conservé)", { wa_id: fromWa, from: origIntent, to: detected });
+        return switchIntentKeepingVehicle(fromWa, detected, stateData, rawMsg);
+      }
       await clearConversationState(fromWa);
       const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
       return handlePrestationFlow(fromWa, menuMap[detected] || text, rawMsg);
@@ -534,7 +572,8 @@ function createPrestationFlow(ctx) {
         const incompat = validateIntentForVehicle(intent, vehicle);
         if (incompat) {
           await setConversationState(fromWa, "VEHICLE_INCOMPATIBLE", intent, { plate, vehicle, originalIntent: intent });
-          await sendWhatsAppInteractiveButtons(fromWa, `❌ ${incompat.title}\n\n${incompat.explain(vehicle)}`, incompat.alternatives);
+          const alts = filterAlternativesForVehicle(incompat.alternatives, vehicle, validateIntentForVehicle);
+          await sendWhatsAppInteractiveButtons(fromWa, `❌ ${incompat.title}\n\n${incompat.explain(vehicle)}`, alts);
           log.info("Intent refusé: véhicule incompatible", { wa_id: fromWa, intent, fuel: vehicle.fuel, plate });
           return true;
         }
