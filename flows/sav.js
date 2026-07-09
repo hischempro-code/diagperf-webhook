@@ -185,6 +185,10 @@ function createSavFlow(ctx) {
       }
 
       if (!valid) {
+        // Une question pendant la saisie de plaque mérite une réponse, pas une erreur
+        if (isLikelyQuestion(t)) {
+          return respondOrAnswerQuestion(fromWa, t, "Pour continuer, envoyez la plaque du véhicule concerné (ex: AA 001 BB) :", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+        }
         await sendWhatsAppInteractiveButtons(fromWa, "Je n'ai pas reconnu la plaque 😅\nEnvoyez-la au format AA 123 BB (avec ou sans tirets).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
       }
@@ -256,13 +260,14 @@ function createSavFlow(ctx) {
 
     // --- Étape 5 : Description → insertion ticket ---
     if (convState.state === "SAV_DESCRIPTION") {
+      // Question d'abord ("prix ?") : y répondre — le check longueur passait avant
+      // et répondait "décrivez le problème" à une question courte.
+      if (isLikelyQuestion(t)) {
+        return respondOrAnswerQuestion(fromWa, t, "Bien sûr ! Une fois répondu, décrivez votre problème en quelques lignes :", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+      }
       if (t.length < 5) {
         await sendWhatsAppInteractiveButtons(fromWa, "Merci de décrire le problème un peu plus en détail (au moins quelques mots).", [{ id: "btn_back_menu", title: "🏠 Menu" }]);
         return true;
-      }
-      // Si le client pose une question en plein milieu, répondre sans créer le ticket
-      if (isLikelyQuestion(t)) {
-        return respondOrAnswerQuestion(fromWa, t, "Bien sûr ! Une fois répondu, décrivez votre problème en quelques lignes :", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
       }
 
       const customerName = convState.data?.customer_name || "";

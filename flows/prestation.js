@@ -353,7 +353,9 @@ function createPrestationFlow(ctx) {
         const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
         return handlePrestationFlow(fromWa, menuMap[newIntent] || t, rawMsg);
       }
-      if (t.length > 10) {
+      // Question courte ("prix ?") OU message long → recours LLM. L'ancien seuil
+      // length > 10 seul faisait répondre "Je n'ai pas reconnu la plaque" à une question.
+      if (isLikelyQuestion(t) || t.length > 10) {
         try {
           const llmResult = await askLLM(text, fromWa);
           if (llmResult) {
@@ -1046,8 +1048,9 @@ function createPrestationFlow(ctx) {
       const firstName = nameParts2.slice(1).join(" ") || "";
 
       if (!email || nameParts2.length < 1) {
-        await sendWhatsAppInteractiveButtons(fromWa, `Je n'ai pas compris 😅\nVeuillez envoyer vos coordonnées au format : *Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
-        return true;
+        // Même guard que WAITING_DEVIS_CONTACT/DIAG_EMAIL/SAV_COORDINATES : une question
+        // mérite une réponse LLM avant de re-demander les coordonnées (pas un perroquet).
+        return respondOrAnswerQuestion(fromWa, text, `Pour finaliser, veuillez envoyer vos coordonnées au format : *Nom Prénom Email*\nExemple : Dupont Jean jean.dupont@gmail.com`, [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
       }
 
       const stateData = convState.data || {};
@@ -1156,7 +1159,14 @@ function createPrestationFlow(ctx) {
         } catch (llmErr) {
           log.warn("LLM fallback failed in DIAG_CHOOSE", { wa_id: fromWa, error: String(llmErr?.message || llmErr) });
         }
-        await sendWhatsAppText(fromWa, "Je n'ai pas bien saisi votre demande \ud83e\udd14 Pourriez-vous pr\u00e9ciser ?");
+        // Toujours re-proposer la liste : un texte sec sans options laissait le client
+        // dans l'\u00e9tat DIAG_CHOOSE sans savoir quoi r\u00e9pondre (semi-impasse).
+        await sendWhatsAppList(
+          fromWa,
+          "Je n'ai pas bien saisi votre demande \ud83e\udd14\n\nChoisissez le type de diagnostic souhait\u00e9 :",
+          "\ud83d\udd0d Voir les options",
+          [{ title: "Nos diagnostics", rows: DIAG_OPTIONS.map(opt => ({ id: opt.id, title: opt.title, description: `${opt.description} \u2014 ${(opt.priceTtcCents / 100).toFixed(0)}\u20ac TTC` })) }]
+        );
         return true;
       }
 
@@ -1171,14 +1181,8 @@ function createPrestationFlow(ctx) {
     if (convState.state === "DIAG_DESCRIBE" && intent === "DIAG") {
       const description = String(text || "").trim();
 
-      if (description.length < 10) {
-        await sendWhatsAppInteractiveButtons(fromWa,
-          "Merci de décrire votre problème en quelques mots 📝\n(ex: voyant moteur allumé, perte de puissance, code défaut...)",
-          [{ id: "btn_back_menu", title: "🏠 Menu" }]
-        );
-        return true;
-      }
-
+      // Question d'abord ("prix ?") : y répondre — le check longueur passait avant
+      // et répondait "décrivez votre problème" à une question courte.
       if (isLikelyQuestion(description)) {
         const fallback = await respondOrAnswerQuestion(fromWa, description,
           "Pouvez-vous décrire votre problème en quelques lignes ?",
@@ -1186,6 +1190,14 @@ function createPrestationFlow(ctx) {
           rawMsg
         );
         if (fallback) return true;
+      }
+
+      if (description.length < 10) {
+        await sendWhatsAppInteractiveButtons(fromWa,
+          "Merci de décrire votre problème en quelques mots 📝\n(ex: voyant moteur allumé, perte de puissance, code défaut...)",
+          [{ id: "btn_back_menu", title: "🏠 Menu" }]
+        );
+        return true;
       }
 
       const data = convState.data;
@@ -1240,6 +1252,10 @@ function createPrestationFlow(ctx) {
       }
 
       if (!valid) {
+        // Une question pendant la saisie de plaque mérite une réponse, pas une erreur
+        if (isLikelyQuestion(String(text || ""))) {
+          return respondOrAnswerQuestion(fromWa, text, "Pour continuer, envoyez la plaque de votre véhicule (ex: AA 123 BB) :", [{ id: "btn_back_menu", title: "🏠 Menu" }], rawMsg);
+        }
         await sendWhatsAppInteractiveButtons(fromWa,
           "Je n'ai pas reconnu la plaque 😅\nEnvoyez-la au format AA 123 BB (avec ou sans tirets).",
           [{ id: "btn_back_menu", title: "🏠 Menu" }]
