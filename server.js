@@ -634,11 +634,35 @@ log.info(`Scheduler avis client démarré (intervalle: ${REVIEW_CHECK_INTERVAL_M
 const relanceInterval = setInterval(() => runRelances().catch(err => log.error("Relance scheduler error", { error: String(err?.message || err) })), 60 * 60 * 1000);
 log.info("Scheduler relances devis démarré (intervalle: 1h)");
 
+// ====== Keep-alive anti spin-down (Render Free) ======
+// Render Free suspend le service après ~15 min sans requête ENTRANTE → au message suivant,
+// cold start 30-60s pendant lequel le webhook Meta peut timeout (message client RATÉ).
+// On s'auto-ping /health toutes les 10 min : tant que le process tourne, le timer d'inactivité
+// est remis à zéro → le service reste éveillé en permanence.
+// NB: stopgap fiable en régime établi ; si Render stoppe le process (deploy/crash), c'est
+// Render qui le relance. Le plan payant supprime le spin-down définitivement (+ IP sortante
+// fixe → règle aussi le blocage de l'API plaques). Un monitor externe (UptimeRobot) en
+// doublon reste un bon filet de sécurité.
+const KEEP_ALIVE_URL = (process.env.KEEP_ALIVE_URL || process.env.RENDER_EXTERNAL_URL || "").replace(/\/+$/, "");
+let keepAliveInterval = null;
+if (KEEP_ALIVE_URL && (process.env.NODE_ENV || "production") !== "development") {
+  const pingUrl = `${KEEP_ALIVE_URL}/health`;
+  keepAliveInterval = setInterval(() => {
+    fetchFn(pingUrl)
+      .then(r => log.debug("keep-alive ping OK", { status: r.status }))
+      .catch(err => log.warn("keep-alive ping échec", { error: String(err?.message || err) }));
+  }, 10 * 60 * 1000);
+  log.info("Keep-alive actif (auto-ping anti spin-down)", { url: pingUrl, intervalMin: 10 });
+} else {
+  log.info("Keep-alive désactivé (définir KEEP_ALIVE_URL, ou déployer sur Render qui fournit RENDER_EXTERNAL_URL)");
+}
+
 // ====== Graceful shutdown ======
 function gracefulShutdown(signal) {
   log.info(`${signal} reçu, arrêt gracieux...`);
   clearInterval(reviewInterval);
   clearInterval(relanceInterval);
+  if (keepAliveInterval) clearInterval(keepAliveInterval);
   server.close(() => {
     log.info("Serveur arrêté proprement");
     process.exit(0);
