@@ -1,6 +1,7 @@
 const { extractInboundText, extractInteractiveId, isGreetingOrReset, isGreeting } = require("../lib/text-helpers");
 const { parseRoutingInstruction, createInitialStateFromRoute, isRoutingSafe } = require("../lib/intent-router");
 const { extractProfileSignals, updateClientProfile } = require("../lib/conversation-memory");
+const { extractAndValidatePlate } = require("../lib/plate-extractor");
 
 // ====== Verrou de traitement par utilisateur ======
 // Deux messages rapprochés du même client arrivent dans deux POST Meta concurrents :
@@ -253,13 +254,24 @@ function createWebhookHandler(ctx) {
               // Cas 1 & 4 : intent ou routing avancé détecté → re-router vers le bon flow
               let routeInstruction = parseRoutingInstruction(llmResult);
               if (routeInstruction) {
-                // Safety: only apply advanced routing when LLM is confident enough.
-                // Threshold configurable via env LLM_ROUTING_MIN_CONF (default 0.9).
+                // Safety: le seuil de confiance (défaut 0.9) ne gate que les cibles PROFONDES.
+                // Une confiance basse ne jette plus tout le routage : on rabat sur l'état
+                // d'entrée sûr en CONSERVANT intent + plaque. (Avant : routeInstruction=null
+                // → aucune branche ne matchait → "Je n'ai pas bien saisi" alors que le LLM
+                // avait compris — constaté en prod le 08/07 sur "Merci DG-831-EQ".)
                 const minRoutingConf = parseFloat(process.env.LLM_ROUTING_MIN_CONF || "0.9");
                 if (routeInstruction.type === "route" && !isRoutingSafe(routeInstruction, minRoutingConf)) {
-                  log.warn("LLM routing ignored due to low confidence", { wa_id: fromWa, intent: routeInstruction.intent, target: routeInstruction.target, confidence: routeInstruction.confidence, threshold: minRoutingConf });
-                  // ignore advanced routing instruction so we fall back to safer branches
-                  routeInstruction = null;
+                  const hasPlate = !!routeInstruction.data?.plate;
+                  // Plancher absolu : confiance < 0.5 sans plaque extraite = signal trop
+                  // faible → on laisse les branches answer/fallback prendre le relais.
+                  if ((routeInstruction.confidence || 0) < 0.5 && !hasPlate) {
+                    log.warn("LLM routing ignored (confidence trop basse, pas de plaque)", { wa_id: fromWa, intent: routeInstruction.intent, confidence: routeInstruction.confidence });
+                    routeInstruction = null;
+                  } else {
+                    const downgraded = routeInstruction.intent === "SAV" ? "SAV_TOPIC" : "WAITING_PLATE";
+                    log.info("LLM routing → confiance basse, rabattu sur état d'entrée", { wa_id: fromWa, intent: routeInstruction.intent, from: routeInstruction.target, to: downgraded, confidence: routeInstruction.confidence });
+                    routeInstruction.target = downgraded;
+                  }
                 }
                 // Si c'est un routing avancé avec état cible et data → créer l'état directement
                 if (routeInstruction && routeInstruction.type === "route" && routeInstruction.target) {
@@ -320,6 +332,17 @@ function createWebhookHandler(ctx) {
             }
           } catch (llmErr) {
             log.error("LLM fallback error", { wa_id: fromWa, error: String(llmErr?.message || llmErr) });
+          }
+
+          // Filet déterministe : le message contient une plaque valide mais aucun intent
+          // n'a pu être établi (LLM en panne, réponse rejetée…) → ne JAMAIS répondre
+          // "je n'ai pas saisi" à une plaque : accuser réception + proposer le menu.
+          const plateNet = extractAndValidatePlate(text);
+          if (plateNet?.valid && plateNet?.plate) {
+            log.info("Fallback plaque détectée → menu prestations", { wa_id: fromWa, plate: plateNet.plate });
+            await sendWhatsAppText(fromWa, `J'ai bien noté votre plaque *${plateNet.plate}* ✅\n\nPour quelle prestation souhaitez-vous un devis ?`);
+            await sendMenuList(fromWa);
+            continue;
           }
 
           // fallback final → le LLM a échoué (erreur réseau, parse, rate limit) → clarification sans menu
