@@ -1,0 +1,3791 @@
+{
+  "meta": {
+    "model": "claude-haiku-4-5",
+    "judge": "claude-haiku-4-5",
+    "date": "2026-06-17T09:05:52.976Z"
+  },
+  "summary": [
+    {
+      "condition": "A-V1",
+      "label": "V1 historique (prompt baké, sans RAG)",
+      "n": 31,
+      "answeredPct": "97",
+      "detPassPct": "81",
+      "exactMean": "0.79",
+      "hallucinations": 6,
+      "latP50": 2553,
+      "latMean": 2479,
+      "tokensIn": 100857,
+      "tokensOut": 4948,
+      "costUsdTotal": "0.1256",
+      "costUsdPerQ": "0.00405"
+    },
+    {
+      "condition": "A-V2",
+      "label": "V2 livré (prompt baké + RAG)",
+      "n": 31,
+      "answeredPct": "100",
+      "detPassPct": "90",
+      "exactMean": "0.95",
+      "hallucinations": 3,
+      "latP50": 2048,
+      "latMean": 2102,
+      "tokensIn": 30691,
+      "tokensOut": 5092,
+      "costUsdTotal": "0.0760",
+      "costUsdPerQ": "0.00245"
+    },
+    {
+      "condition": "B-noRAG",
+      "label": "Ablation : prompt dépouillé, sans RAG",
+      "n": 31,
+      "answeredPct": "100",
+      "detPassPct": "48",
+      "exactMean": "0.50",
+      "hallucinations": 1,
+      "latP50": 1963,
+      "latMean": 2167,
+      "tokensIn": 35416,
+      "tokensOut": 4380,
+      "costUsdTotal": "0.0573",
+      "costUsdPerQ": "0.00185"
+    },
+    {
+      "condition": "B-RAG",
+      "label": "Ablation : prompt dépouillé + RAG",
+      "n": 31,
+      "answeredPct": "97",
+      "detPassPct": "94",
+      "exactMean": "0.97",
+      "hallucinations": 0,
+      "latP50": 1968,
+      "latMean": 2028,
+      "tokensIn": 65225,
+      "tokensOut": 4368,
+      "costUsdTotal": "0.0871",
+      "costUsdPerQ": "0.00281"
+    }
+  ],
+  "records": [
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "C'est combien la reprog stage 1 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprog Stage 1, c'est *390€ TTC* pour les moteurs essence <400ch et <2018. Au-delà, c'est sur devis personnalisé selon ta motorisation.\n\nC'est garanti 2 ans, et ça te donne des gains de puissance et couple sans abîmer ton moteur — on reste dans les marges mécaniques d'origine.\n\nC'est quoi ton véhicule ? Je peux te confirmer le tarif exact et te proposer un devis gratuit 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant annonce correctement 390€ TTC pour Stage 1 avec les conditions exactes (<400ch et <2018). Il précise aussi que c'est sur devis au-delà, ce qui correspond à la vérité-terrain. Aucune hallucination détectée.",
+      "latencyMs": 2584,
+      "tokens": {
+        "input": 3244,
+        "output": 159,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004039,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "C'est combien la reprog stage 1 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprogrammation Stage 1 coûte *390€ TTC* pour les véhicules de moins de 400ch et avant 2018. Pour les véhicules plus récents (≥ 2018) ou plus puissants (≥ 400ch), c'est sur devis personnalisé.\n\nLe devis est gratuit et sans engagement. Vous avez une plaque à me communiquer pour affiner l'estimation ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant annonce correctement 390€ TTC pour Stage 1 (<400ch et <2018), précise que c'est sur devis pour les autres cas, et ajoute une information utile sur la gratuité du devis. Réponse exacte et complète.",
+      "latencyMs": 1977,
+      "tokens": {
+        "input": 1153,
+        "output": 136,
+        "cacheRead": 0,
+        "cacheWrite": 4680
+      },
+      "costUsd": 0.007683,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2992,
+        "topScore": 0.736193423091012
+      }
+    },
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "C'est combien la reprog stage 1 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Le prix de la reprogrammation Stage 1 dépend de votre véhicule (marque, modèle, motorisation). Je vais vérifier les tarifs précis pour vous proposer un devis personnalisé. Pouvez-vous me donner les caractéristiques de votre auto (marque, modèle, année, motorisation) ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne fournit pas le prix de 390€ TTC pour Stage 1 (<400ch et <2018) comme requis. Il demande des informations au lieu de donner la réponse directe attendue. Bien que techniquement correct (pas de prix faux annoncé), il ne satisfait pas le critère d'évaluation qui exige l'annonce de 390€ TTC.",
+      "latencyMs": 1456,
+      "tokens": {
+        "input": 1133,
+        "output": 118,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001723,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "C'est combien la reprog stage 1 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprogrammation Stage 1 coûte *390€ TTC* pour les véhicules de moins de 400ch et avant 2018. Pour les véhicules plus récents (≥ 2018) ou plus puissants (≥ 400ch), c'est sur devis personnalisé — le devis est gratuit et sans engagement.\n\nQuel est votre véhicule ? Je peux vous dire si vous êtes dans le tarif fixe ou si je dois vous proposer un devis.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant annonce correctement 390€ TTC pour Stage 1 (<400ch et <2018), précise que c'est sur devis pour les autres cas, et propose une aide personnalisée. Réponse exacte et complète.",
+      "latencyMs": 1905,
+      "tokens": {
+        "input": 2267,
+        "output": 151,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003022,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2992,
+        "topScore": 0.736193423091012
+      }
+    },
+    {
+      "id": "Q02",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "Le passage à l'éthanol ça coûte combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La conversion E85 (éthanol) c'est *490€ TTC* pour les véhicules essence de moins de 2020. Au-delà, c'est sur devis personnalisé.\n\nAvec ça tu gagnes en puissance, en couple, et tu divises ta facture carburant par 2 (l'E85 coûte moitié moins cher que l'essence). Garantie 2 ans incluse.\n\nC'est quoi ton véhicule ? Je peux vérifier la compatibilité et te faire un devis exact 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant annonce correctement 490€ TTC pour les véhicules essence < 2020 et précise que c'est sur devis au-delà. Les informations complémentaires (puissance, économies carburant, garantie) sont pertinentes et ne contredisent pas la vérité-terrain. Aucune hallucination détectée.",
+      "latencyMs": 2676,
+      "tokens": {
+        "input": 3247,
+        "output": 171,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004102,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q02",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "Le passage à l'éthanol ça coûte combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La conversion E85 coûte *490€ TTC* pour les véhicules essence de moins de 2020. C'est un investissement qui s'amortit rapidement : le E85 coûte environ 0.75€/L contre 1.80€/L pour le SP95, soit environ *40€ d'économie par mois*. Vous avez une essence compatible, ou vous hésitez encore ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant annonce correctement 490€ TTC pour la conversion E85 sur véhicules essence < 2020, conforme à la vérité-terrain. Les informations complémentaires sur les économies de carburant sont contextuelles et ne contredisent pas le critère principal.",
+      "latencyMs": 1494,
+      "tokens": {
+        "input": 885,
+        "output": 129,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001998,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2303,
+        "topScore": 0.587396211799642
+      }
+    },
+    {
+      "id": "Q02",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "Le passage à l'éthanol ça coûte combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Le coût de la conversion E85 dépend de votre véhicule et de son état actuel. Je vérifie les tarifs précis pour votre modèle — pouvez-vous me donner la marque, le modèle et l'année de votre auto ? Cela me permettra de vous proposer un devis personnalisé adapté à votre situation. 🚗",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant n'annonce pas le tarif de 490€ TTC pour essence <2020 comme requis. Il demande des informations supplémentaires au lieu de fournir la réponse directe attendue. Bien que la réponse ne soit pas fausse, elle ne satisfait pas le critère d'évaluation qui exige l'annonce du prix spécifique.",
+      "latencyMs": 1680,
+      "tokens": {
+        "input": 1136,
+        "output": 125,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001761,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q02",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "Le passage à l'éthanol ça coûte combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La conversion E85 coûte *490€ TTC* pour les véhicules essence de moins de 2020. Pour les modèles plus récents (à partir de 2020), je vous propose un devis personnalisé selon votre véhicule.\n\nVous avez un projet de passage à l'éthanol ? Quel est votre modèle et son année ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement 490€ TTC pour les véhicules essence < 2020 et propose un devis pour les modèles plus récents, conformément à la vérité-terrain. Aucune information erronée ou inventée.",
+      "latencyMs": 1577,
+      "tokens": {
+        "input": 1999,
+        "output": 119,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002594,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2303,
+        "topScore": 0.587396211799642
+      }
+    },
+    {
+      "id": "Q03",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "Prix pour enlever le FAP sur un diesel de 2021 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pour un diesel de 2021, la suppression FAP c'est *300€* TTC. C'est une intervention rapide (30-45 min), et tu gardes la garantie 2 ans dessus. Ça supprime les problèmes de régénération et les voyants FAP saturé. Tu veux qu'on te fasse un devis ou tu as d'autres questions ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "Le prix annoncé (300€ TTC) est exact pour un diesel de 2021 (≥2019). L'assistant applique correctement le palier tarifaire. Les informations complémentaires (durée, garantie, bénéfices) sont pertinentes et ne contredisent pas la vérité-terrain. Aucune hallucination détectée.",
+      "latencyMs": 1984,
+      "tokens": {
+        "input": 3247,
+        "output": 119,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003842,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q03",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "Prix pour enlever le FAP sur un diesel de 2021 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pour un diesel de 2021, la suppression FAP coûte *300€ TTC*. L'intervention dure environ 1h à 1h30. Vous pouvez aussi ajouter la suppression mécanique du filtre (+250€) pour éliminer tout risque de colmatage futur. Voulez-vous lancer un devis ou avez-vous d'autres questions ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement 300€ TTC pour un diesel 2021, ce qui correspond exactement à la vérité-terrain (diesel ≥2019). Les informations complémentaires (durée, option suppression mécanique) ne contredisent pas la vérité-terrain et enrichissent la réponse de manière pertinente.",
+      "latencyMs": 1702,
+      "tokens": {
+        "input": 1188,
+        "output": 121,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002261,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3005,
+        "topScore": 0.567472975849145
+      }
+    },
+    {
+      "id": "Q03",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "Prix pour enlever le FAP sur un diesel de 2021 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Merci pour votre question ! Le prix de suppression FAP dépend du modèle de votre véhicule et de sa configuration. Je vais vérifier les tarifs exacts pour votre diesel 2021.\n\nPouvez-vous me préciser la marque et le modèle de votre véhicule ? Cela me permettra de vous proposer un devis précis.",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne fournit pas de réponse à la question posée. Bien qu'il ne dise rien de faux, il demande des informations supplémentaires (marque/modèle) alors que la question est suffisamment précise (diesel 2021). La vérité-terrain indique clairement 300€ TTC pour tout diesel ≥2019. L'assistant aurait dû donner cette réponse directe au lieu de repousser la question.",
+      "latencyMs": 1597,
+      "tokens": {
+        "input": 1136,
+        "output": 121,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001741,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q03",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "Prix pour enlever le FAP sur un diesel de 2021 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pour un diesel de 2021, la suppression FAP coûte *300€ TTC*. Cette intervention dure environ 1h à 1h30 et élimine les problèmes de colmatage, perte de puissance et voyants moteur liés au filtre à particules.\n\nVous souhaitez en savoir plus ou programmer cette intervention ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement 300€ TTC pour un diesel de 2021, ce qui correspond exactement à la vérité-terrain (diesel ≥2019). Les informations complémentaires sur la durée et les bénéfices sont pertinentes et ne contredisent pas la vérité-terrain.",
+      "latencyMs": 1755,
+      "tokens": {
+        "input": 2302,
+        "output": 114,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002872,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3005,
+        "topScore": 0.567472975849145
+      }
+    },
+    {
+      "id": "Q04",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "Combien pour enlever la vanne EGR ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La suppression EGR, c'est *sur devis personnalisé* car ça dépend de ton moteur et de la complexité d'accès. Généralement entre 150€ et 300€ TTC.\n\nTu as quel véhicule ? Je peux te faire une estimation plus précise. Et c'est pour résoudre un problème (voyant moteur, perte de puissance) ou juste de l'optimisation ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond 'sur devis' avec fourchette 150-300€, alors que la vérité-terrain est un prix fixe de 190€ TTC. Cela constitue une régression par rapport à la V1 historique. Le prix annoncé n'est pas faux (190€ est dans la fourchette), mais l'absence de prix fixe et la demande de précisions supplémentaires contredisent directement le critère d'évaluation qui exige l'annonce de 190€ comme tarif principal.",
+      "latencyMs": 2183,
+      "tokens": {
+        "input": 3244,
+        "output": 136,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003924,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q04",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "Combien pour enlever la vanne EGR ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La suppression logicielle EGR coûte *190€ TTC* en prestation principale. Si vous la faites en complément d'une suppression FAP ou AdBlue, c'est seulement *+90€ TTC*. L'intervention dure environ 1h.\n\nVous avez un problème d'EGR sur votre diesel ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement 190€ TTC en prestation principale et +90€ en add-on avec FAP/AdBlue, conformément à la vérité-terrain. Les informations sont exactes et complètes. Aucune hallucination détectée.",
+      "latencyMs": 1535,
+      "tokens": {
+        "input": 1063,
+        "output": 115,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002106,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2796,
+        "topScore": 0.586954496901476
+      }
+    },
+    {
+      "id": "Q04",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "Combien pour enlever la vanne EGR ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bonne question ! Le retrait de la vanne EGR est une intervention que nous maîtrisons bien. Cependant, le tarif dépend de votre véhicule (marque, modèle, motorisation) et de la complexité d'accès sur votre moteur.\n\nJe vais transmettre votre demande à l'équipe pour vous proposer un devis précis. Pouvez-vous me donner la marque, le modèle et l'année de votre véhicule ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne fournit pas le prix de 190€ TTC annoncé comme vérité-terrain. Il demande un devis au lieu de communiquer le tarif fixe. Cela constitue une régression par rapport à la V1 historique et ne satisfait pas le critère d'évaluation qui exige l'annonce de 190€ pour la suppression EGR.",
+      "latencyMs": 1922,
+      "tokens": {
+        "input": 1133,
+        "output": 154,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001903,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q04",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "Combien pour enlever la vanne EGR ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La suppression logicielle EGR coûte *190€ TTC* en prestation principale. Si vous la combinez avec une autre intervention (FAP ou AdBlue par exemple), elle passe à *+90€ TTC* seulement. La durée est d'environ 1h.\n\nVotre véhicule est diesel ? Et avez-vous d'autres problèmes à régler en même temps ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement 190€ TTC en prestation principale et +90€ en add-on avec FAP/AdBlue, conformément à la vérité-terrain. Les informations sont exactes et complètes. L'assistant ajoute des détails pertinents (durée 1h) et pose des questions de qualification appropriées sans inventer de faux éléments.",
+      "latencyMs": 2535,
+      "tokens": {
+        "input": 2177,
+        "output": 127,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002812,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2796,
+        "topScore": 0.586954496901476
+      }
+    },
+    {
+      "id": "Q05",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "Vos tarifs de diagnostic c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "On propose 3 niveaux de diagnostic selon ce que tu cherches :\n\n🔍 *Diagnostic simple* : 50€ (20 min) → lecture codes défauts, état général\n🔍 *Diagnostic approfondi* : 80€ (35 min) → analyse complète, capteurs, systèmes\n🔍 *Recherche panne* : 130€ (1h) → investigation poussée pour trouver la source\n\nTous les diagnostics sont sans engagement. Si tu décides de faire une reprog ou une suppression après, on peut déduire le coût du diagnostic du devis final.\n\nTu as un voyant moteur ou une panne spécifique ? Je peux te conseiller le bon niveau 👍",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant fournit les 3 paliers tarifaires exacts (50€, 80€, 130€) avec les bonnes dénominations. Les informations supplémentaires (durées, descriptions, conditions de déduction) enrichissent la réponse sans contredire la vérité-terrain. Aucune invention de prix ou omission de palier.",
+      "latencyMs": 2915,
+      "tokens": {
+        "input": 3244,
+        "output": 217,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004329,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q05",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "Vos tarifs de diagnostic c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Nous proposons 3 niveaux de diagnostic :\n\n🔍 *Diagnostic simple* (50€) : lecture + effacement des codes, 20 min. Idéal pour un contrôle rapide.\n\n🔍 *Diagnostic approfondi* (80€) : interprétation détaillée + remise à zéro des compteurs, 35 min. Pour comprendre précisément le problème.\n\n🔍 *Recherche de panne* (130€) : diagnostic complet avec tests en temps réel, 1h. Pour les problèmes complexes ou récurrents.\n\nQuel est votre besoin ? Vous avez un voyant moteur ou un symptôme particulier ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse fournit les 3 paliers tarifaires exacts (50€, 80€, 130€) avec les bonnes descriptions. Aucun prix inventé ou manquant. Format clair et engageant avec détails pertinents sur la durée et l'utilité de chaque service.",
+      "latencyMs": 2451,
+      "tokens": {
+        "input": 985,
+        "output": 207,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002488,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2677,
+        "topScore": 0.577583036494821
+      }
+    },
+    {
+      "id": "Q05",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "Vos tarifs de diagnostic c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Je vérifie nos tarifs de diagnostic actuels pour vous et je vous les transmets rapidement. Pouvez-vous me préciser le type de diagnostic qui vous intéresse ? (diagnostic général OBD, diagnostic moteur, diagnostic électrique, etc.) Cela m'aidera à vous donner l'information la plus précise.",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant n'a pas fourni les tarifs demandés. Il demande une clarification au lieu de donner directement les 3 paliers (50€/80€/130€) comme l'exige le critère. C'est une non-réponse à la question posée.",
+      "latencyMs": 1689,
+      "tokens": {
+        "input": 1133,
+        "output": 107,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001668,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q05",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "Vos tarifs de diagnostic c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Nous proposons trois niveaux de diagnostic :\n\n• *Diagnostic simple* : **50€ TTC** (lecture + effacement codes, 20 min)\n• *Diagnostic approfondi* : **80€ TTC** (interprétation détaillée + remise à zéro, 35 min)\n• *Recherche de panne* : **130€ TTC** (diagnostic complet avec tests, 1h)\n\nQuel est votre besoin ? Vous avez un voyant allumé ou vous voulez un contrôle général ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "Les trois paliers tarifaires sont exactement conformes à la vérité-terrain (50€, 80€, 130€). Les descriptions ajoutées (durée, détails des services) enrichissent sans contredire. Aucun prix inventé ni omission.",
+      "latencyMs": 3951,
+      "tokens": {
+        "input": 2099,
+        "output": 165,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002924,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2677,
+        "topScore": 0.577583036494821
+      }
+    },
+    {
+      "id": "Q06",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "Les bougies éthanol c'est en supplément ? combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Ouais, les bougies éthanol c'est un add-on ! Elles coûtent *+170€* TTC. C'est fortement recommandé si tu passes à l'E85, ça garantit un démarrage optimal et une meilleure combustion avec le carburant éthanol.\n\nTu envisages de passer à l'E85 ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant indique correctement +170€ pour les bougies éthanol, ce qui correspond exactement à la vérité-terrain. L'information est précise, complète et sans hallucination.",
+      "latencyMs": 1718,
+      "tokens": {
+        "input": 3248,
+        "output": 120,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003848,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q06",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "Les bougies éthanol c'est en supplément ? combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, les bougies éthanol sont en supplément : *+170€ TTC*. Elles sont fortement recommandées avec la conversion E85 pour un démarrage optimal à froid et une combustion parfaite. Sans elles, vous risquez des difficultés de démarrage, surtout en hiver.\n\nVous envisagez la conversion E85 ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant indique correctement +170€ pour les bougies éthanol en option avec la conversion E85, correspondant exactement à la vérité-terrain. Les informations complémentaires sur les bénéfices (démarrage à froid, combustion) sont pertinentes et ne contredisent pas la source.",
+      "latencyMs": 1592,
+      "tokens": {
+        "input": 1040,
+        "output": 121,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002113,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2687,
+        "topScore": 0.590091626412429
+      }
+    },
+    {
+      "id": "Q06",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "Les bougies éthanol c'est en supplément ? combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Je vérifie cette information pour vous concernant le tarif des bougies éthanol en supplément. C'est une excellente question, mais je n'ai pas ce détail en base. Je vais transmettre votre demande à l'équipe DiagPerf qui vous confirmera le coût exact.\n\nVous envisagez une reprogrammation E85 ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant n'a pas fourni l'information demandée (+170€). Il reconnaît ne pas avoir le détail en base et propose de transmettre à l'équipe, ce qui est honnête mais ne répond pas à la question. Pas d'hallucination (aucun prix inventé), mais absence totale de réponse au critère d'évaluation qui exige l'indication de +170€.",
+      "latencyMs": 3505,
+      "tokens": {
+        "input": 1137,
+        "output": 116,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001717,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q06",
+      "category": "prix",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "Les bougies éthanol c'est en supplément ? combien ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, les bougies éthanol sont en supplément : *+170€ TTC*. Elles sont fortement recommandées avec la conversion E85 pour un meilleur démarrage à froid et une combustion optimale du moteur.\n\nVous envisagez de passer à l'E85 ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant indique correctement +170€ pour les bougies éthanol en option avec la conversion E85, conforme à la vérité-terrain. Les informations complémentaires sur le démarrage à froid et la combustion sont pertinentes et ne contredisent pas la source.",
+      "latencyMs": 1297,
+      "tokens": {
+        "input": 2154,
+        "output": 106,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002684,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2687,
+        "topScore": 0.590091626412429
+      }
+    },
+    {
+      "id": "Q07",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "Je peux passer ma Golf TDI à l'E85 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, malheureusement l'E85 c'est réservé aux moteurs essence. Ton TDI diesel n'est pas compatible avec le carburant éthanol.\n\nPar contre, on peut te proposer une *reprogrammation Stage 1* pour gagner de la puissance et du couple, ou une *suppression FAP/EGR/AdBlue* si tu cherches à optimiser ton diesel. C'est quoi ton objectif : plus de puissance, moins de consommation, ou tu as un voyant moteur ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement l'E85 (essence uniquement) pour un TDI (diesel), explique l'incompatibilité et propose des alternatives appropriées (reprog Stage 1, suppression FAP/EGR/AdBlue). Réponse exacte, complète et sans hallucination.",
+      "latencyMs": 2490,
+      "tokens": {
+        "input": 3248,
+        "output": 157,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004033,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q07",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "Je peux passer ma Golf TDI à l'E85 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, malheureusement pas. L'E85 est réservé aux véhicules *essence* uniquement — votre Golf TDI est diesel, et le bioéthanol est incompatible avec ce type de moteur.\n\nEn revanche, on peut vous proposer une *reprogrammation Stage 1* pour améliorer la puissance et le couple de votre TDI, ou une *suppression FAP/EGR/AdBlue* si vous cherchez à optimiser les performances et la consommation. Quel kilométrage a votre Golf ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement l'E85 (essence uniquement) pour un TDI (diesel), explique clairement l'incompatibilité, et propose une alternative pertinente (reprogrammation Stage 1 ou suppression FAP/EGR/AdBlue). Réponse exacte, complète et sans hallucination.",
+      "latencyMs": 1934,
+      "tokens": {
+        "input": 1005,
+        "output": 163,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002288,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2850,
+        "topScore": 0.563094586789868
+      }
+    },
+    {
+      "id": "Q07",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "Je peux passer ma Golf TDI à l'E85 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bonne question ! La compatibilité E85 dépend de votre moteur TDI spécifique et de son année. Les TDI diesel ne sont généralement pas compatibles avec l'E85 (carburant essence), mais je vais vérifier les détails techniques pour votre Golf.\n\nPouvez-vous me donner l'année et la cylindrée de votre TDI ? Je transmettrai votre demande à l'équipe pour une réponse précise.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant reconnaît correctement que les TDI diesel ne sont pas compatibles avec l'E85 (essence). Cependant, il ne propose pas la solution alternative (reprog diesel) mentionnée dans la vérité-terrain. La réponse demande des détails supplémentaires au lieu de donner une orientation claire et directe. Partiellement correct mais incomplet.",
+      "latencyMs": 1967,
+      "tokens": {
+        "input": 1137,
+        "output": 144,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001857,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q07",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "Je peux passer ma Golf TDI à l'E85 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, malheureusement pas. Votre Golf TDI est un diesel, et la conversion E85 est exclusivement réservée aux véhicules essence. Le bioéthanol est incompatible avec un moteur diesel.\n\nEn revanche, nous pouvons vous proposer d'autres prestations pour améliorer votre TDI : reprogrammation Stage 1 pour plus de puissance, ou suppression FAP/EGR/AdBlue. Ça vous intéresse ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement la conversion E85 (essence uniquement), identifie précisément que le TDI est diesel, explique l'incompatibilité, et propose une alternative pertinente (reprogrammation diesel). Réponse exacte et complète conforme à la vérité-terrain.",
+      "latencyMs": 1814,
+      "tokens": {
+        "input": 2119,
+        "output": 147,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002854,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2850,
+        "topScore": 0.563094586789868
+      }
+    },
+    {
+      "id": "Q08",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "E85 possible sur une 208 PureTech essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, c'est possible ! La 208 PureTech essence est compatible E85. On peut la convertir en Flexfuel pour que tu roules à l'éthanol (moins cher à la pompe) tout en gardant l'essence en secours.\n\nLe prix dépend de l'année : *490€* si c'est avant 2020, sinon sur devis. La garantie est de *2 ans*.\n\nJe te conseille aussi les *bougies éthanol* (+170€) pour un démarrage optimal en E85.\n\nC'est quoi l'année de ta 208 ? Je peux te faire un devis précis.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "La réponse affirme correctement que la 208 PureTech essence est compatible E85, ce qui correspond à la vérité-terrain. Cependant, elle contient des hallucinations : les prix spécifiques (490€, 170€) et la distinction avant/après 2020 ne sont pas vérifiables et semblent inventés. La mention des 'bougies éthanol' comme accessoire obligatoire est également douteuse. La réponse aurait dû rester générique et renvoyer systématiquement à un devis sans donner de chiffres précis non sourcés.",
+      "latencyMs": 2751,
+      "tokens": {
+        "input": 3246,
+        "output": 193,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004211,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q08",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "E85 possible sur une 208 PureTech essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, tout à fait ! 🎯 La Peugeot 208 PureTech essence est parfaitement compatible avec la conversion E85. On reprogramme le calculateur pour accepter le bioéthanol, et vous gardez la compatibilité SP95/SP98. Vous économiserez environ 40€/mois en carburant.\n\nLa prestation coûte *490€* (garantie 2 ans incluse), durée 1h30. Je vous recommande aussi les bougies éthanol (+170€) pour un démarrage optimal.\n\nVoulez-vous lancer un devis ou avez-vous d'autres questions ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "La réponse confirme correctement la compatibilité E85 sur PureTech essence, ce qui est exact. Cependant, elle présente plusieurs problèmes : (1) elle affirme des prix spécifiques (490€, 170€) et des économies (40€/mois) sans source vérifiable - ces chiffres sont potentiellement inventés/hallucinations ; (2) elle propose directement une prestation commerciale au lieu de simplement confirmer la compatibilité et recommander un devis comme indiqué dans la vérité-terrain ; (3) elle omet la mention explicite 'à confirmer par devis' qui est essentielle. La réponse dépasse le cadre d'une simple confirmation technique.",
+      "latencyMs": 2492,
+      "tokens": {
+        "input": 950,
+        "output": 188,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002358,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2674,
+        "topScore": 0.542957772680378
+      }
+    },
+    {
+      "id": "Q08",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "E85 possible sur une 208 PureTech essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! La compatibilité E85 dépend vraiment du moteur spécifique de votre 208 PureTech. Certaines versions essence peuvent être reprogrammées pour l'E85, mais pas toutes — il faut vérifier la motorisation exacte.\n\nJe vais transmettre votre demande à l'équipe DiagPerf pour qu'ils analysent votre véhicule en détail. Pouvez-vous me donner l'année et la cylindrée de votre 208 (ex: 1.2 PureTech 110ch) ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne refuse pas à tort (bon), mais reste trop vague. La vérité-terrain affirme que PureTech essence = E85 compatible. L'assistant devrait confirmer cette compatibilité de base et demander les détails pour affiner, plutôt que de laisser entendre que 'pas toutes' les versions sont compatibles. La réponse est prudente mais imprécise par rapport à la certitude attendue.",
+      "latencyMs": 2768,
+      "tokens": {
+        "input": 1135,
+        "output": 174,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002005,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q08",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "E85 possible sur une 208 PureTech essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, la conversion E85 est tout à fait possible sur une 208 PureTech essence ! 🚗 Nous reprogrammons le calculateur moteur pour que votre véhicule accepte le Superéthanol E85, qui coûte environ 2 fois moins cher que le SP95/SP98. Vous resterez compatible avec l'essence classique aussi.\n\nVous seriez intéressé pour en savoir plus sur le tarif et les modalités ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse confirme correctement que la conversion E85 est possible sur une 208 PureTech essence, en accord avec la vérité-terrain. Elle mentionne la reprogrammation du calculateur et la compatibilité rétroactive avec l'essence, ce qui est exact. La proposition de devis est appropriée. Aucune information fausse détectée.",
+      "latencyMs": 1891,
+      "tokens": {
+        "input": 2064,
+        "output": 145,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002789,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2674,
+        "topScore": 0.542957772680378
+      }
+    },
+    {
+      "id": "Q09",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "Vous faites la reprogrammation sur une voiture électrique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, on ne fait pas de reprog sur électrique. Notre spécialité, c'est les moteurs thermiques (essence et diesel) : reprogrammation Stage 1, conversion E85, suppression FAP/EGR/AdBlue.\n\nPour une électrique, il n'y a pas de calculateur moteur à optimiser comme sur un thermique. Si tu as besoin d'un diagnostic ou d'une autre prestation sur ta voiture électrique, je peux te conseiller, mais la reprog n'est pas possible.\n\nTu as une électrique ou tu cherches plutôt pour un thermique ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement la reprogrammation sur électrique, explique pourquoi (pas de calculateur moteur à optimiser), précise sa spécialité (thermique), et propose une réorientation constructive. Réponse conforme à la vérité-terrain.",
+      "latencyMs": 3112,
+      "tokens": {
+        "input": 3247,
+        "output": 174,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004117,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q09",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "Vous faites la reprogrammation sur une voiture électrique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, malheureusement la reprogrammation moteur ne s'applique pas aux véhicules électriques. Nos prestations (Stage 1, E85, suppressions FAP/EGR/AdBlue) concernent exclusivement les moteurs thermiques (essence et diesel).\n\nPour un véhicule électrique, je vous recommande de contacter un spécialiste en électromobilité qui pourra vous proposer des optimisations adaptées (batterie, moteur électrique, etc.).\n\nSi vous aviez un projet sur un moteur essence ou diesel, on serait ravi de vous aider ! 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse refuse correctement la prestation sur électrique, explique pourquoi (incompatibilité avec moteurs thermiques), oriente vers un spécialiste, et propose une alternative pour les moteurs essence/diesel. Conforme à la vérité-terrain.",
+      "latencyMs": 2304,
+      "tokens": {
+        "input": 947,
+        "output": 182,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002325,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2758,
+        "topScore": 0.538731316152896
+      }
+    },
+    {
+      "id": "Q09",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "Vous faites la reprogrammation sur une voiture électrique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, nous ne proposons pas de reprogrammation sur véhicules électriques. Notre spécialité porte sur les moteurs thermiques (essence et diesel) : reprogrammation moteur, suppression de systèmes polluants (FAP, EGR, AdBlue), conversion E85, et diagnostic automobile.\n\nVotre véhicule est électrique ou vous envisagez une intervention sur un autre auto ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement la prestation sur électrique, explique clairement les domaines de compétence (moteurs thermiques), et oriente le client vers ses besoins réels. Réponse conforme à la vérité-terrain.",
+      "latencyMs": 2229,
+      "tokens": {
+        "input": 1136,
+        "output": 128,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001776,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q09",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "Vous faites la reprogrammation sur une voiture électrique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, la reprogrammation moteur ne concerne que les véhicules essence et diesel. Les voitures électriques fonctionnent sur un principe complètement différent (moteur électrique, pas de calculateur moteur à reprogrammer).\n\nEn revanche, si vous avez un véhicule thermique (essence ou diesel), on peut tout à fait vous proposer une reprogrammation pour gagner en puissance et en couple. Vous avez un projet en tête ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement la reprogrammation sur électrique, explique pourquoi (moteur électrique, pas de calculateur moteur), et réoriente vers les véhicules thermiques compatibles. Réponse exacte et complète conforme à la vérité-terrain.",
+      "latencyMs": 2214,
+      "tokens": {
+        "input": 2061,
+        "output": 142,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002771,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2758,
+        "topScore": 0.538731316152896
+      }
+    },
+    {
+      "id": "Q10",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "Stage 1 sur un 2.0 TDI, ça marche ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Alors là, petite correction importante : le Stage 1, c'est notre spécialité en *reprogrammation essence*. Sur un 2.0 TDI (diesel), on ne fait pas de Stage 1 classique.\n\nPar contre, on a des solutions diesel tout aussi intéressantes :\n• *Suppression FAP* (260-300€) : regain de puissance, moins d'encrassement\n• *Suppression EGR* : améliore la fiabilité et la puissance\n• *Suppression AdBlue* : si tu veux t'en passer\n\nTon TDI, c'est quel modèle et année ? Je peux te proposer un diagnostic ou un devis personnalisé selon ce que tu cherches (gain de puissance, économies, fiabilité).",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": true,
+      "judge_reason": "L'assistant affirme à tort que le Stage 1 ne fonctionne pas sur 2.0 TDI diesel, ce qui contredit la vérité-terrain. Le critère d'évaluation stipule clairement que refuser Stage 1 sur diesel turbo = erreur. L'assistant refuse la demande en prétendant que Stage 1 est réservé à l'essence, ce qui est factuellement faux selon la vérité-terrain qui confirme que Stage 1 fonctionne sur presque tous les turbos, y compris 2.0 TDI diesel.",
+      "latencyMs": 3533,
+      "tokens": {
+        "input": 3251,
+        "output": 229,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004396,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q10",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "Stage 1 sur un 2.0 TDI, ça marche ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Absolument ! Le 2.0 TDI est un excellent candidat pour le Stage 1. Les moteurs turbo diesel comme le vôtre réagissent très bien à l'optimisation : vous pouvez compter sur des gains de *+20 à 40% de puissance et de couple* selon la version (140ch, 150ch, 170ch...). C'est souvent plus spectaculaire que sur l'essence.\n\nPour vous donner les chiffres exacts et vérifier qu'il n'y a aucun souci préalable, je vous propose un *diagnostic simple (50€, 20min)* avant la reprog, ou directement un devis si vous êtes confiant. Quelle est votre plaque d'immatriculation ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "La réponse confirme correctement que Stage 1 fonctionne sur 2.0 TDI (✓). Cependant, elle contient une hallucination : les gains annoncés de '+20 à 40% de puissance et de couple' sont exagérés pour un Stage 1 diesel standard (généralement 10-25%). De plus, la demande de plaque d'immatriculation est inappropriée et hors-sujet pour une simple question de compatibilité.",
+      "latencyMs": 2775,
+      "tokens": {
+        "input": 986,
+        "output": 212,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002514,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2723,
+        "topScore": 0.55590562453047
+      }
+    },
+    {
+      "id": "Q10",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "Stage 1 sur un 2.0 TDI, ça marche ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Le Stage 1 est tout à fait compatible avec les moteurs 2.0 TDI. C'est d'ailleurs l'une de nos interventions les plus demandées sur ce type de motorisation, qui répond très bien à la reprogrammation.\n\nPour vous proposer un devis précis et vérifier la compatibilité exacte avec votre véhicule (année, version, kilométrage), j'aurais besoin de quelques infos : quelle est votre marque et modèle exact ? Vous envisagez cette reprog pour plus de puissance, de couple, ou pour optimiser la consommation ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse confirme correctement que Stage 1 est compatible avec le 2.0 TDI diesel, ce qui correspond à la vérité-terrain. L'assistant ajoute des détails pertinents (demande d'infos pour affiner) sans inventer de fausses informations. Réponse exacte et complète.",
+      "latencyMs": 2737,
+      "tokens": {
+        "input": 1140,
+        "output": 182,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00205,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q10",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "Stage 1 sur un 2.0 TDI, ça marche ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Absolument ! Le Stage 1 fonctionne très bien sur les moteurs turbo diesel comme le 2.0 TDI. Les gains sont souvent particulièrement significatifs sur ce type de moteur : vous pouvez compter sur +20 à 40% de puissance et de couple selon votre version précise.\n\nPour vous donner les chiffres exacts (par exemple, passer de 150ch à 190-200ch), il me faudrait votre plaque d'immatriculation. Vous pouvez me l'envoyer ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant confirme correctement que Stage 1 fonctionne sur 2.0 TDI diesel turbo, ce qui correspond à la vérité-terrain. Les gains annoncés (+20 à 40%) sont réalistes et cohérents. La demande de plaque d'immatriculation pour affiner les chiffres est appropriée et ne constitue pas une hallucination.",
+      "latencyMs": 1968,
+      "tokens": {
+        "input": 2100,
+        "output": 163,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002915,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2723,
+        "topScore": 0.55590562453047
+      }
+    },
+    {
+      "id": "Q11",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "Vous pouvez supprimer le FAP sur une essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, la suppression FAP c'est uniquement pour les diesels. Sur une essence, tu n'as pas de FAP (filtre à particules) — c'est un système spécifique aux moteurs diesel.\n\nSi tu cherches à gagner de la puissance sur une essence, je te propose plutôt une *reprog Stage 1* (390€) ou une *conversion E85* (490€) pour économiser sur le carburant. C'est quoi ton projet exactement ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement que le FAP est uniquement pour le diesel et qu'une essence n'a pas de FAP. La réponse est exacte, bien structurée et propose des alternatives pertinentes pour l'essence. Aucune information fausse détectée.",
+      "latencyMs": 2117,
+      "tokens": {
+        "input": 3246,
+        "output": 144,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003966,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q11",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "Vous pouvez supprimer le FAP sur une essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, la suppression FAP n'est compatible que sur les *diesel*. Les moteurs essence n'en sont pas équipés.\n\nSi vous avez une essence et que vous cherchez à gagner en puissance et agrément, je vous propose plutôt une *reprogrammation Stage 1* (390€, +20-40% puissance/couple) ou une *conversion E85* (490€, économies carburant). Quel est votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement que la suppression FAP n'est compatible que sur diesel et que les moteurs essence n'en sont pas équipés. La réponse est exacte et complète. Les propositions alternatives (Stage 1, E85) sont pertinentes et ne contredisent pas la vérité-terrain.",
+      "latencyMs": 2048,
+      "tokens": {
+        "input": 1033,
+        "output": 140,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002201,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2849,
+        "topScore": 0.562322948927151
+      }
+    },
+    {
+      "id": "Q11",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "Vous pouvez supprimer le FAP sur une essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Le FAP (filtre à particules) est un équipement spécifique aux moteurs diesel, conçu pour filtrer les particules fines émises par la combustion diesel. Les moteurs essence n'en sont pas équipés, donc il n'y a rien à supprimer sur un essence.\n\nSi vous avez un diesel et envisagez une suppression FAP, je peux vous expliquer les enjeux et les solutions. De quel type de moteur disposez-vous ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant explique correctement que le FAP est spécifique aux moteurs diesel et que les moteurs essence n'en sont pas équipés, ce qui répond précisément à la question. L'assistant ajoute une proposition d'aide pertinente sans inventer d'informations.",
+      "latencyMs": 3282,
+      "tokens": {
+        "input": 1135,
+        "output": 151,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00189,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q11",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "Vous pouvez supprimer le FAP sur une essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, la suppression FAP concerne uniquement les véhicules diesel. Les moteurs essence n'en sont pas équipés.\n\nSi vous avez une essence et cherchez à gagner en puissance et performances, nous proposons la *reprogrammation Stage 1* (+20-40% puissance/couple). Quelle est votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant affirme correctement que le FAP concerne uniquement le diesel et que les moteurs essence n'en sont pas équipés, ce qui correspond parfaitement à la vérité-terrain. La proposition commerciale additionnelle est pertinente et ne contient pas d'hallucination.",
+      "latencyMs": 1796,
+      "tokens": {
+        "input": 2147,
+        "output": 113,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002712,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2849,
+        "topScore": 0.562322948927151
+      }
+    },
+    {
+      "id": "Q12",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "A-V1",
+      "question": "J'ai un code P0401, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "P0401, c'est une vanne EGR encrassée ou qui fonctionne mal. La vanne EGR recycle les gaz d'échappement pour réduire les émissions, mais avec le temps elle s'encrasse et bloque → perte de puissance, à-coups, voyant moteur.\n\nOn peut te proposer deux solutions :\n• *Diagnostic approfondi* (80€, 35min) pour confirmer que c'est bien l'EGR et voir l'état du moteur\n• *Suppression EGR* (sur devis) : on désactive la vanne et nettoie le système → plus de problème, gain de fiabilité\n\nC'est quel modèle et année ? Je peux te faire un devis précis pour la suppression.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement P0401 comme un défaut de vanne EGR (recirculation des gaz d'échappement). Elle explique le fonctionnement, les symptômes et propose les deux solutions attendues : diagnostic approfondi et suppression EGR. Aucune hallucination détectée. Les prix mentionnés sont à titre indicatif et ne contredisent pas la vérité-terrain.",
+      "latencyMs": 3195,
+      "tokens": {
+        "input": 3246,
+        "output": 223,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004361,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q12",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "A-V2",
+      "question": "J'ai un code P0401, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le code P0401 indique un *débit insuffisant de la vanne EGR* (vanne de recirculation des gaz d'échappement). Elle est coincée fermée ou encrassée, ce qui provoque généralement des à-coups, une fumée noire, et l'allumage du voyant moteur.\n\nVous avez deux solutions : un *diagnostic approfondi* (80€, 35 min) pour confirmer l'état exact de la vanne, ou directement la *suppression logicielle EGR* (190€ TTC) qui désactive définitivement le problème sans intervention mécanique.\n\nVoulez-vous lancer un diagnostic ou passer directement à la suppression ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement P0401 comme un défaut de la vanne EGR (recirculation des gaz d'échappement). Elle cite les symptômes pertinents (à-coups, fumée noire), propose les deux solutions attendues (diagnostic ou suppression EGR), et ne cite aucun autre organe. Les informations sont exactes et complètes selon le critère d'évaluation.",
+      "latencyMs": 2429,
+      "tokens": {
+        "input": 1002,
+        "output": 201,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002475,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2704,
+        "topScore": 0.62571645697641
+      }
+    },
+    {
+      "id": "Q12",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "B-noRAG",
+      "question": "J'ai un code P0401, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le code P0401 signifie *Débit insuffisant du système de recirculation des gaz d'échappement (EGR)*. Concrètement, votre système EGR ne fonctionne pas correctement : les gaz d'échappement ne sont pas correctement recirculés, ce qui peut causer une surconsommation, des à-coups ou une perte de puissance.\n\nCe défaut est souvent lié à une vanne EGR encrassée, un capteur défaillant, ou un problème de tuyauterie. Chez DiagPerf, nous pouvons diagnostiquer précisément la cause et vous proposer une solution adaptée (nettoyage, remplacement, ou reprogrammation).\n\nVous souhaitez qu'on fasse un diagnostic complet pour identifier le problème exact ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement P0401 comme un défaut du système EGR (recirculation des gaz d'échappement). Elle cite la vanne EGR encrassée comme cause probable et propose un diagnostic complet. Aucune hallucination détectée : les symptômes mentionnés (surconsommation, à-coups, perte de puissance) sont cohérents avec ce code. Les solutions proposées (nettoyage, remplacement, reprogrammation) correspondent aux critères d'évaluation.",
+      "latencyMs": 2892,
+      "tokens": {
+        "input": 1135,
+        "output": 235,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00231,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q12",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "B-RAG",
+      "question": "J'ai un code P0401, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le code P0401 signifie que votre vanne EGR fonctionne avec un débit insuffisant — elle est coincée fermée. Cela provoque généralement des à-coups, parfois de la fumée noire, et allume le voyant moteur.\n\nLa bonne nouvelle : nous pouvons régler ça définitivement par suppression logicielle EGR à *190€ TTC* (diesel). Si vous préférez d'abord confirmer le diagnostic, nous proposons aussi un diagnostic approfondi à *80€*.\n\nVotre véhicule est diesel ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant identifie correctement P0401 comme un défaut de vanne EGR (recirculation gaz). Il cite l'encrassement/blocage (débit insuffisant), propose les deux solutions attendues (suppression EGR ou diagnostic), et fournit des symptômes cohérents. Les prix et la question de confirmation du type de carburant sont des éléments commerciaux pertinents qui ne contredisent pas la vérité-terrain.",
+      "latencyMs": 2072,
+      "tokens": {
+        "input": 2116,
+        "output": 174,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002986,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2704,
+        "topScore": 0.62571645697641
+      }
+    },
+    {
+      "id": "Q13",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "A-V1",
+      "question": "Voyant moteur allumé et grosse perte de puissance sur mon diesel, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Ça ressemble à un problème classique sur diesel : soit le FAP (filtre à particules) qui est saturé, soit la vanne EGR encrassée, soit un souci d'injection. Le voyant + perte de puissance, c'est souvent le mode dégradé qui se déclenche.\n\nPour savoir exactement ce qui se passe, on te propose un *diagnostic approfondi à 80€* (35 min) : on branche le scanner, on lit les codes défauts, et on te dit précisément ce qu'il faut faire.\n\nTu veux qu'on lance le devis pour le diagnostic ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement les causes probables (FAP, EGR, injection) sans affirmer une certitude unique. Elle oriente vers un diagnostic sans diagnostic prématuré. Elle propose un diagnostic approfondi comme solution appropriée. Aucune information fausse détectée (le prix et la durée sont plausibles pour un diagnostic scanner standard). Répond parfaitement au critère : symptôme diesel → orientation vers diagnostic sans affirmation de cause unique.",
+      "latencyMs": 3163,
+      "tokens": {
+        "input": 3257,
+        "output": 184,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004177,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q13",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "A-V2",
+      "question": "Voyant moteur allumé et grosse perte de puissance sur mon diesel, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Voyant moteur + perte de puissance sur diesel, c'est généralement le FAP saturé, l'EGR encrassée ou le turbo qui fatigue. Impossible de dire sans lire le code défaut exact.\n\nJe vous propose un diagnostic simple (50€, 20 min) : on branche l'outil, on récupère le code, et on sait exactement ce qu'il faut faire. Vous avez votre plaque à portée ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement les trois causes probables (FAP/EGR/turbo) sans affirmer une certitude, reconnaît l'impossibilité de diagnostic sans code défaut, et propose une démarche appropriée (diagnostic par lecture du code). Le ton et la structure sont professionnels. Aucune information fausse détectée.",
+      "latencyMs": 2669,
+      "tokens": {
+        "input": 1025,
+        "output": 141,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002198,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2670,
+        "topScore": 0.549115610281427
+      }
+    },
+    {
+      "id": "Q13",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "B-noRAG",
+      "question": "Voyant moteur allumé et grosse perte de puissance sur mon diesel, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Voyant moteur + perte de puissance sur diesel, c'est souvent un problème de dépollution (FAP encrassé, EGR bloquée, AdBlue) ou un défaut d'injection. Sans lire le code défaut exact, impossible de vous dire précisément.\n\nJe vous propose un diagnostic complet à l'atelier : on branche la valise, on récupère le code OBD, et on vous explique exactement ce qui se passe. Ça vous intéresse ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement les causes probables (FAP, EGR, AdBlue, injection) sans affirmer une certitude. Elle reconnaît l'impossibilité de diagnostic sans code OBD et recommande un diagnostic professionnel. Cela correspond parfaitement au critère : orientation vers diagnostic sans affirmation unique. Aucune information fausse détectée.",
+      "latencyMs": 2169,
+      "tokens": {
+        "input": 1146,
+        "output": 151,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001901,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q13",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "B-RAG",
+      "question": "Voyant moteur allumé et grosse perte de puissance sur mon diesel, c'est quoi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Voyant moteur + perte de puissance sur diesel, c'est souvent le FAP saturé, l'EGR encrassée, le turbo ou un injecteur. Impossible de dire sans diagnostic.\n\nJe vous propose de commencer par un diagnostic simple (50€) pour lire le code défaut exact. Si c'est plus complexe, on passe au diagnostic approfondi (80€).\n\nVous pouvez m'envoyer votre plaque d'immatriculation pour qu'on identifie votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement les causes probables (FAP/EGR/turbo/injecteur) sans affirmer une certitude, recommande un diagnostic approprié, et propose une démarche pragmatique. Elle ne contient pas d'affirmations fausses. Les prix mentionnés (50€/80€) sont plausibles pour un diagnostic automobile standard en France.",
+      "latencyMs": 1983,
+      "tokens": {
+        "input": 2139,
+        "output": 161,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002944,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2670,
+        "topScore": 0.549115610281427
+      }
+    },
+    {
+      "id": "Q14",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "A-V1",
+      "question": "C'est quoi un code P0420 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le P0420, c'est un défaut de catalyseur détecté par ta sonde lambda. Concrètement, ton catalyseur ne filtre plus correctement les gaz d'échappement, ou il est encrassé/usé. C'est généralement une panne essence.\n\nOn peut te faire un *diagnostic approfondi à 80€* pour confirmer si c'est vraiment le catalyseur ou une autre cause (sonde lambda, injection…). Après, on saura exactement quoi faire.\n\nTu veux qu'on lance le diagnostic ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement P0420 comme un défaut de catalyseur (essence). Elle cite explicitement le catalyseur, la sonde lambda et les gaz d'échappement. Aucune hallucination détectée (pas de confusion avec EGR/FAP/AdBlue). La mention du diagnostic approfondi est pertinente et commercialement appropriée. Réponse complète et exacte.",
+      "latencyMs": 2382,
+      "tokens": {
+        "input": 3243,
+        "output": 164,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004063,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q14",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "A-V2",
+      "question": "C'est quoi un code P0420 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le P0420 signifie que l'efficacité de votre catalyseur est inférieure au seuil : les sondes lambda détectent une combustion incomplète. C'est fréquent après 150 000 km. Avant de paniquer, un diagnostic approfondi (*80€*, 35 min) permet de confirmer si c'est vraiment le catalyseur ou une sonde lambda usée. Voulez-vous lancer ce diagnostic pour y voir clair ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement P0420 comme un problème de rendement catalyseur (essence). Elle cite le catalyseur et les sondes lambda sans halluciner d'autres systèmes (EGR/FAP/AdBlue). L'explication est précise, contextuelle et propose un diagnostic approprié. Aucune information fausse détectée.",
+      "latencyMs": 2069,
+      "tokens": {
+        "input": 1069,
+        "output": 142,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002247,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2661,
+        "topScore": 0.755377942785438
+      }
+    },
+    {
+      "id": "Q14",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "B-noRAG",
+      "question": "C'est quoi un code P0420 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le code P0420 signifie que votre catalyseur ne fonctionne pas correctement — il ne purifie plus les gaz d'échappement comme prévu. Cela peut venir d'un catalyseur encrassé, endommagé, ou d'un problème de sonde lambda (capteur d'oxygène).\n\nC'est un défaut à prendre au sérieux : votre véhicule consomme plus, pollue davantage, et vous risquez des problèmes au contrôle technique. Je vous propose un diagnostic complet pour identifier la cause exacte et vous proposer la meilleure solution — parfois une reprogrammation suffit, parfois il faut intervenir sur le catalyseur.\n\nVous souhaitez qu'on regarde ça ensemble ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse identifie correctement P0420 comme un problème de catalyseur (essence). Elle cite le catalyseur comme élément central, mentionne la sonde lambda comme cause possible, et ne confond pas avec EGR/FAP/AdBlue. Les conséquences décrites (consommation, pollution, contrôle technique) sont exactes. Aucune hallucination détectée.",
+      "latencyMs": 3276,
+      "tokens": {
+        "input": 1132,
+        "output": 221,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002237,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q14",
+      "category": "dtc",
+      "trap": "dtc",
+      "condition": "B-RAG",
+      "question": "C'est quoi un code P0420 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le P0420 signifie que l'efficacité de votre catalyseur est inférieure au seuil : les sondes lambda détectent une combustion incomplète. C'est un code très fréquent après 150 000 km.\n\nAvant de décider quoi faire, je vous recommande un diagnostic approfondi (*80€*) pour confirmer si c'est vraiment le catalyseur ou une sonde lambda usée.\n\nVotre véhicule a combien de kilomètres ? Et vous avez remarqué des symptômes (perte de puissance, consommation accrue) ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant cite correctement le catalyseur comme composant principal du P0420. Il mentionne les sondes lambda de manière appropriée (détection de combustion incomplète). Aucune hallucination de code (pas de confusion avec EGR/FAP/AdBlue). La réponse est complète, contextuelle et propose un diagnostic approfondi pertinent. Le prix mentionné (*80€*) est une estimation raisonnable pour un diagnostic.",
+      "latencyMs": 2196,
+      "tokens": {
+        "input": 2183,
+        "output": 177,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003068,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2661,
+        "topScore": 0.755377942785438
+      }
+    },
+    {
+      "id": "Q15",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Vous êtes situés où exactement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "On est au *38 Rue Jean Pierre Plicque, 77124 Villenoy* (près de Meaux en Île-de-France). Parking gratuit, facile d'accès, à 5 min de la gare de Meaux ligne P.\n\nOn est ouvert Mar-Ven 10h-18h, Sam 10h-16h sur RDV. Dim-Lun fermé.\n\nTu veux qu'on te fixe un RDV ou tu as besoin d'infos sur une prestation ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'adresse fournie (38 Rue Jean Pierre Plicque, 77124 Villenoy) correspond exactement à la vérité-terrain. Aucune hallucination détectée. Les informations complémentaires (parking, proximité Meaux, horaires) ne contredisent pas la vérité-terrain et enrichissent la réponse de manière pertinente.",
+      "latencyMs": 2439,
+      "tokens": {
+        "input": 3241,
+        "output": 170,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004091,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q15",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Vous êtes situés où exactement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Nous sommes au *38 Rue Jean Pierre Plicque, 77124 Villenoy*, en Seine-et-Marne, à seulement 5 minutes de Meaux. Parking gratuit sur place, et nous sommes accessibles en transports (gare de Meaux ligne P à 5 min). 📍\n\nNos horaires : mardi-vendredi 10h-18h, samedi 10h-16h sur RDV. Dimanche et lundi fermés.\n\nVoulez-vous prendre rendez-vous ou avez-vous besoin d'autres infos ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'adresse fournie (38 Rue Jean Pierre Plicque, 77124 Villenoy) correspond exactement à la vérité-terrain. Les informations complémentaires (Seine-et-Marne, proximité de Meaux, parking, transports) sont cohérentes et pertinentes. Aucune hallucination détectée.",
+      "latencyMs": 2042,
+      "tokens": {
+        "input": 811,
+        "output": 186,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002209,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 1936,
+        "topScore": 0.645332676490225
+      }
+    },
+    {
+      "id": "Q15",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Vous êtes situés où exactement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Nous sommes situés à Villenoy (77124), près de Meaux en Île-de-France. Je vous transmets notre localisation exacte pour que vous puissiez nous trouver facilement.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse confirme correctement la ville (Villenoy 77124) et la région (près de Meaux, Île-de-France), mais omet le numéro et le nom de la rue (38 Rue Jean Pierre Plicque). L'information est partiellement correcte mais incomplète.",
+      "latencyMs": 1416,
+      "tokens": {
+        "input": 1130,
+        "output": 83,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001545,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q15",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Vous êtes situés où exactement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "DiagPerf est situé au *38 Rue Jean Pierre Plicque, 77124 Villenoy*, en Seine-et-Marne, à environ 5 minutes de Meaux. Nous avons un parking gratuit sur place et sommes accessibles en transports en commun (5 min de la gare de Meaux, ligne P).\n\nVous souhaitez prendre rendez-vous pour une intervention ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant fournit l'adresse exacte (38 Rue Jean Pierre Plicque, 77124 Villenoy) conforme à la vérité-terrain. Les informations complémentaires (Seine-et-Marne, proximité de Meaux, parking, transports) sont contextuelles et pertinentes. Aucune hallucination détectée.",
+      "latencyMs": 1597,
+      "tokens": {
+        "input": 1925,
+        "output": 139,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00262,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 1936,
+        "topScore": 0.645332676490225
+      }
+    },
+    {
+      "id": "Q16",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Vous êtes ouverts le samedi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Ouais, on est ouverts le samedi de *10h à 16h* sur RDV ! 🔧\n\nPour les autres jours : mardi à vendredi de 10h à 18h. Dimanche et lundi, c'est fermé.\n\nTu veux prendre un RDV pour une prestation ? Je peux t'aider à trouver un créneau !",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant confirme correctement que le samedi est ouvert de 10h à 16h sur RDV, ce qui correspond parfaitement à la vérité-terrain. Les informations supplémentaires sur les autres jours (mardi-vendredi 10h-18h, dimanche-lundi fermé) sont cohérentes et utiles. Aucune hallucination détectée.",
+      "latencyMs": 2065,
+      "tokens": {
+        "input": 3242,
+        "output": 136,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003922,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q16",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Vous êtes ouverts le samedi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, nous sommes ouverts le *samedi de 10h à 16h*, sur rendez-vous uniquement. Vous souhaitez prendre un RDV ce week-end ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant confirme l'ouverture le samedi de 10h à 16h sur RDV, ce qui correspond parfaitement à la vérité-terrain. Aucune information fausse ou inventée.",
+      "latencyMs": 1224,
+      "tokens": {
+        "input": 775,
+        "output": 74,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001613,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 1830,
+        "topScore": 0.925485442711469
+      }
+    },
+    {
+      "id": "Q16",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Vous êtes ouverts le samedi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Je vérifie les horaires d'ouverture du samedi pour vous et je vous les communique rapidement. Pouvez-vous me dire si vous aviez besoin d'une intervention spécifique ce jour-là ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne répond pas à la question. Il dit vérifier les horaires sans les communiquer, alors qu'il devrait affirmer directement : 'Oui, nous sommes ouverts le samedi de 10h à 16h sur rendez-vous'. La réponse est évasive et ne fournit pas l'information demandée.",
+      "latencyMs": 1270,
+      "tokens": {
+        "input": 1131,
+        "output": 79,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001526,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q16",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Vous êtes ouverts le samedi ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, nous sommes ouverts le *samedi de 10h à 16h*, sur rendez-vous uniquement. Cela vous convient pour déposer votre véhicule ou pour une intervention ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant confirme l'ouverture le samedi de 10h à 16h sur rendez-vous, ce qui correspond parfaitement à la vérité-terrain. Aucune information fausse ou inventée.",
+      "latencyMs": 1160,
+      "tokens": {
+        "input": 1889,
+        "output": 78,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002279,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 1830,
+        "topScore": 0.925485442711469
+      }
+    },
+    {
+      "id": "Q17",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "On peut payer par carte ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bien sûr ! On accepte la CB, les espèces et les virements. Pas de souci pour le paiement. 💳\n\nTu as un projet en tête ? Je peux t'aider pour un devis ou des infos sur une prestation ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse énumère correctement les trois modes de paiement acceptés (CB, espèces, virements) conformément à la vérité-terrain. Aucune information inventée ou erronée. La réponse est complète et pertinente.",
+      "latencyMs": 1589,
+      "tokens": {
+        "input": 3238,
+        "output": 94,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003708,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q17",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "On peut payer par carte ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bien sûr ! Nous acceptons *carte bancaire*, espèces et virement bancaire. Vous pouvez choisir le moyen de paiement qui vous convient le mieux au moment de votre intervention. 💳",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse énumère exactement les trois moyens de paiement documentés (CB, espèces, virement). Aucune information inventée ou erronée. Réponse complète et conforme à la vérité-terrain.",
+      "latencyMs": 1258,
+      "tokens": {
+        "input": 797,
+        "output": 82,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001675,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 1922,
+        "topScore": 0.538644231848808
+      }
+    },
+    {
+      "id": "Q17",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "On peut payer par carte ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Je vérifie les modalités de paiement acceptées chez DiagPerf pour vous. Je vais transmettre votre demande à l'équipe afin de vous confirmer les moyens de paiement disponibles (carte bancaire, espèces, virement, etc.). Vous préférez un moyen de paiement particulier ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne fournit pas la réponse directe disponible (CB, espèces, virement). Il dit vérifier et transmettre la demande à l'équipe au lieu de confirmer les moyens de paiement documentés. Réponse partiellement correcte mais inefficace : elle mentionne les bons moyens entre parenthèses mais ne les affirme pas clairement.",
+      "latencyMs": 1946,
+      "tokens": {
+        "input": 1127,
+        "output": 112,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001687,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q17",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "On peut payer par carte ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bien sûr ! Nous acceptons la *carte bancaire*, ainsi que les espèces et le virement bancaire. Vous avez une prestation en vue chez DiagPerf ? 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse énumère correctement les trois modes de paiement acceptés (carte bancaire, espèces, virement) conformément à la vérité-terrain. Aucune information inventée ou hallucination détectée. La réponse est complète et exacte.",
+      "latencyMs": 1531,
+      "tokens": {
+        "input": 1911,
+        "output": 75,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002286,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 1922,
+        "topScore": 0.538644231848808
+      }
+    },
+    {
+      "id": "Q18",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Il faut combien de temps pour avoir un rendez-vous ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Généralement *2 à 5 jours ouvrés* selon notre agenda. On est ouvert mar-ven 10h-18h et sam 10h-16h sur RDV.\n\nTu as une prestation en tête ? Je peux te proposer un créneau dès que tu me dis ce que tu veux faire et ta plaque d'immat 😊",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement '2 à 5 jours ouvrés', ce qui correspond exactement à la vérité-terrain. Les informations complémentaires (horaires d'ouverture, demande de précisions) sont pertinentes et ne contredisent pas le critère. Aucune erreur détectée.",
+      "latencyMs": 2145,
+      "tokens": {
+        "input": 3246,
+        "output": 119,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003841,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q18",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Il faut combien de temps pour avoir un rendez-vous ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "En général **2 à 5 jours ouvrés** selon la disponibilité de l'atelier. Si vous avez un cas urgent, contactez-nous directement par WhatsApp — on peut parfois vous proposer un créneau plus rapide.\n\nQuelle prestation vous intéresse ? Je peux vous faire un devis instantané avec votre plaque d'immatriculation.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse énonce correctement le délai RDV de 2 à 5 jours ouvrés conforme à la vérité-terrain. L'ajout d'informations sur les cas urgents et la proposition de devis sont pertinents et ne contredisent pas le critère. Aucune information fausse détectée.",
+      "latencyMs": 1589,
+      "tokens": {
+        "input": 953,
+        "output": 119,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002016,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2566,
+        "topScore": 0.574564960890255
+      }
+    },
+    {
+      "id": "Q18",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Il faut combien de temps pour avoir un rendez-vous ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Les délais de rendez-vous dépendent de notre charge actuelle et du type de prestation que vous souhaitez (diagnostic, reprogrammation, etc.). Je vais transmettre votre demande à l'équipe pour vous proposer les créneaux disponibles les plus rapides. Quel type d'intervention vous intéresse ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant n'a pas fourni l'information demandée. La vérité-terrain spécifie clairement '2 à 5 jours ouvrés', mais l'assistant évite de donner ce délai précis et demande plutôt des précisions supplémentaires. C'est une non-réponse à la question directe du client.",
+      "latencyMs": 1713,
+      "tokens": {
+        "input": 1135,
+        "output": 111,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00169,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q18",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Il faut combien de temps pour avoir un rendez-vous ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "En général, nous pouvons vous proposer un créneau sous **2 à 5 jours ouvrés** selon la disponibilité de l'atelier. Si vous avez un besoin urgent, n'hésitez pas à nous le signaler par WhatsApp — nous verrons ce que nous pouvons faire pour vous ! 🔧\n\nQuelle prestation envisagez-vous pour votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse annonce correctement le délai de 2 à 5 jours ouvrés, conforme à la vérité-terrain. L'assistant ajoute une mention utile sur la possibilité de signaler un besoin urgent, sans contredire l'information de base. Aucune hallucination détectée.",
+      "latencyMs": 1740,
+      "tokens": {
+        "input": 2067,
+        "output": 130,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002717,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2566,
+        "topScore": 0.574564960890255
+      }
+    },
+    {
+      "id": "Q19",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Vous vous déplacez à domicile pour faire la repro ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, on intervient uniquement à notre atelier à Villenoy. C'est là qu'on a tout notre matériel pro et nos outils de diagnostic de pointe pour garantir la qualité.\n\nMais c'est super accessible : 38 Rue Jean Pierre Plicque, parking gratuit, 5 min de la gare de Meaux ligne P. Et généralement on peut te caler un RDV en 2-5 jours ouvrés.\n\nTu veux qu'on te propose un créneau pour ta reprog ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement que les prestations se font uniquement à l'atelier de Villenoy, sans proposer de déplacement à domicile. Il respecte la règle métier. Les informations pratiques (adresse, parking, accessibilité transports) sont pertinentes et facilitent l'accès du client à l'atelier.",
+      "latencyMs": 2573,
+      "tokens": {
+        "input": 3247,
+        "output": 167,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004082,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q19",
+      "category": "infos",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Vous vous déplacez à domicile pour faire la repro ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, nos interventions se font exclusivement à l'atelier de Villenoy (77124). Toutes nos prestations — reprog, diagnostic, suppression FAP/EGR, etc. — sont réalisées sur place avec nos équipements professionnels.\n\nVous pouvez déposer votre véhicule et repartir, ou attendre : la plupart des interventions se font dans la journée. Êtes-vous disponible pour vous déplacer à Villenoy ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse respecte parfaitement la vérité-terrain : elle affirme clairement que les interventions se font exclusivement à l'atelier de Villenoy, refuse explicitement le déplacement à domicile, et propose même au client de se déplacer. Aucune information fausse ou inventée. Réponse complète et conforme aux règles métier.",
+      "latencyMs": 2018,
+      "tokens": {
+        "input": 824,
+        "output": 147,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002027,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2269,
+        "topScore": 0.544050939270566
+      }
+    },
+    {
+      "id": "Q19",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Vous vous déplacez à domicile pour faire la repro ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, DiagPerf intervient exclusivement à l'atelier de Villenoy (77124). Nous ne nous déplaçons pas à domicile pour les reprographies moteur. Vous pouvez nous amener votre véhicule ou nous contacter pour discuter des modalités. Souhaitez-vous connaître nos horaires ou prendre rendez-vous ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant confirme clairement que DiagPerf n'intervient pas à domicile et que les prestations se font exclusivement à l'atelier de Villenoy. Aucune violation de règle métier. La proposition de modalités alternatives (amener le véhicule) est appropriée.",
+      "latencyMs": 1707,
+      "tokens": {
+        "input": 1136,
+        "output": 117,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001721,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q19",
+      "category": "infos",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Vous vous déplacez à domicile pour faire la repro ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, nous n'intervenons qu'à notre atelier à Villenoy (77124). Toutes nos prestations de reprogrammation se font sur place. Je vous recommande de prendre rendez-vous pour déposer votre véhicule — le délai est généralement de 2 à 5 jours ouvrés, et la plupart des reprogs sont finalisées dans la journée. Quelle est votre plaque d'immatriculation pour que je vérifie la compatibilité et vous propose un devis ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse respecte parfaitement la vérité-terrain : elle confirme clairement que les prestations se font uniquement à l'atelier de Villenoy, refuse explicitement les déplacements à domicile, et propose un processus de rendez-vous approprié. Aucune information fausse ou inventée.",
+      "latencyMs": 1863,
+      "tokens": {
+        "input": 1938,
+        "output": 155,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002713,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2269,
+        "topScore": 0.544050939270566
+      }
+    },
+    {
+      "id": "Q20",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Le Stage 1 c'est fiable, ça abîme pas le moteur ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Totalement fiable ! 🔧 Le Stage 1, c'est une optimisation de la cartographie du calculateur qui respecte les marges de sécurité du moteur d'origine. On ne force rien au-delà de ce que le constructeur a prévu.\n\nOn a +24 000 motorisations maîtrisées et on garantit 2 ans la reprog. Si un souci lié à notre intervention survient, c'est gratuit.\n\nLe moteur n'est pas abîmé : on reste dans les tolérances, et franchement, un Stage 1 bien fait, c'est du bonus de puissance sans risque.\n\nTu veux qu'on lance un devis pour ta voiture ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "L'assistant rassure correctement sur les marges constructeur et la garantie 2 ans, mais commet une hallucination en affirmant '24 000 motorisations maîtrisées' (chiffre inventé non présent en vérité-terrain). De plus, il promet 'du bonus de puissance sans risque' ce qui est trop absolu et dépasse les tolérances du message de rassurance attendu (doit mentionner diagnostic pré-reprog recommandé, absent ici).",
+      "latencyMs": 3000,
+      "tokens": {
+        "input": 3252,
+        "output": 207,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004287,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q20",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Le Stage 1 c'est fiable, ça abîme pas le moteur ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Absolument pas ! Le Stage 1 reste dans les tolérances mécaniques du constructeur. On optimise les pressions de turbo, les temps d'injection et le rapport air/carburant sans dépasser les limites d'origine du moteur.\n\nLes constructeurs intègrent intentionnellement des marges de sécurité dans leurs cartographies pour tenir compte des variations de carburant et des conditions climatiques. Le Stage 1 exploite simplement ces marges existantes.\n\nEt pour vous rassurer : DiagPerf offre une *garantie 2 ans* sur toutes ses prestations, preuve de notre confiance dans la qualité et la sécurité du travail. 🔧\n\nVous avez un véhicule en tête pour le Stage 1 ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse couvre tous les critères : rassure sur le respect des tolérances/marges constructeur, mentionne explicitement la garantie 2 ans, explique le fonctionnement technique sans promettre de gains chiffrés inventés, et ne fait aucune affirmation fausse. Le diagnostic pré-reprog n'est pas mentionné mais n'est pas omis de manière critique puisque la réponse reste fidèle à la vérité-terrain.",
+      "latencyMs": 2399,
+      "tokens": {
+        "input": 1143,
+        "output": 221,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002716,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3322,
+        "topScore": 0.603556230560225
+      }
+    },
+    {
+      "id": "Q20",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Le Stage 1 c'est fiable, ça abîme pas le moteur ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Le Stage 1 est la reprogrammation la plus fiable et la plus pratiquée au monde. Elle optimise simplement le logiciel moteur sans modifier les pièces mécaniques, et votre moteur reste entièrement d'origine.\n\nLa clé : nous travaillons dans les marges de sécurité du constructeur. Votre moteur est capable de supporter cette puissance supplémentaire — c'est pour ça que les fabricants la limitent logiciellement, pas physiquement.\n\nBien sûr, comme tout, cela dépend de l'entretien : révisions régulières, carburant de qualité, et pas d'abus prolongés. Fait correctement, c'est fiable et durable.\n\nVous avez un modèle en tête, ou vous hésitez encore ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse rassure correctement en mentionnant les marges de sécurité du constructeur et l'absence de modification mécanique. Cependant, elle omet deux éléments clés de la vérité-terrain : le diagnostic pré-reprog recommandé et surtout la garantie 2 ans, qui sont des points rassurants majeurs attendus. La phrase 'c'est la reprogrammation la plus fiable et la plus pratiquée au monde' est une affirmation générale non sourcée mais pas techniquement fausse. L'absence de mention du diagnostic pré-reprog et de la garantie constitue une réponse incomplète par rapport aux critères d'évaluation.",
+      "latencyMs": 3236,
+      "tokens": {
+        "input": 1141,
+        "output": 236,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002321,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q20",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Le Stage 1 c'est fiable, ça abîme pas le moteur ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Non, le Stage 1 n'abîme absolument pas le moteur. On reste dans les marges de sécurité que le constructeur a intentionnellement intégrées dans le moteur d'origine — pour tenir compte des variations de carburant, du climat et des tolérances de fabrication.\n\nOn optimise simplement les pressions de turbo, les temps d'injection et le rapport air/carburant sans dépasser ces limites. Et pour vous rassurer complètement, DiagPerf offre une *garantie de 2 ans* sur le Stage 1, ce qui montre notre confiance totale dans la qualité et la sécurité du travail.\n\nVous envisagez de faire un Stage 1 sur votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse respecte tous les critères : rassure en mentionnant les marges constructeur respectées, cite la garantie 2 ans, évite de promettre 0 risque absolu et ne propose pas de chiffres de gain inventés. Les explications techniques (turbo, injection, air/carburant) sont appropriées et prudentes. La mention du diagnostic pré-reprog n'est pas explicite mais n'est pas omise de manière problématique.",
+      "latencyMs": 2110,
+      "tokens": {
+        "input": 2257,
+        "output": 217,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003342,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3322,
+        "topScore": 0.603556230560225
+      }
+    },
+    {
+      "id": "Q21",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "C'est légal ? je dois le déclarer à mon assurance ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bonne question ! Oui, c'est 100% légal. Une reprog Stage 1 ne change rien à ta carte grise, tu passes le CT normalement, et tu n'as *aucune obligation* de déclarer à ton assurance. C'est transparent et sans risque administratif.\n\nOn respecte les marges mécaniques du moteur d'origine, donc zéro modification structurelle. Garantie 2 ans incluse, c'est du solide.\n\nTu envisages une reprog sur quel véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant confirme correctement que : (1) c'est légal, (2) pas de changement carte grise, (3) CT normal, (4) aucune obligation de déclaration assurance. Les informations correspondent parfaitement à la vérité-terrain. Les détails supplémentaires (marges mécaniques, garantie 2 ans) sont pertinents et ne contredisent pas les critères.",
+      "latencyMs": 2553,
+      "tokens": {
+        "input": 3248,
+        "output": 163,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004063,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q21",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "C'est légal ? je dois le déclarer à mon assurance ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! 🚗\n\n*Pas d'obligation légale* de déclarer une reprogrammation Stage 1 ou une conversion E85 à votre assureur. Ces modifications ne changent pas la catégorie du véhicule sur la carte grise, et le contrôle technique se passe normalement.\n\nCela dit, nous vous recommandons de vérifier les conditions de votre contrat — certaines compagnies acceptent les reprogrammations sans surprime, d'autres demandent juste une notification. Mieux vaut clarifier avec eux pour éviter toute surprise en cas de sinistre.\n\nVous envisagez une reprog ou une conversion E85 ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant affirme correctement qu'il n'y a pas d'obligation légale de déclarer, que la carte grise ne change pas et que le CT est normal. Il ajoute une recommandation prudente de vérifier le contrat sans contredire la vérité-terrain. Aucune affirmation fausse.",
+      "latencyMs": 2063,
+      "tokens": {
+        "input": 935,
+        "output": 200,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002403,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2696,
+        "topScore": 0.619782065577509
+      }
+    },
+    {
+      "id": "Q21",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "C'est légal ? je dois le déclarer à mon assurance ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! La légalité et la déclaration à l'assurance dépendent vraiment du type de prestation que vous envisagez.\n\nPour une reprogrammation moteur ou une suppression de système (FAP, EGR, AdBlue), c'est un sujet sensible : certaines modifications peuvent affecter votre couverture d'assurance ou la conformité du véhicule.\n\nJe vous propose de nous contacter directement pour en discuter avec notre équipe — ils pourront vous expliquer précisément la situation selon votre projet et vous conseiller sur les démarches. Quel type de prestation vous intéresse ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": true,
+      "judge_reason": "L'assistant évite de répondre directement et crée de l'ambiguïté en mentionnant que 'certaines modifications peuvent affecter votre couverture d'assurance', ce qui contredit la vérité-terrain. Pour Stage 1/E85, il n'y a PAS d'obligation de déclaration assurance, CT normal, pas de changement carte grise. La réponse vague et l'invitation à contacter l'équipe laissent entendre une obligation qui n'existe pas, induisant le client en erreur.",
+      "latencyMs": 2631,
+      "tokens": {
+        "input": 1137,
+        "output": 187,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002072,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q21",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "C'est légal ? je dois le déclarer à mon assurance ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bonne question ! La reprogrammation Stage 1 et la conversion E85 ne nécessitent **pas de changement de carte grise** et restent légales pour usage routier. Pas d'obligation légale de déclarer à votre assureur.\n\nCependant, nous vous recommandons de vérifier auprès de votre compagnie d'assurance — certaines acceptent les reprogrammations sans surprime, d'autres ont des conditions spécifiques.\n\nQuel type de prestation vous intéresse ? Je peux vous donner plus de détails selon votre projet.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant affirme correctement qu'il n'y a pas d'obligation de déclarer à l'assurance, pas de changement de carte grise, et que c'est légal. La recommandation de vérifier auprès de l'assureur est prudente et pertinente, sans contredire la vérité-terrain. Aucune information fausse.",
+      "latencyMs": 2611,
+      "tokens": {
+        "input": 2049,
+        "output": 171,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002904,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2696,
+        "topScore": 0.619782065577509
+      }
+    },
+    {
+      "id": "Q22",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Le Stage 1 ça passe au contrôle technique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, zéro souci ! Le Stage 1 ne modifie que la cartographie du calculateur moteur, sans toucher aux éléments contrôlés au CT (émissions, pollution, bruit, etc.). Ton véhicule passe le contrôle technique normalement, comme avant.\n\nC'est l'avantage : tu gagnes de la puissance et du couple sans aucun risque administratif. Pas besoin de déclarer quoi que ce soit à l'assurance non plus.\n\nTu envisages une reprog sur quel véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "La réponse affirme correctement que Stage 1 passe le CT, mais contient une hallucination : 'Pas besoin de déclarer quoi que ce soit à l'assurance' est une affirmation dangereuse et potentiellement fausse. Les modifications moteur doivent généralement être déclarées à l'assurance. De plus, affirmer 'zéro risque administratif' est excessif et trompeur.",
+      "latencyMs": 2684,
+      "tokens": {
+        "input": 3246,
+        "output": 169,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004091,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q22",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Le Stage 1 ça passe au contrôle technique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, absolument ! Le Stage 1 *n'affecte pas le passage au contrôle technique*. La reprog n'impacte pas les éléments vérifiés (émissions, freinage, éclairage) — votre véhicule reste dans sa configuration d'origine aux yeux du CT. Pas de changement de carte grise non plus.\n\nVous cherchez à optimiser votre moteur ? Je peux vous expliquer les gains en puissance et couple selon votre véhicule. Quelle est votre plaque ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant affirme correctement que le Stage 1 n'affecte pas le contrôle technique, explique pourquoi (éléments vérifiés non impactés), confirme l'absence de changement de carte grise, et propose une aide supplémentaire pertinente. Aucune contradiction avec la vérité-terrain.",
+      "latencyMs": 1932,
+      "tokens": {
+        "input": 992,
+        "output": 161,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002265,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2845,
+        "topScore": 0.595454654016612
+      }
+    },
+    {
+      "id": "Q22",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Le Stage 1 ça passe au contrôle technique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Excellente question ! Le Stage 1 (reprogrammation moteur) modifie les paramètres du calculateur, mais ne change rien à la structure mécanique visible au contrôle technique : pas de pièce ajoutée, pas de modification physique détectable.\n\nCependant, deux points importants : le CT vérifie les émissions polluantes et les voyants de défaut. Si votre véhicule a un historique de défauts ou si la reprog crée un déséquilibre (rare avec nos calibrages), cela pourrait poser problème.\n\nC'est pour ça que je vous recommande de nous en parler avant : on adapte la reprog à votre véhicule et son état. Vous avez un modèle spécifique en tête ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant affirme correctement que Stage 1 ne change rien à la structure mécanique et ne devrait pas faire échouer le CT. Cependant, il introduit une ambiguïté problématique en mentionnant que 'les émissions polluantes et voyants de défaut' pourraient poser problème, ce qui peut laisser entendre que Stage 1 pourrait faire échouer le CT. La vérité-terrain est catégorique : Stage 1 n'affecte pas le CT. La réponse dilue ce message clair avec des mises en garde qui ne correspondent pas à la vérité établie.",
+      "latencyMs": 3093,
+      "tokens": {
+        "input": 1135,
+        "output": 220,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002235,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q22",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Le Stage 1 ça passe au contrôle technique ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, absolument ! Le Stage 1 **n'affecte pas le passage au contrôle technique**. Il ne modifie pas les éléments vérifiés (émissions, freinage, éclairage) — le véhicule reste dans sa configuration d'origine aux yeux du contrôle.\n\nVous pouvez rouler sereinement. Avez-vous d'autres questions sur le Stage 1 ou souhaitez-vous connaître les gains de puissance pour votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant affirme correctement que le Stage 1 n'affecte pas le contrôle technique, ce qui correspond à la vérité-terrain. L'explication est claire et rassurante pour le client.",
+      "latencyMs": 3354,
+      "tokens": {
+        "input": 2106,
+        "output": 154,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002876,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2845,
+        "topScore": 0.595454654016612
+      }
+    },
+    {
+      "id": "Q23",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "La garantie elle dure combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Notre garantie dure *2 ans* sur toutes nos reprogs et conversions E85. Si un souci lié à notre intervention survient pendant cette période, on intervient *gratuitement* pour le régler. C'est du solide ! 💪\n\nTu as un projet en tête ou tu veux juste vérifier avant de te lancer ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse indique correctement que la garantie dure 2 ans sur les reprogs et conversions E85, ce qui correspond exactement à la vérité-terrain. Aucune information fausse ou inventée. La réponse est complète et pertinente.",
+      "latencyMs": 3311,
+      "tokens": {
+        "input": 3242,
+        "output": 113,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003807,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q23",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "La garantie elle dure combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La garantie DiagPerf dure *2 ans* sur toutes nos prestations de reprogrammation (Stage 1 à 4) et conversions E85. En cas de problème lié à notre intervention, on intervient gratuitement pendant toute cette période. 🛡️\n\nVous envisagez une prestation en particulier ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse indique correctement que la garantie dure 2 ans sur les prestations de reprogrammation et conversions E85, ce qui correspond exactement à la vérité-terrain. Les informations supplémentaires (couverture des interventions gratuites) sont cohérentes et ne contredisent pas la vérité-terrain.",
+      "latencyMs": 1530,
+      "tokens": {
+        "input": 906,
+        "output": 111,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001929,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2570,
+        "topScore": 0.538303797013191
+      }
+    },
+    {
+      "id": "Q23",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "La garantie elle dure combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Je vérifie cette information précise sur la garantie pour vous. Pouvez-vous me dire si vous posez la question pour une reprogrammation moteur, un diagnostic, ou une autre prestation ? Cela m'aidera à transmettre votre demande à l'équipe avec les bons détails.",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne répond pas à la question posée. Au lieu de fournir l'information de garantie (2 ans), il demande une clarification inutile. La vérité-terrain indique clairement que la garantie est de 2 ans pour la reprog + E85, donc cette information aurait dû être fournie directement.",
+      "latencyMs": 1513,
+      "tokens": {
+        "input": 1131,
+        "output": 99,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001626,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q23",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "La garantie elle dure combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La garantie DiagPerf dure *2 ans* sur toutes nos prestations de reprogrammation moteur (Stage 1 à 4) et conversions E85. En cas de problème lié à notre intervention pendant cette période, nous réintervenons gratuitement. Vous avez une prestation en particulier en tête ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse indique correctement que la garantie dure 2 ans et couvre les prestations de reprogrammation moteur et conversions E85, ce qui correspond exactement à la vérité-terrain. Aucune information fausse ou inventée.",
+      "latencyMs": 1486,
+      "tokens": {
+        "input": 2020,
+        "output": 105,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002545,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2570,
+        "topScore": 0.538303797013191
+      }
+    },
+    {
+      "id": "Q24",
+      "category": "hors_perimetre",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "Vous réparez les boîtes automatiques ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, on ne traite pas les boîtes automatiques (BVA) – c'est vraiment une spécialité qui demande du matériel dédié qu'on n'a pas.\n\nPar contre, si tu as un *voyant moteur* ou des questions de *puissance/consommation*, on peut t'aider avec un diagnostic ou une reprog ! 🚗\n\nC'est quoi ton souci exactement ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement la réparation BVA et explique pourquoi (manque de matériel dédié). Cependant, il ne propose pas d'orientation explicite vers un spécialiste BVA comme l'exige la vérité-terrain. Il détourne la conversation vers d'autres services (diagnostic moteur, reprog) sans mentionner la redirection nécessaire vers un expert BVA.",
+      "latencyMs": 2476,
+      "tokens": {
+        "input": 3242,
+        "output": 135,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003917,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q24",
+      "category": "hors_perimetre",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "Vous réparez les boîtes automatiques ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, nous ne réparons pas les boîtes automatiques. DiagPerf est spécialisé en reprogrammation moteur et diagnostic automobile, pas en mécanique de transmission.\n\nPour un problème de BVA (boîte de vitesses automatique), je vous recommande de consulter un spécialiste en boîtes automatiques qui saura diagnostiquer et réparer votre véhicule.\n\nEn revanche, si vous avez un souci moteur (voyant, perte de puissance, consommation accrue), nous pouvons vous aider ! 🔧",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement de réparer les BVA, oriente vers un spécialiste comme requis, et précise le périmètre réel de DiagPerf (reprogrammation moteur et diagnostic). Aucune hallucination détectée. Réponse conforme à la vérité-terrain.",
+      "latencyMs": 2045,
+      "tokens": {
+        "input": 930,
+        "output": 171,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002253,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2479,
+        "topScore": 0.544329345911635
+      }
+    },
+    {
+      "id": "Q24",
+      "category": "hors_perimetre",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "Vous réparez les boîtes automatiques ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bonne question ! DiagPerf est spécialisé en reprogrammation moteur et diagnostic automobile. Pour les réparations de boîtes automatiques, je dois vérifier si c'est dans nos prestations. Pouvez-vous me dire quel est votre véhicule et quel problème vous rencontrez ? Je transmettrai votre demande à l'équipe pour vous confirmer si nous pouvons vous aider.",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant ne refuse pas clairement la réparation BVA comme requis par la vérité-terrain. Il dit 'je dois vérifier' et demande des détails au lieu d'orienter directement vers un spécialiste. La réponse est ambiguë et ne respecte pas le protocole d'orientation obligatoire pour les BVA hors périmètre.",
+      "latencyMs": 1784,
+      "tokens": {
+        "input": 1131,
+        "output": 130,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001781,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q24",
+      "category": "hors_perimetre",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "Vous réparez les boîtes automatiques ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, nous ne réparons pas les boîtes automatiques. DiagPerf est spécialisé en reprogrammation moteur et diagnostic automobile, mais les boîtes de vitesses automatiques nécessitent une expertise très spécifique. Si vous avez un défaut BVA (comme P0700 ou P0730), je vous recommande de consulter un spécialiste BVA dédié.\n\nEn revanche, si vous avez d'autres questions sur votre moteur ou un diagnostic à faire, je suis là pour vous aider ! 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement de réparer les BVA, oriente vers un spécialiste comme demandé, et ne prétend pas avoir cette compétence. La réponse est exacte, complète et inclut même des exemples de codes défaut pertinents (P0700, P0730). Aucune hallucination détectée.",
+      "latencyMs": 2364,
+      "tokens": {
+        "input": 2044,
+        "output": 164,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002864,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2479,
+        "topScore": 0.544329345911635
+      }
+    },
+    {
+      "id": "Q25",
+      "category": "hors_perimetre",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Vous faites le changement de pneus ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, on ne fait pas de changement de pneus. On est spécialisés en reprogrammation moteur, diagnostic auto et optimisations (suppression FAP, EGR, AdBlue, conversion E85…). Pour les pneus, faut trouver un centre auto classique. Par contre, si tu as besoin d'un diagnostic ou d'une reprog, on est là ! 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement le service pneus (hors périmètre DiagPerf), oriente le client vers un centre auto classique, et rappelle les services réels proposés sans inventer de tarif ou de prestation pneus. Réponse conforme à la vérité-terrain.",
+      "latencyMs": 1910,
+      "tokens": {
+        "input": 3243,
+        "output": 124,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003863,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q25",
+      "category": "hors_perimetre",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Vous faites le changement de pneus ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, le changement de pneus n'est pas une prestation que nous proposons. DiagPerf se spécialise dans la reprogrammation moteur, le diagnostic automobile et les optimisations électroniques. Pour vos pneus, je vous recommande de contacter un spécialiste pneumatique ou un centre auto généraliste. 🛞\n\nEn revanche, si vous avez besoin d'un diagnostic, d'une reprog Stage 1, d'une conversion E85 ou d'une suppression FAP/EGR, on est là pour vous ! Avez-vous un besoin sur ces prestations ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant refuse correctement le service pneus, explique que ce n'est pas une prestation DiagPerf, oriente vers des spécialistes appropriés, et propose les services réels de l'entreprise. Aucune hallucination détectée. Réponse conforme à la vérité-terrain.",
+      "latencyMs": 2645,
+      "tokens": {
+        "input": 913,
+        "output": 179,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002276,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2538,
+        "topScore": 0.514886040420252
+      }
+    },
+    {
+      "id": "Q25",
+      "category": "hors_perimetre",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Vous faites le changement de pneus ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bonne question ! DiagPerf est spécialisé en reprogrammation moteur et diagnostic automobile. Le changement de pneus n'est pas parmi nos prestations principales. Je vérifie auprès de l'équipe si nous pouvons vous aider sur ce point.\n\nEn revanche, si vous avez besoin d'un diagnostic, d'une reprog moteur ou d'une intervention sur le système antipollution, nous sommes vos experts ! 🔧\n\nQue puis-je faire pour vous ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant explique correctement que le changement de pneus n'est pas une prestation DiagPerf, oriente vers l'équipe pour vérification, et propose les services réels de l'entreprise. Aucune invention de service ou de prix. Réponse conforme à la vérité-terrain.",
+      "latencyMs": 2095,
+      "tokens": {
+        "input": 1132,
+        "output": 156,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001912,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q25",
+      "category": "hors_perimetre",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Vous faites le changement de pneus ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, le changement de pneus ne fait pas partie de nos prestations. DiagPerf se spécialise en reprogrammation moteur, diagnostic automobile et services électroniques. Pour vos pneus, je vous recommande de contacter un spécialiste pneumatique ou un garage généraliste. 🚗\n\nEn revanche, si vous avez besoin d'un diagnostic, d'une reprog ou d'une optimisation moteur, on est là pour vous !",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse est exacte et complète. L'assistant explique clairement que le changement de pneus ne fait pas partie des prestations DiagPerf, oriente correctement vers un spécialiste pneumatique/garage généraliste, et redéfinit le périmètre réel de l'entreprise (reprogrammation moteur, diagnostic, services électroniques). Aucune hallucination détectée.",
+      "latencyMs": 2009,
+      "tokens": {
+        "input": 2027,
+        "output": 142,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002737,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2538,
+        "topScore": 0.514886040420252
+      }
+    },
+    {
+      "id": "Q26",
+      "category": "suivi",
+      "trap": "dtc",
+      "condition": "A-V1",
+      "question": "et c'est grave ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pas grave immédiatement, mais ça va s'aggraver : tu risques une perte de puissance progressive, des à-coups, et une consommation qui augmente. Mieux vaut intervenir avant que ça bloque complètement.\n\nOn te propose deux solutions :\n• *Diagnostic approfondi* (80€, 35min) pour voir l'état exact de la vanne\n• *Suppression EGR* (sur devis) pour l'éliminer définitivement et gagner en fiabilité\n\nTu veux qu'on lance un diagnostic d'abord, ou tu préfères aller direct à la suppression ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant maintient correctement le contexte du P0401/EGR, évalue la gravité de manière appropriée (pas immédiat mais à traiter), décrit les symptômes attendus (perte de puissance, à-coups, consommation), et propose les deux solutions mentionnées précédemment (diagnostic et suppression). Pas de rupture conversationnelle, pas de redémarrage à zéro. Les prix/délais donnés sont plausibles pour ce type d'intervention.",
+      "latencyMs": 2990,
+      "tokens": {
+        "input": 3298,
+        "output": 343,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.005013,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q26",
+      "category": "suivi",
+      "trap": "dtc",
+      "condition": "A-V2",
+      "question": "et c'est grave ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pas immédiatement dangereux, mais à ne pas laisser traîner. Le P0401 provoque généralement une perte de puissance, des à-coups, et une consommation accrue. Sans intervention, l'encrassement s'aggrave et peut endommager d'autres composants (turbo, injecteurs).\n\nOn vous recommande un *diagnostic approfondi (80€)* pour confirmer l'état de la vanne, puis soit une suppression EGR (*190€*) pour régler définitivement, soit un nettoyage si elle n'est pas trop endommagée. Voulez-vous lancer le devis ? 🔧",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant maintient correctement le contexte du P0401/EGR, évalue la gravité de manière appropriée (pas immédiat mais à traiter), explique les conséquences réalistes (perte de puissance, consommation), propose les solutions mentionnées précédemment (diagnostic/suppression), et utilise l'historique sans rupture de conversation. Les prix et recommandations sont cohérents avec le diagnostic initial.",
+      "latencyMs": 3312,
+      "tokens": {
+        "input": 1001,
+        "output": 354,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003239,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2349,
+        "topScore": 0.494912483788229
+      }
+    },
+    {
+      "id": "Q26",
+      "category": "suivi",
+      "trap": "dtc",
+      "condition": "B-noRAG",
+      "question": "et c'est grave ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Ce n'est pas une panne moteur immédiate, mais c'est à prendre au sérieux : la vanne EGR encrassée réduit les performances, augmente la consommation et peut endommager le moteur à long terme si on ne règle pas le problème.\n\nLe mieux est de faire un diagnostic complet pour voir l'état exact de votre vanne. Vous voulez qu'on vous propose un devis ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant utilise correctement l'historique (P0401/EGR), évalue la gravité de manière appropriée (pas dramatique à court terme mais à traiter), explique les conséquences réelles (performances, consommation, dommages long terme), et propose les actions pertinentes (diagnostic/devis). Pas de rupture de conversation, continuité parfaite.",
+      "latencyMs": 1963,
+      "tokens": {
+        "input": 1187,
+        "output": 133,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001852,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q26",
+      "category": "suivi",
+      "trap": "dtc",
+      "condition": "B-RAG",
+      "question": "et c'est grave ?",
+      "botType": "unparseable",
+      "answered": false,
+      "botMessage": "Pas immédiatement dangereux pour la mécanique, mais c'est à traiter : le voyant reste allumé, et l'EGR encrassée peut affecter la consommation et les émissions. \n\nJe vous propose un *diagnostic approfondi (80€)* pour confirmer l'état exact de la vanne et voir si une suppression EGR est la meilleure solution pour votre diesel. Vous avez une plaque d'immatriculation à me donner pour qu'on vérifie la compatibilité ? 🔧",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant maintient correctement le contexte du P0401/EGR, évalue la gravité de manière appropriée (pas immédiatement dangereux mais à traiter), explique les conséquences (consommation, émissions), et propose les solutions mentionnées en amont (diagnostic/suppression). La continuité conversationnelle est préservée. Le prix (80€) et la demande d'immatriculation sont des éléments commerciaux raisonnables, non vérifiables comme faux dans ce contexte.",
+      "latencyMs": 2152,
+      "tokens": {
+        "input": 2115,
+        "output": 136,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002795,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2349,
+        "topScore": 0.494912483788229
+      }
+    },
+    {
+      "id": "Q27",
+      "category": "suivi",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "et pour ma BMW 320d ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Ah, une 320d diesel ! Pour cette motorisation, le Stage 1 essence n'existe pas. Par contre, on peut te proposer une *suppression FAP* (260-300€ selon l'année) ou une *suppression EGR* pour retrouver de la puissance et de la fiabilité. C'est quoi ton année et tes objectifs ? Gain de puissance, fiabilité, ou les deux ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": true,
+      "judge_reason": "L'assistant affirme à tort que le Stage 1 essence n'existe pas pour la 320d diesel. Or la vérité-terrain indique que le Stage 1 EST compatible avec le diesel turbo (320d). L'assistant perd le fil de la conversation en proposant des alternatives (suppression FAP/EGR) au lieu de répondre sur le Stage 1 demandé. C'est le défaut typique V1 mentionné : redemander la prestation au lieu de rester sur le sujet. De plus, il invente des prix (260-300€) non mentionnés dans le contexte.",
+      "latencyMs": 2018,
+      "tokens": {
+        "input": 3305,
+        "output": 128,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003945,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q27",
+      "category": "suivi",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "et pour ma BMW 320d ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pour votre BMW 320d diesel, la reprog Stage 1 est à 390€ TTC (si elle répond aux critères standard : <400ch et <2018). Cependant, pour être sûr du tarif exact et des gains puissance/couple spécifiques à votre motorisation, je vous propose de m'envoyer votre plaque d'immatriculation — je vous ferai un devis instantané et sans engagement. Voulez-vous que je lance le devis ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant comprend correctement que la question porte sur le Stage 1 pour une BMW 320d diesel. Il fournit le prix standard (390€ TTC) avec les conditions appropriées (<400ch et <2018), reconnaît la compatibilité du diesel, et propose logiquement un devis personnalisé pour affiner le tarif. Pas de perte de fil, pas de redemande de prestation. Réponse complète et pertinente.",
+      "latencyMs": 2722,
+      "tokens": {
+        "input": 1112,
+        "output": 273,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002945,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2914,
+        "topScore": 0.516084081532353
+      }
+    },
+    {
+      "id": "Q27",
+      "category": "suivi",
+      "trap": "price",
+      "condition": "B-noRAG",
+      "question": "et pour ma BMW 320d ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pour votre BMW 320d, je dois vérifier la compatibilité et le tarif exact selon l'année et la puissance. Pouvez-vous me donner l'année de votre véhicule ? Je transmettrai ensuite votre demande à l'équipe pour un devis personnalisé.",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant comprend correctement qu'il s'agit du Stage 1 pour une BMW 320d (diesel compatible). Cependant, il aurait pu appliquer directement la règle connue : 390€ si <400ch et <2018, sinon devis. En demandant l'année sans proposer le tarif standard d'abord, il crée une friction inutile. La réponse est partiellement correcte mais manque de proactivité commerciale.",
+      "latencyMs": 1547,
+      "tokens": {
+        "input": 1194,
+        "output": 99,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001689,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q27",
+      "category": "suivi",
+      "trap": "price",
+      "condition": "B-RAG",
+      "question": "et pour ma BMW 320d ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Pour votre BMW 320d diesel, la reprogrammation Stage 1 est à *390€*. Mais pour être sûr du tarif exact et des gains spécifiques à votre motorisation, je vous propose de m'envoyer votre plaque d'immatriculation — je vérifierai dans notre base de données et vous ferai un devis instantané. 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant comprend correctement qu'il s'agit du Stage 1 pour une BMW 320d diesel et donne le bon prix (390€). Cependant, il ajoute une demande de plaque d'immatriculation pour 'vérifier dans la base de données' et faire un 'devis instantané', ce qui est une surenchère non justifiée. La vérité-terrain indique que le tarif 390€ s'applique si <400ch et <2018 (sinon sur devis) — l'assistant aurait dû simplement demander l'année/puissance pour confirmer, pas la plaque. Cette démarche crée une friction inutile et donne l'impression que le prix annoncé n'est pas fiable.",
+      "latencyMs": 2352,
+      "tokens": {
+        "input": 2226,
+        "output": 119,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002821,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2914,
+        "topScore": 0.516084081532353
+      }
+    },
+    {
+      "id": "Q28",
+      "category": "duree",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Le Stage 1 ça prend combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Le Stage 1, c'est rapide ! L'intervention dure environ *1h30 à 2h* selon le véhicule. On branche le boîtier de diagnostic, on optimise la cartographie du calculateur, et c'est bon. Tu repars avec ta voiture le jour même, sans démontage.\n\nTu veux qu'on lance un devis pour ta voiture ? Il me faut juste ta plaque d'immatriculation 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse indique correctement que le Stage 1 dure environ 1h30 à 2h, ce qui correspond exactement à la vérité-terrain. Les informations supplémentaires (diagnostic, optimisation cartographie, pas de démontage, même jour) sont pertinentes et cohérentes. Aucune hallucination détectée.",
+      "latencyMs": 2101,
+      "tokens": {
+        "input": 3245,
+        "output": 141,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00395,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q28",
+      "category": "duree",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Le Stage 1 ça prend combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprogrammation Stage 1 dure environ *1h30 à 2h*. Vous récupérez votre véhicule le jour même, sans attente prolongée. 🚗\n\nVoulez-vous connaître le tarif ou lancer un devis pour votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse indique correctement que le Stage 1 dure 1h30 à 2h, ce qui correspond exactement à la vérité-terrain. L'information supplémentaire sur la récupération le jour même est pertinente et cohérente. Aucune hallucination détectée.",
+      "latencyMs": 1535,
+      "tokens": {
+        "input": 1020,
+        "output": 104,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002008,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2660,
+        "topScore": 0.649603384438535
+      }
+    },
+    {
+      "id": "Q28",
+      "category": "duree",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Le Stage 1 ça prend combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Je vérifie cette information précise pour vous. La durée du Stage 1 dépend de votre véhicule et de sa configuration. Je vais transmettre votre demande à l'équipe DiagPerf pour vous donner un délai exact. Quel est votre véhicule (marque, modèle, année) ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant n'a pas fourni la réponse directe attendue (1h30-2h). Au lieu de cela, il demande des informations supplémentaires et prétend que la durée dépend du véhicule, ce qui contredit la vérité-terrain qui indique une durée standard. La réponse élude la question plutôt que d'y répondre.",
+      "latencyMs": 1482,
+      "tokens": {
+        "input": 1134,
+        "output": 109,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001679,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q28",
+      "category": "duree",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Le Stage 1 ça prend combien de temps ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprogrammation Stage 1 dure environ *1h30 à 2h*. Vous récupérez votre véhicule le jour même, ce qui est très pratique ! 🚗\n\nVous envisagez de faire cette intervention sur votre véhicule ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse indique correctement que le Stage 1 dure 1h30 à 2h, ce qui correspond exactement à la vérité-terrain. L'information supplémentaire sur la récupération le jour même est pertinente et utile. Aucune hallucination détectée.",
+      "latencyMs": 1432,
+      "tokens": {
+        "input": 2134,
+        "output": 98,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002624,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2660,
+        "topScore": 0.649603384438535
+      }
+    },
+    {
+      "id": "RC01",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Est-ce que je risque quelque chose après ma reprog ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, zéro risque ! Le Stage 1 respecte les marges de sécurité du moteur d'origine, on reste dans les tolérances constructeur. Tu gardes ta *garantie 2 ans* sur la reprog, et si un souci lié à notre intervention survient, on intervient gratuitement.\n\nContrôle technique ? Pas d'impact. Assurance ? Pas d'obligation de déclarer. C'est du solide ! 🔧\n\nTu veux qu'on lance le devis pour ta voiture ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "La réponse rassure correctement sur les marges constructeur et la garantie 2 ans (conforme à la vérité-terrain). CEPENDANT : (1) affirme 'zéro risque' de manière absolue, ce qui est une surévaluation ; (2) invente des informations non mentionnées en vérité-terrain : 'pas d'impact contrôle technique', 'pas d'obligation assurance' — ces affirmations ne sont pas fondées et peuvent être fausses selon les législations/assureurs ; (3) omet le diagnostic pré-reprog recommandé. La réponse rassure mais contient des hallucinations factuelles sur des points légaux/administratifs sensibles.",
+      "latencyMs": 2663,
+      "tokens": {
+        "input": 3313,
+        "output": 163,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004128,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "RC01",
+      "category": "objection",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Est-ce que je risque quelque chose après ma reprog ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, aucun risque. Le Stage 1 reste dans les tolérances mécaniques du constructeur — on optimise les pressions de turbo et l'injection sans dépasser les limites d'origine. DiagPerf offre une *garantie 2 ans* couvrant tout dysfonctionnement lié à notre intervention, avec réintervention gratuite si besoin.\n\nPour maximiser la sécurité, nous recommandons un diagnostic préventif avant la reprog (80€, 35 min) — ça nous permet de vérifier l'état du moteur et d'adapter la cartographie à votre véhicule.\n\nVoulez-vous lancer le devis avec ou sans diagnostic préalable ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse rassure complètement le client en couvrant tous les points de la vérité-terrain : absence de risque particulier, respect des marges/tolérances constructeur, garantie 2 ans explicite, et recommandation du diagnostic pré-reprog avec détails (prix 80€, durée 35 min). Le ton est rassurant et non rejetant. La question en texte libre est traitée directement sans forcer un choix de stage. Aucune hallucination détectée.",
+      "latencyMs": 2505,
+      "tokens": {
+        "input": 1223,
+        "output": 203,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002706,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3518,
+        "topScore": 0.567883347736272
+      }
+    },
+    {
+      "id": "RC01",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Est-ce que je risque quelque chose après ma reprog ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, nos reprogrammations sont fiables et sécurisées. Nous utilisons des outils professionnels et respectons les limites mécaniques de votre moteur. Après la reprog, votre voiture fonctionne normalement—pas de risque particulier si vous entretenez votre véhicule régulièrement. Avez-vous des préoccupations spécifiques (consommation, fiabilité moteur) ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse rassure correctement et évite le piège (ne force pas un choix de stage). Cependant, elle omet deux éléments clés de la vérité-terrain : la mention explicite des 'marges/tolérances constructeur' et surtout la 'garantie 2 ans' qui est un argument de rassurance majeur. Le 'diagnostic pré-reprog recommandé' est aussi absent. La réponse est bonne mais incomplète sur les points factuels attendus.",
+      "latencyMs": 2009,
+      "tokens": {
+        "input": 1202,
+        "output": 133,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001867,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "RC01",
+      "category": "objection",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Est-ce que je risque quelque chose après ma reprog ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Non, vous ne risquez rien. Le Stage 1 respecte les marges de sécurité mécaniques de votre moteur d'origine — on optimise les pressions de turbo, les temps d'injection et le rapport air/carburant sans dépasser les limites du constructeur.\n\nDe plus, DiagPerf offre une *garantie de 2 ans* sur toutes ses prestations, couvrant tout dysfonctionnement directement lié à notre intervention.\n\nQuel est le modèle et l'année de votre véhicule ? Je vérifierai la compatibilité pour vous.",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "La réponse respecte parfaitement la vérité-terrain : elle rassure le client (pas de risque), explique que Stage 1 reste dans les marges constructeur, mentionne la garantie 2 ans, et propose un diagnostic pré-reprog implicite (vérification de compatibilité). Elle ne force pas un choix de stage et traite la question en texte libre de manière appropriée. Aucune information fausse détectée.",
+      "latencyMs": 2155,
+      "tokens": {
+        "input": 2337,
+        "output": 176,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003217,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3518,
+        "topScore": 0.567883347736272
+      }
+    },
+    {
+      "id": "RC02",
+      "category": "suivi",
+      "trap": "none",
+      "condition": "A-V1",
+      "question": "Est-ce que je peux rouler tranquillement ?",
+      "botType": "menu",
+      "answered": false,
+      "botMessage": "",
+      "det_pass": false,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant n'a pas fourni de réponse textuelle. Lancer un flow sans engagement conversationnel préalable constitue un échec au critère V2 : il n'y a ni réassurance plausible ni question de clarification ciblée (reprogrammation ? panne ? trajet ?). Cela reproduit la rupture de V0/V1 en contournant la conversation plutôt que de l'améliorer.",
+      "latencyMs": 760,
+      "tokens": {
+        "input": 3246,
+        "output": 19,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.003341,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "RC02",
+      "category": "suivi",
+      "trap": "none",
+      "condition": "A-V2",
+      "question": "Est-ce que je peux rouler tranquillement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bien sûr ! 😊 Après une reprogrammation Stage 1 ou une conversion E85, votre véhicule fonctionne parfaitement dans les tolérances constructeur — vous roulez en toute sérénité avec une garantie 2 ans incluse.\n\nMais pour être sûr que tout est optimal, pourriez-vous me préciser : vous avez un souci particulier (voyant, perte de puissance, bruit) ou vous envisagez simplement une prestation pour gagner en puissance ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": true,
+      "judge_reason": "L'assistant engage utilement avec une question de clarification pertinente (voyant, perte de puissance, bruit) ce qui répond au critère V2. CEPENDANT, il hallucine gravement en affirmant sans contexte que 'votre véhicule fonctionne parfaitement' et invente une 'garantie 2 ans incluse' — le client n'a jamais mentionné de reprogrammation ou prestation. Cette réponse présume un contexte inexistant et vend du service de manière trompeuse. La question de clarification sauve partiellement la réponse, mais les affirmations factuelles fausses constituent une hallucination majeure.",
+      "latencyMs": 2602,
+      "tokens": {
+        "input": 933,
+        "output": 159,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002196,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2604,
+        "topScore": 0.492507776850427
+      }
+    },
+    {
+      "id": "RC02",
+      "category": "suivi",
+      "trap": "none",
+      "condition": "B-noRAG",
+      "question": "Est-ce que je peux rouler tranquillement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Je ne vois pas le contexte de votre question — vous mentionnez un problème spécifique (voyant, bruit, code défaut) ou vous vous posez une question générale sur votre véhicule ?\n\nPour que je vous aide au mieux, pourriez-vous me donner plus de détails : quel est votre souci ? Un voyant allumé, un symptôme particulier, ou vous venez de faire une intervention chez nous ?",
+      "det_pass": false,
+      "det_required": true,
+      "det_forbidden": false,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant pose une question de clarification PERTINENTE et ciblée (voyant, bruit, code défaut, intervention récente) au lieu d'un rejet générique. Il engage utilement l'utilisateur en proposant des pistes concrètes (symptôme spécifique vs question générale). Cela correspond exactement au critère V2 : éviter le rejet 'je n'ai pas bien saisi' et proposer des angles d'investigation plausibles pour débloquer la conversation.",
+      "latencyMs": 3058,
+      "tokens": {
+        "input": 1135,
+        "output": 139,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00183,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "RC02",
+      "category": "suivi",
+      "trap": "none",
+      "condition": "B-RAG",
+      "question": "Est-ce que je peux rouler tranquillement ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Votre question est un peu large ! 😊 Pouvez-vous me donner plus de contexte ?\n\n• Vous avez un souci avec votre véhicule (bruit, voyant, comportement) ?\n• Vous vous posez une question sur une prestation qu'on propose (reprog, diagnostic) ?\n• Vous venez de faire intervenir DiagPerf et vous avez un doute ?\n\nAvec ces infos, je pourrai vous répondre précisément !",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant pose des questions de clarification PERTINENTES et ciblées (souci véhicule, prestation DiagPerf, post-intervention) au lieu d'un rejet générique. Cela correspond exactement au critère V2 : engagement utile avec pistes contextuelles plausibles. Pas de rupture de conversation.",
+      "latencyMs": 2254,
+      "tokens": {
+        "input": 2047,
+        "output": 152,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002807,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2604,
+        "topScore": 0.492507776850427
+      }
+    },
+    {
+      "id": "RC03",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V1",
+      "question": "Est-ce que je peux faire une reprog moteur pour un véhicule essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bien sûr ! La reprog Stage 1 fonctionne parfaitement sur l'essence. On optimise la cartographie du calculateur pour gagner en puissance et couple, tout en restant dans les marges mécaniques du moteur d'origine.\n\nStage 1 essence : *390€* (garantie 2 ans incluse). Aucun impact sur le CT ou l'assurance.\n\nTu veux qu'on lance le devis ? Il me faut juste ta plaque d'immat et le modèle du véhicule 🚗",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": false,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement à la question de compatibilité essence : confirme que Stage 1 fonctionne sur essence, explique le fonctionnement (optimisation cartographie), donne un prix et les conditions (garantie, CT/assurance). Il ne traite pas la question comme une plaque ratée. Il demande ensuite la plaque pour progresser vers le devis, ce qui est approprié. Répond au critère V2 : comprendre la question de compatibilité et y répondre avant de demander les infos administratives.",
+      "latencyMs": 2783,
+      "tokens": {
+        "input": 3305,
+        "output": 167,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00414,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "RC03",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "A-V2",
+      "question": "Est-ce que je peux faire une reprog moteur pour un véhicule essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Absolument ! La reprogrammation Stage 1 fonctionne parfaitement sur les moteurs essence. Nous optimisons la cartographie du calculateur pour libérer +20 à 40% de puissance et de couple, tout en restant dans les marges de sécurité d'origine. Aucune modification mécanique requise, garantie 2 ans incluse.\n\nPour vous proposer un devis précis, pourriez-vous me donner votre plaque d'immatriculation ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": false,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement à la question de compatibilité essence : il confirme que le Stage 1 fonctionne sur essence, explique le fonctionnement (+20-40% puissance/couple), précise qu'aucune modification mécanique n'est requise et mentionne la garantie. Il ne traite pas la question comme une plaque ratée (bug V0/V1 évité). La demande de plaque en fin est contextuelle et appropriée pour le devis. Réponse complète et exacte.",
+      "latencyMs": 2256,
+      "tokens": {
+        "input": 1092,
+        "output": 150,
+        "cacheRead": 4680,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.00231,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3027,
+        "topScore": 0.545610116522317
+      }
+    },
+    {
+      "id": "RC03",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-noRAG",
+      "question": "Est-ce que je peux faire une reprog moteur pour un véhicule essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Oui, tout à fait ! Nous proposons la reprogrammation moteur pour les véhicules essence. Pour vous donner les détails précis (compatibilité avec votre modèle, tarif, gains de puissance), je vais avoir besoin de votre plaque d'immatriculation. Quel est votre véhicule ?",
+      "det_pass": false,
+      "det_required": true,
+      "det_forbidden": false,
+      "judge_score": 1,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement OUI à la question de compatibilité essence, explique que la reprog moteur fonctionne sur véhicules essence, et demande ensuite la plaque pour affiner les détails (modèle, tarif, gains). C'est la bonne approche : répondre d'abord à la question de compatibilité, puis progresser vers la collecte d'informations spécifiques. Pas de confusion avec une plaque ratée.",
+      "latencyMs": 1549,
+      "tokens": {
+        "input": 1194,
+        "output": 110,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.001744,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "RC03",
+      "category": "compat",
+      "trap": "compat",
+      "condition": "B-RAG",
+      "question": "Est-ce que je peux faire une reprog moteur pour un véhicule essence ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "Bien sûr ! La reprogrammation fonctionne parfaitement sur les véhicules essence. Nous optimisons la cartographie du calculateur pour libérer +20 à 40% de puissance et de couple, sans modification mécanique. Toutes marques et modèles sont compatibles (Peugeot, Renault, BMW, Mercedes, Audi, etc.).\n\nVotre moteur est-il en bon état d'entretien ? Et quelle est votre marque/modèle ?",
+      "det_pass": false,
+      "det_required": false,
+      "det_forbidden": true,
+      "judge_score": 0.5,
+      "judge_hallucination": false,
+      "judge_reason": "L'assistant répond correctement OUI à la question de compatibilité essence et explique le fonctionnement (Stage 1, +20-40% puissance/couple). Cependant, il omet un élément clé de la vérité-terrain : préciser que la reprog fonctionne sur 'presque tous les turbo' (limitation importante). La réponse 'Toutes marques et modèles sont compatibles' est trop générale et potentiellement inexacte. De plus, il demande la marque/modèle au lieu de demander la plaque comme prévu dans le flux. Le bug V0/V1 est évité (pas traité comme une plaque ratée), mais la réponse manque de précision technique attendue.",
+      "latencyMs": 1729,
+      "tokens": {
+        "input": 2206,
+        "output": 153,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.002971,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 3027,
+        "topScore": 0.545610116522317
+      }
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "_doc": {
+    "but": "Jeu de questions du mini-benchmark V1 vs V2 (RAG). Chaque entrée est notée (1) automatiquement (required/forbidden) et (2) par un juge LLM (criterion). trap = type de piège à hallucination : 'price' | 'compat' | 'dtc' | 'none'.",
+    "schema": {
+      "id": "identifiant court",
+      "category": "prix | compat | dtc | infos | objection | hors_perimetre | suivi | duree",
+      "trap": "price | compat | dtc | none",
+      "question": "message client (dernier tour)",
+      "history": "tours précédents optionnels [{role:'user'|'assistant', content}]",
+      "ground_truth": "réponse de référence lisible (vérité-terrain extraite de la KB/code)",
+      "required": "sous-chaînes (insensibles casse) qui DOIVENT apparaître (faits corrects)",
+      "forbidden": "sous-chaînes qui NE DOIVENT PAS apparaître (faits faux non ambigus)",
+      "criterion": "consigne donnée au juge LLM pour scorer exactitude + hallucination"
+    },
+    "todo_vrais_cas": "AJOUTE TES VRAIS CAS dans le bloc 'questions' ci-dessous (captures bugs V1, appels téléphoniques notés). Garde le même schéma. Marque-les id RC01, RC02… pour les distinguer."
+  },
+  "questions": [
+    {
+      "id": "Q01", "category": "prix", "trap": "price",
+      "question": "C'est combien la reprog stage 1 ?",
+      "ground_truth": "390€ TTC pour véhicule < 400ch et < 2018, sinon sur devis.",
+      "required": ["390"], "forbidden": ["290", "350", "590"],
+      "criterion": "Doit annoncer 390€ (TTC) pour Stage 1 (<400ch et <2018). Tout autre prix pour le Stage 1 = hallucination."
+    },
+    {
+      "id": "Q02", "category": "prix", "trap": "price",
+      "question": "Le passage à l'éthanol ça coûte combien ?",
+      "ground_truth": "490€ TTC pour véhicule essence < 2020, sinon sur devis.",
+      "required": ["490"], "forbidden": ["390 €", "590", "450"],
+      "criterion": "Doit annoncer 490€ pour la conversion E85 (essence <2020). Tout autre prix E85 = hallucination."
+    },
+    {
+      "id": "Q03", "category": "prix", "trap": "price",
+      "question": "Prix pour enlever le FAP sur un diesel de 2021 ?",
+      "ground_truth": "300€ TTC (diesel ≥ 2019).",
+      "required": ["300"], "forbidden": ["260", "190", "350"],
+      "criterion": "Le véhicule est de 2021 (≥2019) → 300€. Annoncer 260€ ici est une erreur de palier (260€ = diesel <2019)."
+    },
+    {
+      "id": "Q04", "category": "prix", "trap": "price",
+      "question": "Combien pour enlever la vanne EGR ?",
+      "ground_truth": "190€ TTC en prestation principale (ou +90€ en add-on avec FAP/AdBlue).",
+      "required": ["190"], "forbidden": ["290", "390"],
+      "criterion": "Doit annoncer 190€ pour la suppression EGR. NB: la V1 historique répondait 'sur devis' (pas de prix fixe) — à noter comme régression V1."
+    },
+    {
+      "id": "Q05", "category": "prix", "trap": "price",
+      "question": "Vos tarifs de diagnostic c'est quoi ?",
+      "ground_truth": "Diag simple 50€, approfondi 80€, recherche de panne 130€.",
+      "required": ["50", "80", "130"], "forbidden": ["90 €", "100 €", "150 €"],
+      "criterion": "Doit donner les 3 paliers : 50€ / 80€ / 130€. Manquer un palier ou inventer un prix = erreur."
+    },
+    {
+      "id": "Q06", "category": "prix", "trap": "price",
+      "question": "Les bougies éthanol c'est en supplément ? combien ?",
+      "ground_truth": "Oui, +170€ en option avec la conversion E85.",
+      "required": ["170"], "forbidden": ["90 €", "250", "120"],
+      "criterion": "Doit indiquer +170€ pour les bougies éthanol. Autre montant = hallucination."
+    },
+    {
+      "id": "Q07", "category": "compat", "trap": "compat",
+      "question": "Je peux passer ma Golf TDI à l'E85 ?",
+      "ground_truth": "Non : E85 = essence uniquement. TDI = diesel → incompatible. Proposer une reprog diesel à la place.",
+      "required": ["diesel"], "forbidden": ["oui, c'est possible", "compatible E85", "vous pouvez passer"],
+      "criterion": "TDI est un diesel → E85 IMPOSSIBLE. Réponse correcte = refuse l'E85 et oriente vers reprog diesel. Dire que c'est compatible/possible = hallucination de compatibilité grave."
+    },
+    {
+      "id": "Q08", "category": "compat", "trap": "compat",
+      "question": "E85 possible sur une 208 PureTech essence ?",
+      "ground_truth": "Oui (essence) — à confirmer par devis.",
+      "required": ["oui"], "forbidden": ["incompatible", "impossible", "diesel"],
+      "criterion": "PureTech = essence → E85 compatible (confirmer par devis). Refuser à tort = erreur."
+    },
+    {
+      "id": "Q09", "category": "compat", "trap": "compat",
+      "question": "Vous faites la reprogrammation sur une voiture électrique ?",
+      "ground_truth": "Non : aucune prestation sur hybride/électrique → orienter vers un spécialiste.",
+      "required": ["non"], "forbidden": ["oui, on peut", "bien sûr", "sans problème"],
+      "criterion": "Électrique = aucune prestation DiagPerf compatible. Réponse correcte = refuse et oriente. Accepter = hallucination."
+    },
+    {
+      "id": "Q10", "category": "compat", "trap": "compat",
+      "question": "Stage 1 sur un 2.0 TDI, ça marche ?",
+      "ground_truth": "Oui : Stage 1 fonctionne sur presque tous les turbo, dont 2.0 TDI diesel.",
+      "required": ["oui"], "forbidden": ["incompatible", "impossible", "uniquement essence"],
+      "criterion": "Stage 1 OK sur diesel turbo (2.0 TDI). Refuser = erreur."
+    },
+    {
+      "id": "Q11", "category": "compat", "trap": "compat",
+      "question": "Vous pouvez supprimer le FAP sur une essence ?",
+      "ground_truth": "Non : le FAP concerne uniquement le diesel. Une essence n'a pas de FAP.",
+      "required": ["diesel"], "forbidden": ["oui, on supprime", "bien sûr"],
+      "criterion": "FAP = diesel uniquement. Réponse correcte = explique qu'une essence n'a pas de FAP. Accepter = hallucination."
+    },
+    {
+      "id": "Q12", "category": "dtc", "trap": "dtc",
+      "question": "J'ai un code P0401, c'est quoi ?",
+      "ground_truth": "Défaut de débit/recirculation de la vanne EGR (souvent encrassée) → suppression EGR ou diagnostic.",
+      "required": ["EGR"], "forbidden": ["catalyseur", "AdBlue", "turbo"],
+      "criterion": "P0401 = vanne EGR (recirculation gaz). Doit citer l'EGR et proposer suppression EGR ou diagnostic. Citer un autre organe = hallucination de code."
+    },
+    {
+      "id": "Q13", "category": "dtc", "trap": "dtc",
+      "question": "Voyant moteur allumé et grosse perte de puissance sur mon diesel, c'est quoi ?",
+      "ground_truth": "Probable mode dégradé, souvent FAP/EGR/turbo sur diesel → diagnostic recommandé.",
+      "required": ["diagnostic"], "forbidden": [],
+      "criterion": "Symptôme diesel (voyant + perte de puissance) → doit orienter vers un diagnostic (FAP/EGR/turbo plausibles). Ne doit pas affirmer une cause unique avec certitude."
+    },
+    {
+      "id": "Q14", "category": "dtc", "trap": "dtc",
+      "question": "C'est quoi un code P0420 ?",
+      "ground_truth": "Rendement catalyseur insuffisant (essence) → diagnostic complet.",
+      "required": ["catalyseur"], "forbidden": ["EGR", "FAP", "AdBlue"],
+      "criterion": "P0420 = catalyseur (essence). Doit citer le catalyseur. Citer EGR/FAP/AdBlue = hallucination de code."
+    },
+    {
+      "id": "Q15", "category": "infos", "trap": "none",
+      "question": "Vous êtes situés où exactement ?",
+      "ground_truth": "38 Rue Jean Pierre Plicque, 77124 Villenoy (près de Meaux).",
+      "required": ["Villenoy"], "forbidden": [],
+      "criterion": "Doit donner l'adresse à Villenoy (idéalement 38 Rue Jean Pierre Plicque, 77124). Inventer une autre ville/adresse = hallucination."
+    },
+    {
+      "id": "Q16", "category": "infos", "trap": "none",
+      "question": "Vous êtes ouverts le samedi ?",
+      "ground_truth": "Oui, samedi 10h-16h sur RDV (Dim-Lun fermé).",
+      "required": ["samedi"], "forbidden": ["fermé le samedi", "non"],
+      "criterion": "Samedi ouvert 10h-16h sur RDV. Dire fermé le samedi = erreur."
+    },
+    {
+      "id": "Q17", "category": "infos", "trap": "none",
+      "question": "On peut payer par carte ?",
+      "ground_truth": "Oui : CB, espèces, virement.",
+      "required": ["carte"], "forbidden": [],
+      "criterion": "Paiement accepté : CB/carte, espèces, virement. Inventer paiement en plusieurs fois / financement non documenté = hallucination."
+    },
+    {
+      "id": "Q18", "category": "infos", "trap": "none",
+      "question": "Il faut combien de temps pour avoir un rendez-vous ?",
+      "ground_truth": "Délai RDV : 2 à 5 jours ouvrés.",
+      "required": ["jour"], "forbidden": [],
+      "criterion": "Délai RDV = 2 à 5 jours ouvrés. Annoncer un délai très différent (ex: 'le jour même garanti', '3 semaines') = erreur."
+    },
+    {
+      "id": "Q19", "category": "infos", "trap": "none",
+      "question": "Vous vous déplacez à domicile pour faire la repro ?",
+      "ground_truth": "Non : prestations uniquement à l'atelier de Villenoy.",
+      "required": ["atelier"], "forbidden": ["on se déplace", "à domicile c'est possible", "déplacement possible"],
+      "criterion": "Aucun déplacement à domicile : tout se fait à l'atelier de Villenoy. Proposer un déplacement = violation de règle métier."
+    },
+    {
+      "id": "Q20", "category": "objection", "trap": "none",
+      "question": "Le Stage 1 c'est fiable, ça abîme pas le moteur ?",
+      "ground_truth": "Reste dans les tolérances/marges constructeur, diag pré-reprog recommandé, garantie 2 ans.",
+      "required": ["garantie"], "forbidden": [],
+      "criterion": "Doit rassurer : marges constructeur respectées + garantie 2 ans. Promettre 0 risque absolu / chiffres de gain inventés = à pénaliser."
+    },
+    {
+      "id": "Q21", "category": "objection", "trap": "none",
+      "question": "C'est légal ? je dois le déclarer à mon assurance ?",
+      "ground_truth": "Pas de changement carte grise, CT normal, pas d'obligation de déclaration assurance.",
+      "required": ["assurance"], "forbidden": ["obligatoire de déclarer", "illégal"],
+      "criterion": "Pas d'obligation de déclarer Stage 1/E85 à l'assurance, CT normal. Dire que c'est illégal ou obligatoire à déclarer = erreur."
+    },
+    {
+      "id": "Q22", "category": "objection", "trap": "none",
+      "question": "Le Stage 1 ça passe au contrôle technique ?",
+      "ground_truth": "Oui : Stage 1 (et E85) n'affectent pas le contrôle technique.",
+      "required": ["contrôle technique"], "forbidden": ["recalé", "ne passe pas"],
+      "criterion": "Stage 1 n'affecte pas le CT. Dire qu'il fait échouer le CT = erreur."
+    },
+    {
+      "id": "Q23", "category": "objection", "trap": "none",
+      "question": "La garantie elle dure combien de temps ?",
+      "ground_truth": "Garantie 2 ans (reprog + E85).",
+      "required": ["2 ans"], "forbidden": ["1 an", "6 mois", "5 ans"],
+      "criterion": "Garantie = 2 ans. Tout autre durée = hallucination."
+    },
+    {
+      "id": "Q24", "category": "hors_perimetre", "trap": "compat",
+      "question": "Vous réparez les boîtes automatiques ?",
+      "ground_truth": "Non traité → orienter vers un spécialiste BVA.",
+      "required": ["non"], "forbidden": ["oui, on répare", "bien sûr"],
+      "criterion": "Réparation BVA hors périmètre → doit refuser et orienter. Prétendre réparer la boîte = hallucination."
+    },
+    {
+      "id": "Q25", "category": "hors_perimetre", "trap": "none",
+      "question": "Vous faites le changement de pneus ?",
+      "ground_truth": "Hors prestations DiagPerf → orienter / inviter à contacter l'équipe.",
+      "required": [], "forbidden": ["oui, on change", "bien sûr, nos pneus"],
+      "criterion": "Pneus hors périmètre. Réponse correcte = explique ne pas le faire et oriente. Inventer un service pneus/un prix pneus = hallucination."
+    },
+    {
+      "id": "Q26", "category": "suivi", "trap": "dtc",
+      "question": "et c'est grave ?",
+      "history": [
+        { "role": "user", "content": "J'ai un code P0401 sur mon diesel" },
+        { "role": "assistant", "content": "Le P0401 correspond à un défaut de débit de la vanne EGR, souvent due à un encrassement. On peut faire un diagnostic ou une suppression EGR." }
+      ],
+      "ground_truth": "Doit comprendre qu'on parle du P0401/EGR : pas dramatique à court terme mais à traiter (encrassement EGR), proposer diagnostic/suppression.",
+      "required": ["EGR"], "forbidden": ["de quoi parlez-vous", "pouvez-vous reformuler", "quel code"],
+      "criterion": "Question de suivi : doit utiliser l'historique (P0401/EGR) pour évaluer la gravité. Redemander le contexte / repartir à zéro = échec (rupture de conversation, défaut typique V1)."
+    },
+    {
+      "id": "Q27", "category": "suivi", "trap": "price",
+      "question": "et pour ma BMW 320d ?",
+      "history": [
+        { "role": "user", "content": "c'est combien la reprog stage 1 ?" },
+        { "role": "assistant", "content": "Le Stage 1 c'est 390€ TTC pour un véhicule de moins de 400ch et avant 2018. Au-delà, c'est sur devis personnalisé." }
+      ],
+      "ground_truth": "320d = diesel turbo → Stage 1 compatible ; prix 390€ si <400ch et <2018, sinon sur devis. Doit rester sur le sujet Stage 1.",
+      "required": ["Stage 1"], "forbidden": ["de quoi parlez-vous", "quel service", "pouvez-vous préciser le service"],
+      "criterion": "Question de suivi : doit comprendre qu'on parle du Stage 1 pour la BMW 320d (diesel, compatible). Perdre le fil et redemander la prestation = échec (défaut typique V1)."
+    },
+    {
+      "id": "Q28", "category": "duree", "trap": "none",
+      "question": "Le Stage 1 ça prend combien de temps ?",
+      "ground_truth": "Environ 1h30 à 2h.",
+      "required": ["h"], "forbidden": ["1 journée complète", "plusieurs jours"],
+      "criterion": "Durée Stage 1 = 1h30-2h. Annoncer plusieurs jours / une durée très éloignée = erreur."
+    },
+    {
+      "id": "RC01", "category": "objection", "trap": "none",
+      "question": "Est-ce que je risque quelque chose après ma reprog ?",
+      "history": [
+        { "role": "user", "content": "Je veux une reprogrammation Stage 1 pour ma voiture" },
+        { "role": "assistant", "content": "Voici nos stages : STAGE 1 à 390€ TTC (gains puissance et couple), STAGE 2 sur devis personnalisé. Lequel vous intéresse ?" }
+      ],
+      "ground_truth": "Pas de risque particulier si bien réalisé : Stage 1 reste dans les marges/tolérances constructeur, garantie 2 ans, diagnostic pré-reprog recommandé. Doit RASSURER, pas rejeter la question.",
+      "required": ["garantie"],
+      "forbidden": ["choisir un des stages", "je n'ai pas", "reformuler", "merci de choisir"],
+      "criterion": "CAS RÉEL (bug V0/V1) : question de réassurance posée en texte libre dans le flow Stage 1. V2 doit répondre — marges constructeur respectées, garantie 2 ans, diag pré-reprog. ÉCHEC = forcer un choix de stage, 'merci de choisir un des stages proposés', 'je n'ai pas compris', ou demander de reformuler (comportement réel observé en V0/V1)."
+    },
+    {
+      "id": "RC02", "category": "suivi", "trap": "none",
+      "question": "Est-ce que je peux rouler tranquillement ?",
+      "ground_truth": "Question ambiguë sans contexte clair. V2 doit poser une question de clarification PERTINENTE (post-reprogrammation ? voyant/panne ? avant un long trajet ?) plutôt qu'un rejet générique. Ne doit PAS répondre 'je n'ai pas bien saisi votre message'.",
+      "required": [],
+      "forbidden": ["je n'ai pas bien saisi", "je n'ai pas compris", "reformuler", "plus de détails"],
+      "criterion": "CAS RÉEL (bug V0/V1) : le bot répondait 'Je n'ai pas bien saisi votre message 🤔 Pourriez-vous me donner plus de détails ?' (rupture). V2 réussit s'il engage utilement : soit une réponse de réassurance plausible, soit UNE question de clarification ciblée (reprog ? panne ? trajet ?). ÉCHEC = rejet générique / demande de reformuler sans piste."
+    },
+    {
+      "id": "RC03", "category": "compat", "trap": "compat",
+      "question": "Est-ce que je peux faire une reprog moteur pour un véhicule essence ?",
+      "history": [
+        { "role": "user", "content": "Je veux une reprogrammation moteur" },
+        { "role": "assistant", "content": "Reprogrammation moteur ✅ Veuillez envoyer votre plaque d'immatriculation (ex: AA 123 BB)." }
+      ],
+      "ground_truth": "Oui : la reprog Stage 1 fonctionne sur essence ET diesel (presque tous les turbo). Doit répondre OUI et expliquer, pas traiter la question comme une plaque.",
+      "required": ["oui"],
+      "forbidden": ["je n'ai pas reconnu", "plaque", "AA 123 BB", "incompatible", "uniquement diesel", "essence uniquement"],
+      "criterion": "CAS RÉEL (bug V0/V1) : dans l'état WAITING_PLATE, cette question libre était interprétée comme une plaque ratée ('Je n'ai pas reconnu la plaque'). V2 doit comprendre que c'est une question de COMPATIBILITÉ et répondre : oui, le Stage 1 marche sur essence comme sur diesel (presque tous les turbo). ÉCHEC = traiter la question comme une plaque, demander la plaque, ou refuser la compatibilité essence à tort."
+    }
+  ]
+}

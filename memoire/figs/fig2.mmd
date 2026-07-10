@@ -1,0 +1,7 @@
+flowchart TD
+    KB[Base de connaissances<br/>24 fichiers Q&A] --> EMB[Embeddings Google<br/>+ découpage en chunks]
+    EMB --> DB[(Supabase pgvector<br/>table kb_chunks)]
+    Q[Question client] --> H[Recherche hybride<br/>vecteur + full-text]
+    DB -. chunks indexés .-> H
+    H --> LLM[Claude Haiku 4.5]
+    LLM --> A[Réponse ancrée]

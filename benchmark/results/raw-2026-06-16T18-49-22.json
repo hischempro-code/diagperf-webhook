@@ -1,0 +1,101 @@
+{
+  "meta": {
+    "model": "claude-haiku-4-5",
+    "judge": null,
+    "date": "2026-06-16T18:49:22.825Z"
+  },
+  "summary": [
+    {
+      "condition": "A-V1",
+      "label": "V1 historique (prompt baké, sans RAG)",
+      "n": 1,
+      "answeredPct": "100",
+      "detPassPct": "100",
+      "exactMean": "-",
+      "hallucinations": 0,
+      "latP50": 2592,
+      "latMean": 2592,
+      "tokensIn": 3244,
+      "tokensOut": 158,
+      "costUsdTotal": "0.0040",
+      "costUsdPerQ": "0.00403"
+    },
+    {
+      "condition": "A-V2",
+      "label": "V2 livré (prompt baké + RAG)",
+      "n": 1,
+      "answeredPct": "100",
+      "detPassPct": "100",
+      "exactMean": "-",
+      "hallucinations": 0,
+      "latP50": 1550,
+      "latMean": 1550,
+      "tokensIn": 1153,
+      "tokensOut": 125,
+      "costUsdTotal": "0.0076",
+      "costUsdPerQ": "0.00763"
+    }
+  ],
+  "records": [
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "C'est combien la reprog stage 1 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprog Stage 1, c'est *390€ TTC* pour les moteurs <400ch et <2018. Au-delà, c'est sur devis personnalisé selon ta motorisation.\n\nC'est garanti 2 ans, et ça te donne des gains de puissance et couple sans abîmer ton moteur — on reste dans les marges mécaniques d'origine.\n\nC'est quoi ton véhicule ? Je peux te confirmer le tarif exact et te proposer un devis gratuit 🚗",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": null,
+      "judge_hallucination": null,
+      "judge_reason": "juge désactivé",
+      "latencyMs": 2592,
+      "tokens": {
+        "input": 3244,
+        "output": 158,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "costUsd": 0.004034,
+      "rag": {
+        "used": false,
+        "chunks": 0,
+        "chars": 0,
+        "topScore": null
+      }
+    },
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "C'est combien la reprog stage 1 ?",
+      "botType": "answer",
+      "answered": true,
+      "botMessage": "La reprogrammation Stage 1 coûte *390€ TTC* pour les véhicules de moins de 400ch et avant 2018. Pour les véhicules plus récents ou plus puissants, c'est sur devis personnalisé.\n\nLe devis est gratuit et sans engagement. Vous avez une plaque à me communiquer pour que je vous propose un devis précis ?",
+      "det_pass": true,
+      "det_required": true,
+      "det_forbidden": true,
+      "judge_score": null,
+      "judge_hallucination": null,
+      "judge_reason": "juge désactivé",
+      "latencyMs": 1550,
+      "tokens": {
+        "input": 1153,
+        "output": 125,
+        "cacheRead": 0,
+        "cacheWrite": 4680
+      },
+      "costUsd": 0.007628,
+      "rag": {
+        "used": true,
+        "chunks": 8,
+        "chars": 2992,
+        "topScore": 0.736193423091012
+      }
+    }
+  ]
+}

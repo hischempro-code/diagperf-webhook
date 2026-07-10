@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(railway --version)",
+      "Read(//c/Users/hisch/.claude/projects/c--Users-hisch-Workspace-Diagperf-Webhook/memory/**)",
+      "Bash(node ingest.js)",
+      "Bash(ls assets/)",
+      "Bash(dir assets *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s \"https://diagperf-webhook.onrender.com/webhook?hub.mode=subscribe&hub.verify_token=diagperf_verify_123&hub.challenge=TEST123\")",
+      "Bash(nslookup webhook.diagperf.com)",
+      "Bash(curl -s \"https://dns.google/resolve?name=webhook.diagperf.com&type=CNAME\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\(a['data']\\) for a in d.get\\('Answer',[]\\)]\")",
+      "Bash(curl -s \"https://dns.google/resolve?name=diagperf.com&type=NS\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(Object.keys\\(p.dependencies\\)\\)\\)\")",
+      "Bash(node scripts/re-embed-kb.js)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\" -Recurse -Depth 3)",
+      "Bash(grep -v \"^\\\\s*//\")",
+      "Bash(node -e \"const s = 'éthanol'; const n = s.normalize\\('NFD'\\).replace\\(/[̀-ͯ]/g, ''\\); console.log\\(n\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const c=fs.readFileSync\\('flows/sav.js','utf8'\\); const i=c.indexOf\\('SAV_COORDINATES\\\\\", \\\\\"SAV\\\\\", { topic }'\\); console.log\\(JSON.stringify\\(c.slice\\(i, i+200\\)\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const c=fs.readFileSync\\('flows/sav.js','utf8'\\); const i=c.indexOf\\('SAV_COORDINATES\\\\\", \\\\\"SAV\\\\\", { topic }'\\); console.log\\(JSON.stringify\\(c.slice\\(i, i+300\\)\\)\\);\")",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\lib\\\\llm-service.js\" -Encoding utf8\\) -replace [regex]::Escape\\('Stage 1 : 1h30-2h | E85 : 1h | FAP : 3-4h | EGR : 2-3h | Diag : selon niveau'\\), 'Stage 1 : 1h30-2h | E85 : 1h30 | FAP : 1h à 1h30 | EGR : 1h | AdBlue : 1h à 1h30 | Diag : 20min / 35min / 1h' | Set-Content \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\lib\\\\llm-service.js\" -Encoding utf8)",
+      "PowerShell(\\(Get-Content \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\lib\\\\llm-service.js\" -Encoding utf8\\) -replace [regex]::Escape\\('🔧 Suppression EGR : sur devis'\\), '🔧 Suppression EGR : 190€ \\(diesel\\)' | Set-Content \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\lib\\\\llm-service.js\" -Encoding utf8)",
+      "Bash(git checkout *)",
+      "PowerShell(Get-Item \"C:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\12698164_4070_2160_24fps.mp4\" -ErrorAction SilentlyContinue | Select-Object FullName, LastWriteTime, @{Name=\"SizeMB\";Expression={[math]::Round\\($_.Length/1MB,2\\)}} | Format-List)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\public\" -File | Select-Object Name, @{Name=\"SizeKB\";Expression={[math]::Round\\($_.Length/1KB,2\\)}} | Format-Table)",
+      "Bash(Copy-Item \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\12698164_4070_2160_24fps.mp4\" \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\public\\\\bg.mp4\")",
+      "PowerShell(Copy-Item \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\12698164_4070_2160_24fps.mp4\" \"c:\\\\Users\\\\hisch\\\\Workspace\\\\Diagperf Webhook\\\\public\\\\bg.mp4\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\hisch\\.claude\\projects\\c--Users-hisch-Workspace-Diagperf-Webhook\\memory"
+    ]
+  }
+}

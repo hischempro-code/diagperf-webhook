@@ -1,0 +1,7 @@
+flowchart TD
+    A[Message WhatsApp] --> B{Flow déterministe<br/>actif ?}
+    B -->|oui| F[Flow déterministe<br/>devis · RDV · SAV]
+    B -->|non · question libre| R[RAG + Claude Haiku 4.5]
+    R --> F
+    R --> O[Réponse ancrée]
+    F --> O

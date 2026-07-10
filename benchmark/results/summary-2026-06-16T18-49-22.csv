@@ -1,0 +1,3 @@
+condition,label,n,answeredPct,detPassPct,exactMean,hallucinations,latP50ms,latMeanMs,tokensIn,tokensOut,costUsdTotal,costUsdPerQ
+A-V1,"V1 historique (prompt baké, sans RAG)",1,100,100,-,0,2592,2592,3244,158,0.0040,0.00403
+A-V2,"V2 livré (prompt baké + RAG)",1,100,100,-,0,1550,1550,1153,125,0.0076,0.00763

@@ -1,0 +1,16 @@
+sequenceDiagram
+    actor C as Client
+    participant WH as Webhook
+    participant DB as Supabase
+    participant RAG as RAG
+    participant LLM as Claude
+    C->>WH: Question (signée HMAC)
+    WH->>DB: Lecture de l'état
+    DB-->>WH: Question libre
+    WH->>RAG: retrieveContext()
+    RAG->>DB: Recherche hybride
+    DB-->>RAG: Chunks pertinents
+    RAG-->>WH: Contexte ancré
+    WH->>LLM: Prompt + contexte
+    LLM-->>WH: JSON (answer)
+    WH-->>C: Réponse ancrée

@@ -1,0 +1,26 @@
+{
+  "meta": {
+    "model": "claude-sonnet-4-20250514",
+    "judge": null,
+    "date": "2026-06-16T18:48:55.201Z"
+  },
+  "summary": [],
+  "records": [
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V1",
+      "question": "C'est combien la reprog stage 1 ?",
+      "error": "Claude API 404: {\"type\":\"error\",\"error\":{\"type\":\"not_found_error\",\"message\":\"model: claude-sonnet-4-20250514\"},\"request_id\":\"req_011Cc7SR5yTHS4zEoG2ZBVts\"}"
+    },
+    {
+      "id": "Q01",
+      "category": "prix",
+      "trap": "price",
+      "condition": "A-V2",
+      "question": "C'est combien la reprog stage 1 ?",
+      "error": "Claude API 404: {\"type\":\"error\",\"error\":{\"type\":\"not_found_error\",\"message\":\"model: claude-sonnet-4-20250514\"},\"request_id\":\"req_011Cc7SR8mduZDd1Dc5gfJBR\"}"
+    }
+  ]
+}

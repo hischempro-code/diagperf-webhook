@@ -1,0 +1,5 @@
+condition,label,n,answeredPct,detPassPct,exactMean,hallucinations,latP50ms,latMeanMs
+A-V1,"V1 historique (prompt baké, sans RAG)",31,97,81,0.77,9,2553,2479
+A-V2,"V2 livré (prompt baké + RAG)",31,100,90,0.97,1,2048,2102
+B-noRAG,"Ablation : prompt dépouillé, sans RAG",31,100,48,0.66,0,1963,2167
+B-RAG,"Ablation : prompt dépouillé + RAG",31,97,94,0.98,0,1968,2028
