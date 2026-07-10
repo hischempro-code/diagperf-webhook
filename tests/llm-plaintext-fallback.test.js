@@ -77,6 +77,29 @@ function initWithLlmReply(replyText) {
     await check("tronqué inexploitable → null (pas de contenu inventé)", () => assert.strictEqual(r, null));
   }
 
+  console.log("🧪 Filtre anti-faux-devis (le LLM invente un devis en texte)");
+  {
+    // Une SEULE prestation citée → routé vers le vrai flow (intent)
+    initWithLlmReply('{"type":"answer","message":"Voici le devis correct :\\n✅ Devis généré\\nRéf : DEV-235\\nPrestation : Suppression AdBlue\\nTotal TTC : 260€"}');
+    const r = await askLLM("je veux l'adblue", "33600000020");
+    await check("faux devis (1 presta) → converti en intent", () => assert.ok(r && r.type === "intent", JSON.stringify(r)));
+    await check("intent = ADBLUE (le vrai flow générera le vrai devis)", () => assert.strictEqual(r.intent, "ADBLUE"));
+    await check("aucun 'DEV-235' inventé renvoyé", () => assert.ok(!/DEV-235/.test(JSON.stringify(r))));
+  }
+  {
+    // Prestations ambiguës → message sûr, pas de faux devis
+    initWithLlmReply('{"type":"answer","message":"✅ Devis généré Réf : DEV-99 — vous vouliez AdBlue pas EGR, TTC 260€"}');
+    const r = await askLLM("adblue pas egr", "33600000021");
+    await check("faux devis (ambigu) → answer sûr", () => assert.ok(r && r.type === "answer"));
+    await check("message ne contient PAS de DEV-xx", () => assert.ok(!/DEV-\d/.test(r.message), r.message));
+  }
+  {
+    // Réponse normale mentionnant "devis gratuit" → PAS filtrée (faux positif évité)
+    initWithLlmReply('{"type":"answer","message":"Bien sûr, le devis est gratuit et sans engagement !"}');
+    const r = await askLLM("le devis est gratuit ?", "33600000022");
+    await check("'devis gratuit' n'est PAS filtré", () => assert.ok(r && r.type === "answer" && /gratuit/.test(r.message)));
+  }
+
   console.log(`\n${failed === 0 ? "✅" : "❌"} ${passed} réussis, ${failed} échoués`);
   process.exit(failed === 0 ? 0 : 1);
 })();
