@@ -526,9 +526,11 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
 
     // LLM detected an intent change → redirect user to the correct flow
     // (même garde-fou : pas de redirection vers le flow déjà en cours)
-    if (llmResult.type === "intent" && llmResult.intent && llmResult.intent !== currentIntent) {
+    // type "route" accepté aussi : il porte un intent valide — l'ignorer jetait la
+    // compréhension du LLM et re-proposait bêtement les boutons courants.
+    if ((llmResult.type === "intent" || llmResult.type === "route") && llmResult.intent && llmResult.intent !== currentIntent) {
       if (MENU_MAP[llmResult.intent]) {
-        log.info("Mid-flow intent change detected (LLM)", { wa_id: fromWa, intent: llmResult.intent });
+        log.info("Mid-flow intent change detected (LLM)", { wa_id: fromWa, intent: llmResult.intent, viaType: llmResult.type });
         const redirected = await redirectMidFlow(fromWa, llmResult.intent, currentConv, rawMsg);
         if (redirected) return { handled: true, redirected: true };
       }

@@ -406,11 +406,13 @@ function createPrestationFlow(ctx) {
         try {
           const llmResult = await askLLM(text, fromWa);
           if (llmResult) {
-            if (llmResult.type === "intent" && llmResult.intent) {
+            // "route" porte aussi un intent valide — l'ignorer répondait "je n'ai pas
+            // reconnu la plaque" à un message pourtant compris par le LLM.
+            if ((llmResult.type === "intent" || llmResult.type === "route") && llmResult.intent) {
               await clearConversationState(fromWa);
               const menuMap2 = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
               const mapped = menuMap2[llmResult.intent];
-              if (mapped) { log.info("WAITING_PLATE → LLM intent redirect", { wa_id: fromWa, intent: llmResult.intent }); return handlePrestationFlow(fromWa, mapped, rawMsg); }
+              if (mapped) { log.info("WAITING_PLATE → LLM intent redirect", { wa_id: fromWa, intent: llmResult.intent, viaType: llmResult.type }); return handlePrestationFlow(fromWa, mapped, rawMsg); }
             }
             if (llmResult.type === "answer" && llmResult.message) {
               log.info("WAITING_PLATE → LLM answer", { wa_id: fromWa, msgLen: llmResult.message.length });
@@ -1188,7 +1190,7 @@ function createPrestationFlow(ctx) {
             await sendWhatsAppText(fromWa, llmResult.message);
             return true;
           }
-          if (llmResult?.type === "intent" && llmResult?.intent) {
+          if ((llmResult?.type === "intent" || llmResult?.type === "route") && llmResult?.intent) {
             if (llmResult.intent === "DIAG") {
               // Client veut vraiment un diagnostic \u2192 re-afficher la liste
               await sendWhatsAppList(

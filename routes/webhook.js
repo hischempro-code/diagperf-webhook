@@ -122,7 +122,13 @@ function createWebhookHandler(ctx) {
                   confidence: voiceResult.metadata.confidence,
                   language: voiceResult.metadata.language,
                 });
-                text = voiceResult.llmContext + voiceResult.rawText;
+                // TEXTE BRUT uniquement — l'ancien préfixe [TRANSCRIPTION VOCALE]\nTexte:...
+                // cassait TOUS les matchs exacts en aval : un vocal "Oui" ne confirmait
+                // jamais un devis (isConfirmation), un vocal "menu" ne resetait pas, un
+                // vocal "1" ne sélectionnait pas de stage → le bot re-posait la question
+                // en boucle (constaté en prod 09/07). Le LLM reçoit le même texte brut :
+                // la tolérance aux fautes de transcription est marginale vs ce bug.
+                text = voiceResult.rawText;
               } else {
                 const errorMsg = getErrorMessage(voiceResult?.metadata || { error: "UNKNOWN" });
                 log.warn("Voice transcription failed", {
@@ -300,8 +306,9 @@ function createWebhookHandler(ctx) {
                   if (savRetry) continue;
                 }
 
-                // Fallback: routing legacy (type=intent) → mapping menu
-                if (llmResult.type === "intent" && llmResult.intent) {
+                // Fallback: routing legacy (type=intent OU route rejetée mais intent
+                // valide — ex: confiance < 0.5 sans plaque) → mapping menu
+                if ((llmResult.type === "intent" || llmResult.type === "route") && llmResult.intent) {
                   const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
                   const mappedText = menuMap[llmResult.intent];
                   if (mappedText) {

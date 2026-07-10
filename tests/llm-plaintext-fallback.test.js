@@ -55,6 +55,28 @@ function initWithLlmReply(replyText) {
     await check("intent ADBLUE extrait malgré le texte autour", () => assert.ok(r && r.type === "intent" && r.intent === "ADBLUE"));
   }
 
+  console.log("🧪 JSON TRONQUÉ (max_tokens) → salvage au lieu de null");
+  {
+    // answer coupé en plein vol : le message partiel est récupéré, coupé à la dernière phrase
+    initWithLlmReply('{"type":"answer","message":"Un voyant AdBlue fixe signale un défaut du système SCR. Pas de panique ! Il faut le trai');
+    const r = await askLLM("voyant adblue", "33600000010");
+    await check("answer tronqué → salvage (plus null)", () => assert.ok(r, "askLLM a renvoyé null"));
+    await check("message coupé à la dernière phrase complète", () => assert.ok(r.message.endsWith("!") || r.message.endsWith("."), "fin: " + r.message.slice(-30)));
+    await check("le début du message est conservé", () => assert.ok(/voyant AdBlue fixe/i.test(r.message)));
+  }
+  {
+    // route coupé : l'intent complet est récupéré → dégradé en intent
+    initWithLlmReply('{"type":"route","target":"WAITING_QUOTE_CONFIRM","intent":"ADBLUE","data":{"plate":"BB-8');
+    const r = await askLLM("je veux la suppression adblue sur ma BB-820-QV", "33600000011");
+    await check("route tronqué → intent récupéré", () => assert.ok(r && r.type === "intent" && r.intent === "ADBLUE", JSON.stringify(r)));
+  }
+  {
+    // JSON tronqué inexploitable (ni intent ni message assez long) → null (comportement sûr)
+    initWithLlmReply('{"type":"answ');
+    const r = await askLLM("test", "33600000012");
+    await check("tronqué inexploitable → null (pas de contenu inventé)", () => assert.strictEqual(r, null));
+  }
+
   console.log(`\n${failed === 0 ? "✅" : "❌"} ${passed} réussis, ${failed} échoués`);
   process.exit(failed === 0 ? 0 : 1);
 })();
