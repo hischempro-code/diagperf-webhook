@@ -506,9 +506,13 @@ async function tryOffTopicAnswer({ fromWa, text, retryMessage, retryButtons, raw
   let currentConv = null;
   try { currentConv = await getConversationState(fromWa); } catch { /* non bloquant */ }
   const currentIntent = currentConv?.intent || null;
-  const { detectIntent } = require("./lib/intent-detector");
-  const directIntent = detectIntent(text);
-  if (directIntent && directIntent !== currentIntent) {
+  const { detectIntentsAll } = require("./lib/intent-detector");
+  // Prestation(s) mentionnée(s) par le client, MOINS l'intent courant → capte une
+  // CORRECTION ("vous m'avez proposé EGR et moi je veux AdBlue" → ADBLUE). Si le
+  // résultat est ambigu (0 ou ≥2 autres prestations), on laisse le LLM trancher.
+  const desiredIntents = detectIntentsAll(text).filter((i) => i !== currentIntent);
+  const directIntent = desiredIntents.length === 1 ? desiredIntents[0] : null;
+  if (directIntent) {
     log.info("Mid-flow intent change detected (keyword)", { wa_id: fromWa, from: currentIntent, intent: directIntent });
     // Si le véhicule est déjà identifié et qu'on bascule vers une prestation à devis,
     // garder le véhicule (ne PAS redemander la plaque). Sinon, restart classique.
