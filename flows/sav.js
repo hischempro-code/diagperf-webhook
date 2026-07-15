@@ -302,53 +302,57 @@ function createSavFlow(ctx) {
 
         const savRef = `SAV-${ticket.id}`;
         const ref = ticket.reference || savRef;
+
+        // Emails + notification garage AVANT la confirmation client, pour ne pas
+        // affirmer "un récapitulatif a été envoyé" si Brevo échoue ou n'est pas configuré.
+        // allSettled : un échec email ne doit jamais faire échouer la confirmation WhatsApp.
+        const [clientEmailRes] = await Promise.allSettled([
+          sendSavClientEmail({
+            to: customerEmail,
+            firstName: savFirstName,
+            lastName: savLastName,
+            savRef,
+            topic: ticketData.topic || "N/A",
+            vehicleDesc: vehicleDesc || "N/A",
+            description: t,
+          }),
+          sendSavDiagperfEmail({
+            firstName: savFirstName,
+            lastName: savLastName,
+            clientEmail: customerEmail,
+            waId: fromWa,
+            vehicleDesc: vehicleDesc || "N/A",
+            plate: plate || "N/A",
+            topic: ticketData.topic || "N/A",
+            description: t,
+            savRef,
+          }),
+          notifyGarage(
+            `🛠️ NOUVEAU TICKET SAV\n` +
+            `Réf : ${ref}\n` +
+            `Sujet : ${ticketData.topic || "N/A"}\n` +
+            `Client : ${customerName || "N/A"} (${fromWa})\n` +
+            `Email : ${customerEmail || "N/A"}\n` +
+            `Véhicule : ${vehicleDesc || "N/A"}\n` +
+            `Description : ${t || "N/A"}\n` +
+            `Date : ${new Date().toISOString()}`
+          ),
+        ]);
+        const clientEmailSent = clientEmailRes.status === "fulfilled" && clientEmailRes.value === true;
+        if (!clientEmailSent) log.warn("SAV: email client non envoyé (Brevo échec ou non configuré)", { wa_id: fromWa, customerEmail });
+
+        const emailLine = clientEmailSent
+          ? `📧 Un récapitulatif a été envoyé à ${customerEmail}.\n`
+          : `📧 Vous pouvez aussi nous écrire à Diag.perf.pro@gmail.com\n`;
         await sendWhatsAppInteractiveButtons(
           fromWa,
           `✅ Demande SAV enregistrée\n` +
           `Référence : ${ref}\n` +
           `Sujet : ${ticketData.topic}\n\n` +
-          `📧 Un récapitulatif a été envoyé à ${customerEmail}.\n` +
+          `${emailLine}` +
           `Notre équipe vous recontactera dans les 24h.`,
           [{ id: "btn_back_menu", title: "🏠 Menu" }]
         );
-
-        // Emails + notification garage (best effort)
-        try {
-          await Promise.all([
-            sendSavClientEmail({
-              to: customerEmail,
-              firstName: savFirstName,
-              lastName: savLastName,
-              savRef,
-              topic: ticketData.topic || "N/A",
-              vehicleDesc: vehicleDesc || "N/A",
-              description: t,
-            }),
-            sendSavDiagperfEmail({
-              firstName: savFirstName,
-              lastName: savLastName,
-              clientEmail: customerEmail,
-              waId: fromWa,
-              vehicleDesc: vehicleDesc || "N/A",
-              plate: plate || "N/A",
-              topic: ticketData.topic || "N/A",
-              description: t,
-              savRef,
-            }),
-            notifyGarage(
-              `🛠️ NOUVEAU TICKET SAV\n` +
-              `Réf : ${ref}\n` +
-              `Sujet : ${ticketData.topic || "N/A"}\n` +
-              `Client : ${customerName || "N/A"} (${fromWa})\n` +
-              `Email : ${customerEmail || "N/A"}\n` +
-              `Véhicule : ${vehicleDesc || "N/A"}\n` +
-              `Description : ${t || "N/A"}\n` +
-              `Date : ${new Date().toISOString()}`
-            ),
-          ]);
-        } catch (emailErr) {
-          log.error("SAV: erreur envoi emails/notification", { wa_id: fromWa, error: String(emailErr?.message || emailErr) });
-        }
       } catch (err) {
         log.error("Erreur création ticket SAV", { wa_id: fromWa, error: String(err?.message || err) });
         await sendWhatsAppInteractiveButtons(
