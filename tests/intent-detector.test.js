@@ -74,6 +74,13 @@ expectIntent("je veux une reprogrammation", "REPROG");
 expectIntent("stage 1 pour ma golf", "REPROG");
 expectIntent("conversion e85", "E85");
 expectIntent("je veux rouler à l'éthanol", "E85");
+// Collision "reprog" + "éthanol" : "reprogrammer à l'éthanol" = conversion E85, PAS Stage 1
+// (sinon 2 intents → null → LLM → hallucination motorisation, prod 15/07 C1)
+expectIntent("j'aimerai reprogrammer à l'éthanol ma C1", "E85", "'reprogrammer à l'éthanol' → E85 (pas ambigu)");
+expectIntent("reprog e85 svp", "E85", "'reprog e85' → E85 (pas ambigu)");
+expectIntent("reprogrammation bioéthanol", "E85", "'reprogrammation bioéthanol' → E85");
+// Mais un Stage explicite + E85 reste ambigu → null (le LLM/flow tranche)
+expectIntent("je veux une reprog stage 1 et passer à l'e85", null, "reprog stage 1 + e85 → ambigu (null)");
 expectIntent("suppression fap", "FAP");
 expectIntent("le fap est bouché", "FAP");
 expectIntent("problème de fap", "FAP", "'problème de fap' (composant, pas prestation réalisée) → FAP");
