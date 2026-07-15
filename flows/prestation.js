@@ -146,8 +146,17 @@ function createPrestationFlow(ctx) {
     const displayStages = stages.slice(0, maxDisplay);
     const firstRow = displayStages[0];
     const vehicleName = [vehicle.make, vehicle.model].filter(Boolean).join(" ");
+    // Cohérence prix Stage 1 : MÊMES bornes que computeReprogPrice (<400ch, <2018) — la
+    // fiche véhicule les applique déjà. Avant : 390€ fixe ici même quand la fiche venait
+    // d'afficher "Stage 1 — sur devis" (véhicule 2018+/400ch+) → deux prix contradictoires.
+    const stage1Cents = computeReprogPrice(vehicle);
+    const stage1PrixTxtTtc = stage1Cents !== null ? `${stage1Cents / 100}€ TTC` : "Sur devis personnalisé";
+    const stage1PrixBtn = stage1Cents !== null ? `${stage1Cents / 100}€` : "Devis";
+    // Null-safe : une ligne DB incomplète ne doit JAMAIS afficher "null Nm" au client.
     const motorDesc = firstRow.moteur_slug
-      ? firstRow.moteur_slug.replace(/-/g, " ").toUpperCase() + ` ${firstRow.puissance_origine}ch | ${firstRow.couple_origine} Nm`
+      ? firstRow.moteur_slug.replace(/-/g, " ").toUpperCase()
+        + (typeof firstRow.puissance_origine === "number" ? ` ${firstRow.puissance_origine}ch` : "")
+        + (typeof firstRow.couple_origine === "number" ? ` | ${firstRow.couple_origine} Nm` : "")
       : `${vehicle.power_hp || "?"}ch`;
 
     let stageLines = "";
@@ -155,18 +164,22 @@ function createPrestationFlow(ctx) {
       const stageLabel = formatStageLabel(s.stage);
       const prixTxt = CUSTOM_QUOTE_STAGES.has(s.stage)
         ? "Sur devis personnalisé"
-        : (s.stage === "stage1" ? STAGE1_PRICE_LABEL_TTC : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€ TTC` : "Sur devis personnalisé"));
-      stageLines +=
-        `\n*${i + 1})* ${stageLabel} — ${prixTxt}\n` +
-        `   ⚡ Puissance : ${s.puissance_origine} → ${s.puissance_apres} ch (+${s.gain_puissance} ch)\n` +
-        `   🔧 Couple : ${s.couple_origine} → ${s.couple_apres} Nm (+${s.gain_couple} Nm)\n`;
+        : (s.stage === "stage1" ? stage1PrixTxtTtc : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€ TTC` : "Sur devis personnalisé"));
+      stageLines += `\n*${i + 1})* ${stageLabel} — ${prixTxt}\n`;
+      // N'afficher les chiffres de gains QUE s'ils sont complets en DB (anti "null ch")
+      if (typeof s.puissance_origine === "number" && typeof s.puissance_apres === "number" && typeof s.gain_puissance === "number") {
+        stageLines += `   ⚡ Puissance : ${s.puissance_origine} → ${s.puissance_apres} ch (+${s.gain_puissance} ch)\n`;
+      }
+      if (typeof s.couple_origine === "number" && typeof s.couple_apres === "number" && typeof s.gain_couple === "number") {
+        stageLines += `   🔧 Couple : ${s.couple_origine} → ${s.couple_apres} Nm (+${s.gain_couple} Nm)\n`;
+      }
     });
 
     const stageButtons = displayStages.slice(0, 3).map((s, i) => {
       const btnLabel = formatStageLabel(s.stage);
       const btnPrix = CUSTOM_QUOTE_STAGES.has(s.stage)
         ? "Devis"
-        : (s.stage === "stage1" ? STAGE1_PRICE_LABEL : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€` : "Devis"));
+        : (s.stage === "stage1" ? stage1PrixBtn : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€` : "Devis"));
       return { id: `stage_choice_${i + 1}`, title: `${btnLabel} — ${btnPrix}`.slice(0, 20) };
     });
 
@@ -179,6 +192,12 @@ function createPrestationFlow(ctx) {
       `Moteur : ${motorDesc}\n\n` +
       `Stages disponibles :\n` +
       stageLines;
+
+    // Match "marque seule" (tier4) : les chiffres viennent d'un moteur équivalent de la
+    // marque, pas forcément du modèle exact → le dire plutôt que d'affirmer.
+    if (firstRow._match_tier === "tier4:marque-only") {
+      msg += `\n_📐 Estimations basées sur un moteur équivalent — chiffres exacts confirmés par nos techniciens lors du devis._\n`;
+    }
 
     if (displayStages.length > 3) {
       msg += `\nPour d'autres options, tapez le numéro du stage.`;
@@ -711,7 +730,9 @@ function createPrestationFlow(ctx) {
       if (selectedIdx < 0 || selectedIdx >= stages.length) {
         const retryButtons = stages.slice(0, 3).map((s, i) => {
           const btnLabel = formatStageLabel(s.stage);
-          const btnPrix = CUSTOM_QUOTE_STAGES.has(s.stage) ? "Devis" : (s.stage === "stage1" ? STAGE1_PRICE_LABEL : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€` : "Devis"));
+          // Mêmes bornes prix Stage 1 que la fiche/liste (computeReprogPrice)
+          const s1Retry = computeReprogPrice(vehicle);
+          const btnPrix = CUSTOM_QUOTE_STAGES.has(s.stage) ? "Devis" : (s.stage === "stage1" ? (s1Retry !== null ? `${s1Retry / 100}€` : "Devis") : (typeof s.prix_centimes === "number" ? `${(s.prix_centimes / 100).toFixed(0)}€` : "Devis"));
           return { id: `stage_choice_${i + 1}`, title: `${btnLabel} — ${btnPrix}`.slice(0, 20) };
         });
         if (retryButtons.length < 3) retryButtons.push({ id: "btn_back_menu", title: "🏠 Menu" });
@@ -724,7 +745,9 @@ function createPrestationFlow(ctx) {
 
       const isE85Stage = /e85/i.test(selectedStage.stage);
       let priceCents = null;
-      if (selectedStage.stage === "stage1") priceCents = STAGE1_FIXED_PRICE_CENTS;
+      // Stage 1 : mêmes bornes que la fiche/liste (computeReprogPrice : <400ch, <2018).
+      // Hors bornes → null → chemin "sur devis personnalisé" (cohérent avec l'affichage).
+      if (selectedStage.stage === "stage1") priceCents = computeReprogPrice(vehicle);
       else if (typeof selectedStage.prix_centimes === "number" && !CUSTOM_QUOTE_STAGES.has(selectedStage.stage)) priceCents = selectedStage.prix_centimes;
 
       if (priceCents === null) {
@@ -739,8 +762,11 @@ function createPrestationFlow(ctx) {
         const devisId = devisRow?.id ?? "N/A";
         const htTxt = typeof devisRow?.total_ht_centimes === "number" ? `${(devisRow.total_ht_centimes / 100).toFixed(2)}€` : "(non dispo)";
         const ttcTxt = typeof devisRow?.total_ttc_centimes === "number" ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}€` : "(non dispo)";
-        const gainTxt = (!isE85Stage && selectedStage.gain_puissance) ? `\n⚡ +${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm` : "";
-        const stageGainTxtShort = (!isE85Stage && selectedStage.gain_puissance) ? `+${selectedStage.gain_puissance}ch / +${selectedStage.gain_couple}Nm` : null;
+        // Null-safe : gain_couple peut manquer en DB → ne pas afficher "+nullNm"
+        const hasGains = !isE85Stage && typeof selectedStage.gain_puissance === "number";
+        const coupleTxt = typeof selectedStage.gain_couple === "number" ? ` / +${selectedStage.gain_couple}Nm` : "";
+        const gainTxt = hasGains ? `\n⚡ +${selectedStage.gain_puissance}ch${coupleTxt}` : "";
+        const stageGainTxtShort = hasGains ? `+${selectedStage.gain_puissance}ch${coupleTxt}` : null;
 
         await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort });
 
@@ -1054,7 +1080,7 @@ function createPrestationFlow(ctx) {
         if (stateData.customerEmail && stateData.customerName) {
           notifyGarage(`📅 DEMANDE RDV\nClient : ${stateData.customerName} (${stateData.customerEmail})\nDevis : DEV-${stateData.devisId || "N/A"}\nWhatsApp : ${fromWa}`).catch(() => {});
           await setConversationState(fromWa, "AWAITING_CITY_FOR_TRAVEL", intent, { ...stateData, contactReason: "rdv" });
-          await sendWhatsAppInteractiveButtons(fromWa, `Excellent choix ${stateData.customerName} ! 🎉\n\nNotre équipe vous recontactera dans les 24h pour fixer un créneau.\n\n� Vous pouvez aussi joindre directement *Youcef* au *06 75 54 70 85*\n\n�️ En attendant, indiquez votre *ville ou code postal* et je vous donnerai le temps de trajet estimé jusqu'à DiagPerf !`, [
+          await sendWhatsAppInteractiveButtons(fromWa, `Excellent choix ${stateData.customerName} ! 🎉\n\nNotre équipe vous recontactera dans les 24h pour fixer un créneau.\n\n📞 Vous pouvez aussi joindre directement *Youcef* au *06 75 54 70 85*\n\n🗺️ En attendant, indiquez votre *ville ou code postal* et je vous donnerai le temps de trajet estimé jusqu'à DiagPerf !`, [
             { id: "skip_travel", title: "⏭️ Passer" }, { id: "btn_back_menu", title: "🏠 Menu" },
           ]);
           log.info("Post-quote RDV (coords already known) → travel estimate", { wa_id: fromWa, intent });
