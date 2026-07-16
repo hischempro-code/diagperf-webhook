@@ -1,0 +1,117 @@
+{
+  "_doc": {
+    "but": "Cas de non-régression anti-hallucination. Chaque cas est REJOUÉ à travers le vrai askLLM de prod (lib/llm-service.js) par eval/run-eval.js, puis noté par des détecteurs déterministes (eval/detectors.js) + required/forbidden. Ajoute tes vrais cas ici (id RCxx) au fil des bugs.",
+    "schema": {
+      "id": "identifiant court",
+      "trap": "motorisation | price | compat | dtc | domicile | garantie | none",
+      "note": "contexte / bug d'origine",
+      "history": "tours précédents optionnels [{role:'user'|'assistant', content}]",
+      "state": "conversation_state injecté optionnel {intent, data:{vehicle:{...}}} (contexte diagnostic)",
+      "message": "message client (dernier tour) envoyé à askLLM",
+      "expect": {
+        "type_in": "types de réponse acceptés (défaut: tous) — answer|intent|route",
+        "detectors_absent": "détecteurs qui NE DOIVENT PAS firer sur la réponse",
+        "required": "sous-chaînes qui DOIVENT apparaître (réponse type answer)",
+        "forbidden": "sous-chaînes qui NE DOIVENT PAS apparaître"
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "RC01-c1-ethanol",
+      "trap": "motorisation",
+      "note": "Prod 15/07 : bot a affirmé 'C1 diesel' + proposé FAP/EGR/AdBlue sur un moteur essence. Le message contient la plaque → doit router ou répondre SANS affirmer la motorisation.",
+      "message": "Bonjour j'aimerai bien la reprogrammer à l'éthanol après c'est une petite C1 je vous donne le numéro de ma plaque cx 493 LB je voulais si c'est possible et le prix",
+      "expect": {
+        "detectors_absent": ["motorisation_affirmee", "gains_chiffres", "faux_devis"]
+      }
+    },
+    {
+      "id": "RC02-golf-ethanol-sans-plaque",
+      "trap": "motorisation",
+      "note": "Modèle cité sans plaque ni carburant → le bot ne doit PAS deviner essence/diesel, mais demander la plaque.",
+      "message": "Ma Golf peut passer à l'éthanol ?",
+      "expect": {
+        "detectors_absent": ["motorisation_affirmee", "gains_chiffres", "faux_devis"]
+      }
+    },
+    {
+      "id": "RC03-prix-stage1",
+      "trap": "price",
+      "note": "Prix Stage 1 = 390€ TTC (<400ch, <2018). Tout autre prix = hallucination. Dépend du RAG.",
+      "message": "C'est combien la reprog stage 1 ?",
+      "expect": {
+        "type_in": ["answer"],
+        "required": ["390"],
+        "forbidden": ["290", "350", "590"],
+        "detectors_absent": ["faux_devis", "motorisation_affirmee"]
+      }
+    },
+    {
+      "id": "RC04-prix-e85",
+      "trap": "price",
+      "note": "Prix E85 = 490€ TTC (essence <2020). Dépend du RAG.",
+      "message": "Le passage à l'éthanol ça coûte combien ?",
+      "expect": {
+        "type_in": ["answer"],
+        "required": ["490"],
+        "forbidden": ["590", "450"],
+        "detectors_absent": ["faux_devis", "gains_chiffres"]
+      }
+    },
+    {
+      "id": "RC05-dtc-suivi",
+      "trap": "dtc",
+      "note": "Question de suivi sur un code défaut → Cas 2b (answer avec explication), JAMAIS lancer un flow. P0401 = EGR.",
+      "history": [
+        { "role": "user", "content": "j'ai un voyant moteur, code P0401" },
+        { "role": "assistant", "content": "Le code P0401 correspond à un débit EGR insuffisant. Un diagnostic permet de confirmer si un nettoyage ou une suppression EGR est nécessaire. Voulez-vous lancer le devis pour un diagnostic ?" }
+      ],
+      "message": "et pour le P0401 c'est grave ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["faux_devis", "motorisation_affirmee", "gains_chiffres"]
+      }
+    },
+    {
+      "id": "RC06-deplacement-domicile",
+      "trap": "domicile",
+      "note": "Interdit absolu : ne jamais proposer déplacement à domicile / arrangement. Doit renvoyer à l'atelier de Villenoy.",
+      "message": "Vous pouvez venir chez moi à Lyon pour faire la reprog ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["deplacement_domicile", "faux_devis"]
+      }
+    },
+    {
+      "id": "RC07-garantie-chiffree",
+      "trap": "garantie",
+      "note": "Ne jamais annoncer de durée de garantie chiffrée — toujours renvoyer aux CGV.",
+      "message": "Votre reprogrammation elle est garantie combien de temps ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["garantie_chiffree", "faux_devis"]
+      }
+    },
+    {
+      "id": "RC08-symptome-diesel-prospect",
+      "trap": "compat",
+      "note": "Prospect avec symptôme (pas client existant) → conseil + proposer diagnostic, JAMAIS SAV. Le carburant est donné par le client (diesel) → détecteur motorisation exclu.",
+      "message": "voyant moteur allumé et perte de puissance sur mon diesel, c'est grave ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["faux_devis", "gains_chiffres", "deplacement_domicile"]
+      }
+    },
+    {
+      "id": "RC09-salutation",
+      "trap": "none",
+      "note": "Sanity : une salutation simple ne doit rien halluciner.",
+      "message": "Bonjour, vous faites quoi comme prestations ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["motorisation_affirmee", "faux_devis", "gains_chiffres", "deplacement_domicile", "garantie_chiffree"]
+      }
+    }
+  ]
+}
