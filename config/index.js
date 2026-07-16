@@ -39,8 +39,17 @@ if (missingRecommended.length) {
 
 // Sécurité : sans VERIFY_SIGNATURE=true, n'importe qui peut POSTer sur /webhook
 // en se faisant passer pour Meta (injection de faux messages clients).
-if ((process.env.VERIFY_SIGNATURE || "false").toLowerCase() !== "true") {
-  console.warn("⚠️  VERIFY_SIGNATURE désactivé — la signature HMAC des webhooks Meta n'est PAS vérifiée. Définir VERIFY_SIGNATURE=true + META_APP_SECRET en production.");
+// Activation sûre : passer d'abord VERIFY_SIGNATURE=shadow (logge le verdict sans
+// rejeter) pour confirmer que META_APP_SECRET est correct, PUIS =true pour enforcer.
+{
+  const _sigMode = (process.env.VERIFY_SIGNATURE || "false").toLowerCase();
+  if (_sigMode === "true") {
+    console.log("✅ VERIFY_SIGNATURE=true — signature HMAC des webhooks Meta vérifiée (enforce).");
+  } else if (_sigMode === "shadow") {
+    console.warn("🕵️  VERIFY_SIGNATURE=shadow — verdict signature loggé mais NON enforcé. Vérifier les logs 'Signature (shadow) — OK' puis passer à =true.");
+  } else {
+    console.warn("⚠️  VERIFY_SIGNATURE désactivé — la signature HMAC des webhooks Meta n'est PAS vérifiée (trou de sécurité). Passer à =shadow puis =true + META_APP_SECRET en production.");
+  }
 }
 
 // ====== Configuration ======

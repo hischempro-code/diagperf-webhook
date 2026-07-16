@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/helpers.test.js && node tests/intent-detector.test.js && node eval/detectors.test.js",
+    "test": "node tests/helpers.test.js && node tests/intent-detector.test.js && node tests/signature.test.js && node tests/llm-fallback-degrade.test.js && node eval/detectors.test.js",
     "eval": "node eval/run-eval.js"
   },
   "keywords": [],

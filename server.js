@@ -3,7 +3,6 @@ const { initSentry, captureException, setupExpressErrorHandler } = require("./li
 initSentry();
 
 const express = require("express");
-const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
@@ -38,6 +37,7 @@ const {
 const {
   extractAndValidatePlate,
 } = require("./lib/plate-extractor");
+const { verifyMetaSignature: verifySignature } = require("./lib/signature");
 const { createDashboardRouter } = require("./routes/dashboard");
 const {
   isGreetingOrReset,
@@ -309,28 +309,9 @@ app.get("/health", (_req, res) => res.status(200).send("OK"));
 const { router: dashboardRouter, broadcastDashboardEvent } = createDashboardRouter({ supabase, log });
 app.use(dashboardRouter);
 
-// ====== Signature check ======
+// ====== Signature check (logique extraite/testée dans lib/signature.js) ======
 function verifyMetaSignature(req) {
-  const signature = req.get("x-hub-signature-256"); // "sha256=..."
-  const appSecret = process.env.META_APP_SECRET;
-
-  if (!signature) return { ok: false, reason: "missing_signature_header" };
-  if (!appSecret) return { ok: false, reason: "missing_META_APP_SECRET" };
-  if (!req.rawBody) return { ok: false, reason: "missing_raw_body" };
-
-  const expected =
-    "sha256=" +
-    crypto.createHmac("sha256", appSecret).update(req.rawBody).digest("hex");
-
-  // Comparaison en temps constant sur des buffers de taille fixe (71 = "sha256=" + 64 hex)
-  const SIG_LEN = 71;
-  const sigBuf = Buffer.alloc(SIG_LEN, 0);
-  const expBuf = Buffer.alloc(SIG_LEN, 0);
-  Buffer.from(signature.slice(0, SIG_LEN), "utf8").copy(sigBuf);
-  Buffer.from(expected.slice(0, SIG_LEN), "utf8").copy(expBuf);
-  const bytesMatch = crypto.timingSafeEqual(sigBuf, expBuf);
-  const ok = bytesMatch && signature.length === expected.length;
-  return { ok, reason: ok ? "ok" : "bad_signature" };
+  return verifySignature(req.rawBody, req.get("x-hub-signature-256"), process.env.META_APP_SECRET);
 }
 
 // ====== Supabase: Conversation helpers ======

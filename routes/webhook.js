@@ -64,13 +64,21 @@ function createWebhookHandler(ctx) {
     res.sendStatus(200);
     log.info("🔥 WEBHOOK HIT", { hasBody: !!req.body });
 
-    const verifyOn =
-      (process.env.VERIFY_SIGNATURE || "false").toLowerCase() === "true";
+    // VERIFY_SIGNATURE : "true" = enforce (rejette si invalide) | "shadow" =
+    // observation (logge le verdict sans rien rejeter, pour vérifier que
+    // META_APP_SECRET est correct AVANT d'enforcer — évite un bot muet sur mauvais
+    // secret) | autre/absent = désactivé.
+    const sigMode = (process.env.VERIFY_SIGNATURE || "false").toLowerCase();
     const sig = verifyMetaSignature(req);
 
-    if (verifyOn && !sig.ok) {
-      log.warn("Signature invalide", { reason: sig.reason });
-      return;
+    if (sigMode === "true") {
+      if (!sig.ok) {
+        log.warn("Signature invalide — message rejeté", { reason: sig.reason });
+        return;
+      }
+    } else if (sigMode === "shadow") {
+      if (sig.ok) log.info("Signature (shadow) — OK, sûr d'activer VERIFY_SIGNATURE=true");
+      else log.warn("Signature (shadow) — REJET (ne PAS activer enforce tant que ce n'est pas OK)", { reason: sig.reason });
     }
 
     try {
