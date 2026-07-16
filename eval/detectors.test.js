@@ -59,6 +59,20 @@ check("2 ans de garantie", "Vous bénéficiez de 2 ans de garantie sur la reprog
 check("LÉGIT: renvoi CGV", "Pour la garantie, se référer à nos CGV.", "garantie_chiffree", false);
 check("LÉGIT: durée intervention 2h", "L'intervention dure environ 2 heures.", "garantie_chiffree", false);
 
+console.log("\n🔬 specs_inventees");
+check("votre C1 fait 68 ch (spec absolue inventée)", "Votre C1 fait 68 ch d'origine, la reprog apportera un gain notable.", "specs_inventees", true);
+check("votre Golf de 150 chevaux", "Sur votre Golf de 150 chevaux, le Stage 1 est tout indiqué.", "specs_inventees", true);
+check("votre 2.0 TDI (famille moteur)", "Sur votre 2.0 TDI, la suppression FAP est possible.", "specs_inventees", true);
+check("votre 1.6 HDi", "Votre 1.6 HDi supporte très bien la reprogrammation.", "specs_inventees", true);
+check("couple absolu 320 Nm d'origine", "Votre moteur développe 320 Nm de couple d'origine.", "specs_inventees", true);
+check("cylindrée 1968 cm³", "Votre bloc de 1968 cm³ est un excellent candidat.", "specs_inventees", true);
+check("LÉGIT: gain +30 ch (→ gains_chiffres, pas specs)", "Sur votre véhicule, comptez environ +30 ch avec le Stage 1.", "specs_inventees", false);
+check("LÉGIT: hypothèse 'si votre Golf fait 150 ch'", "Sans la plaque je ne peux pas confirmer, mais si votre Golf fait 150 ch, le Stage 1 est adapté.", "specs_inventees", false);
+check("LÉGIT: specs génériques sans 'votre'", "Un moteur 2.0 TDI développe généralement entre 140 et 190 ch selon la version.", "specs_inventees", false);
+check("LÉGIT: prix 390€ (pas une spec)", "Pour votre reprogrammation Stage 1, comptez 390€ TTC.", "specs_inventees", false);
+check("LÉGIT: durée 2h (pas une spec moteur)", "L'intervention sur votre véhicule dure environ 2 heures.", "specs_inventees", false);
+check("LÉGIT: demande la plaque au lieu d'affirmer", "Pour connaître la puissance de votre véhicule, envoyez-moi votre plaque.", "specs_inventees", false);
+
 console.log("\n════════════════════════════════════════");
 console.log(`Résultat détecteurs : ${pass} ✅ / ${fail} ❌`);
 if (fail > 0) { console.log("❌ Détecteurs à corriger (faux positif/négatif).\n"); process.exit(1); }

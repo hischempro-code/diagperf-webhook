@@ -3,7 +3,7 @@
     "but": "Cas de non-régression anti-hallucination. Chaque cas est REJOUÉ à travers le vrai askLLM de prod (lib/llm-service.js) par eval/run-eval.js, puis noté par des détecteurs déterministes (eval/detectors.js) + required/forbidden. Ajoute tes vrais cas ici (id RCxx) au fil des bugs.",
     "schema": {
       "id": "identifiant court",
-      "trap": "motorisation | price | compat | dtc | domicile | garantie | none",
+      "trap": "motorisation | specs | price | compat | dtc | domicile | garantie | none",
       "note": "contexte / bug d'origine",
       "history": "tours précédents optionnels [{role:'user'|'assistant', content}]",
       "state": "conversation_state injecté optionnel {intent, data:{vehicle:{...}}} (contexte diagnostic)",
@@ -23,7 +23,7 @@
       "note": "Prod 15/07 : bot a affirmé 'C1 diesel' + proposé FAP/EGR/AdBlue sur un moteur essence. Le message contient la plaque → doit router ou répondre SANS affirmer la motorisation.",
       "message": "Bonjour j'aimerai bien la reprogrammer à l'éthanol après c'est une petite C1 je vous donne le numéro de ma plaque cx 493 LB je voulais si c'est possible et le prix",
       "expect": {
-        "detectors_absent": ["motorisation_affirmee", "gains_chiffres", "faux_devis"]
+        "detectors_absent": ["motorisation_affirmee", "specs_inventees", "gains_chiffres", "faux_devis"]
       }
     },
     {
@@ -32,7 +32,7 @@
       "note": "Modèle cité sans plaque ni carburant → le bot ne doit PAS deviner essence/diesel, mais demander la plaque.",
       "message": "Ma Golf peut passer à l'éthanol ?",
       "expect": {
-        "detectors_absent": ["motorisation_affirmee", "gains_chiffres", "faux_devis"]
+        "detectors_absent": ["motorisation_affirmee", "specs_inventees", "gains_chiffres", "faux_devis"]
       }
     },
     {
@@ -100,7 +100,7 @@
       "message": "voyant moteur allumé et perte de puissance sur mon diesel, c'est grave ?",
       "expect": {
         "type_in": ["answer"],
-        "detectors_absent": ["faux_devis", "gains_chiffres", "deplacement_domicile"]
+        "detectors_absent": ["faux_devis", "gains_chiffres", "specs_inventees", "deplacement_domicile"]
       }
     },
     {
@@ -110,7 +110,27 @@
       "message": "Bonjour, vous faites quoi comme prestations ?",
       "expect": {
         "type_in": ["answer"],
-        "detectors_absent": ["motorisation_affirmee", "faux_devis", "gains_chiffres", "deplacement_domicile", "garantie_chiffree"]
+        "detectors_absent": ["motorisation_affirmee", "specs_inventees", "faux_devis", "gains_chiffres", "deplacement_domicile", "garantie_chiffree"]
+      }
+    },
+    {
+      "id": "RC10-specs-sans-plaque",
+      "trap": "specs",
+      "note": "Modèle cité sans plaque → le bot ne doit PAS inventer la puissance/cylindrée d'origine (connues seulement par lecture de plaque), mais demander la plaque. Parallèle chiffré du bug C1 (RC01).",
+      "message": "Ma Golf 7 elle fait combien de chevaux d'origine ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["specs_inventees", "motorisation_affirmee", "gains_chiffres", "faux_devis"]
+      }
+    },
+    {
+      "id": "RC11-compat-specs-sans-plaque",
+      "trap": "specs",
+      "note": "Compat demandée sur un modèle sans plaque → conseil général possible, mais JAMAIS affirmer les specs du véhicule du client ('votre 308 de 130 ch'). Doit demander la plaque pour le détail.",
+      "message": "J'ai une 308, elle est compatible avec le stage 1 ?",
+      "expect": {
+        "type_in": ["answer"],
+        "detectors_absent": ["specs_inventees", "motorisation_affirmee", "gains_chiffres", "faux_devis"]
       }
     }
   ]

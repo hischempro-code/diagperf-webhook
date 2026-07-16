@@ -67,6 +67,38 @@ function _matchDomicile(text) {
 // 5) GARANTIE CHIFFRÉE : jamais de durée chiffrée — toujours renvoyer aux CGV.
 const RE_GARANTIE = /garantie[^.!?]{0,20}\b\d+\s*(?:mois|ans?|années?)\b|\b\d+\s*(?:mois|ans?|années?)\b[^.!?]{0,15}garantie/i;
 
+// 6) SPECS D'ORIGINE INVENTÉES sur le véhicule client (puissance/couple/cylindrée en valeur
+//    ABSOLUE, ou famille moteur "2.0 TDI"). Connus UNIQUEMENT par lecture de plaque → jamais
+//    affirmés de mémoire (même cause racine que motorisation_affirmee, bug prod 15/07 C1).
+//    Distinct de gains_chiffres (qui vise les GAINS "+NN ch") : ici valeur absolue rattachée
+//    à "votre" ("votre C1 fait 68 ch", "votre 2.0 TDI de 1968 cm³"). Gardes : exclusion du
+//    "+" (gain) + hypothèse/négation en amont de "votre" ("si votre Golf fait 150 ch").
+const RE_SPECS_CYL_G = /votre\s+[^.!?]{0,25}?\b\d[.,]\d\s*(?:tdi|hdi|dci|cdi|tsi|tfsi|tce|thp|vti|crdi|bluehdi|multijet|jtd)\b/gi;
+const RE_SPEC_TOKEN_G = /(\+\s*)?\b\d{2,4}\s*(?:ch\b|chevaux|nm\b|cm3\b|cm³|cc\b)/gi;
+
+function _matchSpecs(text) {
+  const s = String(text || "");
+  // 6a) famille moteur citée ("votre 2.0 TDI", "votre 1.6 HDi")
+  RE_SPECS_CYL_G.lastIndex = 0;
+  let m = RE_SPECS_CYL_G.exec(s);
+  if (m) {
+    const before = s.slice(Math.max(0, m.index - 18), m.index);
+    if (!RE_HYPOTHESE_AVANT.test(before)) return { hit: true, evidence: m[0].trim().slice(0, 120) };
+  }
+  // 6b) valeur absolue ch/Nm/cc rattachée à "votre" (hors GAIN "+NN ...")
+  RE_SPEC_TOKEN_G.lastIndex = 0;
+  while ((m = RE_SPEC_TOKEN_G.exec(s)) !== null) {
+    if (m[1]) continue;                        // "+NN ch" = gain → gains_chiffres
+    const ctx = s.slice(Math.max(0, m.index - 45), m.index);
+    const vIdx = ctx.toLowerCase().lastIndexOf("votre");
+    if (vIdx === -1) continue;                  // la spec doit porter sur "votre" véhicule
+    const beforeVotre = ctx.slice(Math.max(0, vIdx - 18), vIdx);
+    if (RE_HYPOTHESE_AVANT.test(beforeVotre)) continue;
+    return { hit: true, evidence: (ctx.slice(vIdx) + m[0]).trim().slice(0, 120) };
+  }
+  return { hit: false, evidence: null };
+}
+
 function _match(re, text) {
   const m = String(text || "").match(re);
   return { hit: !!m, evidence: m ? m[0].trim().slice(0, 120) : null };
@@ -96,6 +128,10 @@ const DETECTORS = {
   garantie_chiffree: {
     label: "Durée de garantie chiffrée (mois/ans) — doit renvoyer aux CGV",
     detect: (text) => _match(RE_GARANTIE, text),
+  },
+  specs_inventees: {
+    label: "Specs d'origine du véhicule client inventées (ch/Nm/cc/famille moteur) — connues par plaque uniquement",
+    detect: (text) => _matchSpecs(text),
   },
 };
 
