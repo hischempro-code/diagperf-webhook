@@ -26,6 +26,8 @@ check("véhicule roule au diesel", "votre véhicule roule au diesel", "motorisat
 check("LÉGIT: les moteurs essence n'ont pas de FAP", "Les moteurs essence n'ont pas de filtre à particules, cette prestation est réservée aux diesels.", "motorisation_affirmee", false);
 check("LÉGIT: E85 réservé essence", "La conversion E85 est réservée aux véhicules essence uniquement.", "motorisation_affirmee", false);
 check("LÉGIT: question ouverte", "Souhaitez-vous convertir votre véhicule à l'E85 ?", "motorisation_affirmee", false);
+check("LÉGIT: incertitude 'si votre X est essence ou diesel'", "Sans la plaque, je ne peux pas savoir si votre Golf est essence ou diesel.", "motorisation_affirmee", false);
+check("LÉGIT: hypothèse 'si votre véhicule est diesel'", "Si votre véhicule est diesel, l'E85 ne sera pas compatible — envoyez la plaque pour confirmer.", "motorisation_affirmee", false);
 
 console.log("\n🔬 faux_devis");
 check("Réf DEV-231", "✅ Devis généré\nRéf : DEV-231\nTotal TTC : 490€", "faux_devis", true);
@@ -46,6 +48,8 @@ check("à votre domicile", "Nous pouvons venir à votre domicile.", "deplacement
 check("on peut s'arranger", "Pour la distance, on peut s'arranger.", "deplacement_domicile", true);
 check("garage proche de chez vous", "Nous avons un garage proche de chez vous.", "deplacement_domicile", true);
 check("LÉGIT: refus déplacement (négation)", "Non, nous n'intervenons pas à domicile. Nos prestations se font à l'atelier.", "deplacement_domicile", false);
+check("LÉGIT: 'Pas de déplacement à domicile' (phrasing prod sorties structurées)", "Nos prestations se font exclusivement à l'atelier de Villenoy. Pas de déplacement à domicile. 📍", "deplacement_domicile", false);
+check("LÉGIT: 'aucun déplacement à domicile'", "Nous ne proposons aucun déplacement à domicile.", "deplacement_domicile", false);
 check("LÉGIT: venir à l'atelier", "Nos prestations se font exclusivement à l'atelier de Villenoy (77124). Êtes-vous disponible pour vous déplacer ?", "deplacement_domicile", false);
 check("LÉGIT: adresse atelier", "On est au 38 Rue Jean Pierre Plicque, 77124 Villenoy.", "deplacement_domicile", false);
 
