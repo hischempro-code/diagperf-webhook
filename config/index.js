@@ -125,6 +125,17 @@ const DIAG_OPTIONS = [
   },
 ];
 
+// Durée d'intervention par prestation — SOURCE UNIQUE (affichée sur le devis WhatsApp + PDF).
+// Alignée sur la grille durées du prompt LLM (lib/llm-service.js). DIAG a sa durée par
+// niveau (DIAG_OPTIONS.duration) ; AUTRES = sur devis (variable) → non listé ici.
+const PRESTATION_DURATIONS = {
+  REPROG: "1h30 à 2h",
+  E85: "1h30",
+  FAP: "1h à 1h30",
+  EGR: "1h",
+  ADBLUE: "1h à 1h30",
+};
+
 const MENU_MAP = {
   REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8"
 };
@@ -152,6 +163,7 @@ module.exports = {
   UPSELL_INTENTS,
   NON_TEXT_TYPES,
   DIAG_OPTIONS,
+  PRESTATION_DURATIONS,
   MENU_MAP,
   INTENT_LABELS,
   LLM_MODEL,

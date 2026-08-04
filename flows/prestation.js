@@ -29,8 +29,8 @@ const {
   createDevis,
   addUpsellOptionsToDevis,
 } = require("../lib/devis-service");
-// Source unique des options de diagnostic (évite la divergence avec une copie locale).
-const { DIAG_OPTIONS } = require("../config");
+// Source unique des options de diagnostic + durées d'intervention (évite la divergence).
+const { DIAG_OPTIONS, PRESTATION_DURATIONS } = require("../config");
 
 // ====== Universal info accumulator ======
 // Extracts name/email/plate/stage from any message and merges into state data silently.
@@ -650,15 +650,16 @@ function createPrestationFlow(ctx) {
           const htTxt = typeof devisRow?.total_ht_centimes === "number" ? `${(devisRow.total_ht_centimes / 100).toFixed(2)}€` : "N/A";
           const ttcTxt = typeof devisRow?.total_ttc_centimes === "number" ? `${(devisRow.total_ttc_centimes / 100).toFixed(2)}€` : "N/A";
           const displayLabel = intent === "REPROG" ? `${label} — STAGE 1` : label;
+          const dureeTxt = PRESTATION_DURATIONS[intent] || null;
 
-          await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel });
+          await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel, duration: dureeTxt });
 
           if (["E85", "FAP", "ADBLUE", "EGR"].includes(intent)) {
             const cardUrl = buildPrestationCardUrl({ vehicle, intent, prestationLabel: displayLabel, priceTtc: ttcTxt });
             if (cardUrl) sendWhatsAppImage(fromWa, cardUrl, `📋 Fiche technique — ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}`).catch(() => {});
           }
 
-          await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéf : DEV-${devisId}\nPrestation : ${displayLabel}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
+          await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéf : DEV-${devisId}\nPrestation : ${displayLabel}\n${dureeTxt ? `Durée d'intervention : ${dureeTxt}\n` : ""}Total TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
             { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" }
           ]);
 
@@ -767,10 +768,12 @@ function createPrestationFlow(ctx) {
         const coupleTxt = typeof selectedStage.gain_couple === "number" ? ` / +${selectedStage.gain_couple}Nm` : "";
         const gainTxt = hasGains ? `\n⚡ +${selectedStage.gain_puissance}ch${coupleTxt}` : "";
         const stageGainTxtShort = hasGains ? `+${selectedStage.gain_puissance}ch${coupleTxt}` : null;
+        // Source unique : E85 sélectionné dans la liste des stages = 1h30, sinon Stage reprog.
+        const dureeStage = isE85Stage ? PRESTATION_DURATIONS.E85 : PRESTATION_DURATIONS.REPROG;
 
-        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort });
+        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort, duration: dureeStage });
 
-        await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : 1h30 à 2h\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
+        await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : ${dureeStage}\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
           { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" },
         ]);
 
@@ -997,7 +1000,7 @@ function createPrestationFlow(ctx) {
 
       let pdfBuffer = null;
       if (stateData.devisId) {
-        try { pdfBuffer = await sendQuotePdf(fromWa, { devisId: stateData.devisId, plate: stateData.plate, vehicle: stateData.vehicle, prestationLabel: stateData.prestationLabel || intentToLabel(intent), stageLabel: stateData.stageLabel, gainTxt: stateData.gainTxt, devisRow, customerName, customerEmail, customerPhone: fromWa }); }
+        try { pdfBuffer = await sendQuotePdf(fromWa, { devisId: stateData.devisId, plate: stateData.plate, vehicle: stateData.vehicle, prestationLabel: stateData.prestationLabel || intentToLabel(intent), stageLabel: stateData.stageLabel, gainTxt: stateData.gainTxt, duration: stateData.duration, devisRow, customerName, customerEmail, customerPhone: fromWa }); }
         catch (err) { log.error("sendQuotePdf error (non-blocking)", { wa_id: fromWa, error: String(err?.message || err) }); }
       }
 
@@ -1436,7 +1439,7 @@ function createPrestationFlow(ctx) {
       );
 
       if (devisRow?.isNew) broadcastDashboardEvent("new_devis", { devisId, plate: data.plate || "", wa_id: fromWa, prestation: data.diagTitle, ttc: ttcTxt });
-      if (devisId !== "N/A") sendQuotePdf(fromWa, { devisId, plate: data.plate, vehicle: v, prestationLabel: data.diagTitle, devisRow, customerName, customerEmail, customerPhone: fromWa }).catch(() => {});
+      if (devisId !== "N/A") sendQuotePdf(fromWa, { devisId, plate: data.plate, vehicle: v, prestationLabel: data.diagTitle, duration: data.diagDuration, devisRow, customerName, customerEmail, customerPhone: fromWa }).catch(() => {});
 
       const diagNameParts = customerName.split(/\s+/);
       const diagLastName = diagNameParts[0] || "";
