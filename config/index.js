@@ -27,6 +27,7 @@ const RECOMMENDED_ENV = [
   ["IMMATRICULATION_API_TOKEN", "recherche véhicule par plaque"],
   ["GOOGLE_AI_API_KEY", "embeddings RAG — source unique des prix/compatibilités pour le LLM"],
   ["DASHBOARD_TOKEN", "auth du dashboard admin — sans elle le dashboard est inaccessible"],
+  ["WEB_CHAT_TOKEN", "auth du chat du site — sans elle la fenêtre de discussion du site reste fermée"],
 ];
 const missingRecommended = RECOMMENDED_ENV.filter(([k]) => !process.env[k]);
 if (missingRecommended.length) {

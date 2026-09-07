@@ -1,5 +1,6 @@
 node_modules/
-.env
+.env*
+!.env.example
 *.log
 .DS_Store
 
@@ -8,3 +9,6 @@ node_modules/
 *.exe
 cloudflared.exe
 /12698164_4070_2160_24fps.mp4
+
+# Coffre Obsidian personnel : notes, pas du code du bot.
+/Diagperf/

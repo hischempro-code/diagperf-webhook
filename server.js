@@ -129,6 +129,7 @@ const {
 const { createPrestationFlow } = require("./flows/prestation");
 const { createSavFlow } = require("./flows/sav");
 const { createWebhookHandler } = require("./routes/webhook");
+const { createWebChatRouter } = require("./routes/web-chat");
 const { initPdfService, sendQuotePdf } = require("./lib/pdf-service");
 const {
   initMediaBuilders,
@@ -308,6 +309,10 @@ app.get("/health", (_req, res) => res.status(200).send("OK"));
 // ====== Dashboard & Client API routes (extracted) ======
 const { router: dashboardRouter, broadcastDashboardEvent } = createDashboardRouter({ supabase, log });
 app.use(dashboardRouter);
+
+// ====== Chat du site (fenetre de discussion de la page d'accueil) ======
+// Monte APRES express.json : la route lit un corps JSON deja parse.
+app.use(createWebChatRouter({ log, askLLM }));
 
 // ====== Signature check (logique extraite/testée dans lib/signature.js) ======
 function verifyMetaSignature(req) {
