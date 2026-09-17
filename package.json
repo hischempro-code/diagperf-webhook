@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/helpers.test.js && node tests/intent-detector.test.js && node tests/signature.test.js && node tests/llm-fallback-degrade.test.js && node tests/web-chat.test.js && node eval/detectors.test.js",
+    "test": "node tests/crypto.test.js && node tests/db-scoping.test.js && node tests/escalation-diag.test.js && node tests/guards-friction.test.js && node tests/helpers.test.js && node tests/intent-ambiguity.test.js && node tests/intent-detector.test.js && node tests/intent-router.test.js && node tests/llm-fallback-degrade.test.js && node tests/llm-plaintext-fallback.test.js && node tests/llm-routing-integration.test.js && node tests/plate-extractor.test.js && node tests/signature.test.js && node tests/vehicle-incompat-switch.test.js && node tests/vehicle-pricing.test.js && node tests/voice-handler.test.js && node tests/web-chat.test.js && node eval/detectors.test.js",
     "eval": "node eval/run-eval.js"
   },
   "keywords": [],
