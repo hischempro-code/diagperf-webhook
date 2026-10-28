@@ -1,7 +1,7 @@
 ---
 category: services
 tags: [carplay, android auto, multimedia, ecran, retrofit, sans fil, wireless, apple, google, musique, gps, navigation]
-intent: AUTRES
+intent: CARPLAY
 ---
 
 # Installation CarPlay / Android Auto

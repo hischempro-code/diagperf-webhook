@@ -462,7 +462,7 @@ function setNonTextCooldown(waId) {
 // Si le véhicule est DÉJÀ identifié et que la cible passe par WAITING_VEHICLE_CONFIRM
 // (REPROG/E85/FAP/EGR/ADBLUE), on conserve le véhicule → pas de re-saisie de plaque.
 // Sinon, on efface l'état et on relance proprement le flow ciblé.
-const _CONFIRM_FLOW_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE"]);
+const _CONFIRM_FLOW_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "CARPLAY"]);
 async function redirectMidFlow(fromWa, newIntent, currentConv, rawMsg) {
   const data = currentConv?.data || {};
   if (_CONFIRM_FLOW_INTENTS.has(newIntent) && data.vehicle && data.plate && switchIntentKeepingVehicle) {
