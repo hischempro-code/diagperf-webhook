@@ -91,8 +91,21 @@ const config = {
 };
 
 // ====== Constants ======
-const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DIAG", "AUTRES"]);
+const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DIAG", "AUTRES", "CARPLAY"]);
 const MANUAL_QUOTE_INTENTS = new Set(["AUTRES"]);
+
+// Prestations chiffrées par le garage APRÈS identification du véhicule : pas de prix
+// automatique, mais la plaque reste indispensable pour chiffrer.
+// CarPlay : le prix dépend du module compatible avec le modèle et son écran d'origine
+// (la pièce) + la main-d'œuvre — impossible à fixer à l'avance.
+// Parcours : plaque → confirmation véhicule → coordonnées → garage notifié.
+const QUOTE_ON_REQUEST_INTENTS = new Set(["CARPLAY"]);
+const QUOTE_ON_REQUEST_INFO = {
+  CARPLAY: {
+    platePrompt: "📱 *Installation CarPlay* ✅\n\nLe module CarPlay dépend de votre modèle et de son écran d'origine.\nEnvoyez votre plaque d'immatriculation (ex: AA 123 BB) pour que l'on prépare votre devis.",
+    reason: "Le prix dépend de la pièce (module CarPlay compatible avec votre véhicule) et de la main-d'œuvre : notre équipe vérifie la compatibilité et vous envoie un *devis personnalisé*.",
+  },
+};
 const CUSTOM_QUOTE_STAGES = new Set(["stage2", "stage3", "stage4"]);
 const TTC_INTENTS = new Set(["REPROG", "E85", "FAP", "ADBLUE", "EGR", "DIAG"]);
 
@@ -137,8 +150,23 @@ const PRESTATION_DURATIONS = {
   ADBLUE: "1h à 1h30",
 };
 
+// Téléphone du garage — affiché sur les devis / messages de contact direct.
+// (constante unique : évite un numéro copié-collé qui diverge à chaque changement)
+const GARAGE_PHONE = process.env.GARAGE_PHONE || "06 75 54 70 85";
+
+// Avertissement E85 — affiché AVEC le devis Conversion E85.
+// Raison métier : trop de demandes arrivent pour des véhicules non compatibles éthanol
+// (injection directe fragile, moteur non éligible…). Le prix annoncé ne vaut donc que
+// sous réserve de compatibilité, confirmée par le garage avant toute réservation.
+// WhatsApp ne permet pas la couleur : on utilise 🔴 + gras pour le rendre impossible à rater.
+const E85_ESTIMATE_NOTICE = [
+  "🔴 *PRIX ESTIMATIF — SOUS RÉSERVE DE COMPATIBILITÉ*",
+  "⚠️ *Tous les véhicules essence ne sont PAS compatibles E85.* Le tarif ci-dessus est une estimation ; il dépend de la compatibilité réelle de votre moteur.",
+  `📞 *Merci d'appeler directement le garage au ${GARAGE_PHONE}* pour faire vérifier la compatibilité de votre véhicule avant toute réservation.`,
+].join("\n");
+
 const MENU_MAP = {
-  REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8"
+  REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9"
 };
 
 const INTENT_LABELS = {
@@ -149,6 +177,7 @@ const INTENT_LABELS = {
   ADBLUE: "🔧 Suppression AdBlue",
   DIAG: "🔍 Diagnostic",
   AUTRES: "🎨 Autres services",
+  CARPLAY: "📱 Installation CarPlay",
   SAV: "🛠️ SAV / Support",
 };
 
@@ -159,12 +188,16 @@ module.exports = {
   config,
   PRESTATION_INTENTS,
   MANUAL_QUOTE_INTENTS,
+  QUOTE_ON_REQUEST_INTENTS,
+  QUOTE_ON_REQUEST_INFO,
   CUSTOM_QUOTE_STAGES,
   TTC_INTENTS,
   UPSELL_INTENTS,
   NON_TEXT_TYPES,
   DIAG_OPTIONS,
   PRESTATION_DURATIONS,
+  GARAGE_PHONE,
+  E85_ESTIMATE_NOTICE,
   MENU_MAP,
   INTENT_LABELS,
   LLM_MODEL,

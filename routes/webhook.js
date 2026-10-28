@@ -107,6 +107,7 @@ function createWebhookHandler(ctx) {
             const listIdToMenu = {
               "menu_1": "1", "menu_2": "2", "menu_3": "3", "menu_4": "4",
               "menu_5": "5", "menu_6": "6", "menu_7": "7", "menu_8": "8",
+              "menu_9": "9",
             };
             if (listIdToMenu[listId]) {
               text = listIdToMenu[listId];
@@ -317,7 +318,7 @@ function createWebhookHandler(ctx) {
                 // Fallback: routing legacy (type=intent OU route rejetée mais intent
                 // valide — ex: confiance < 0.5 sans plaque) → mapping menu
                 if ((llmResult.type === "intent" || llmResult.type === "route") && llmResult.intent) {
-                  const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+                  const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9" };
                   const mappedText = menuMap[llmResult.intent];
                   if (mappedText) {
                     log.info("LLM → intent détecté, re-routing", { wa_id: fromWa, intent: llmResult.intent });
@@ -369,7 +370,7 @@ function createWebhookHandler(ctx) {
           // "je n'ai pas bien saisi" car askLLM avait renvoyé null.
           const looseIntent = detectIntentLoose(text);
           if (looseIntent) {
-            const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+            const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9" };
             const mapped = menuMap[looseIntent];
             if (mapped) {
               log.info("Fallback déterministe → intent détecté (LLM indispo)", { wa_id: fromWa, intent: looseIntent });

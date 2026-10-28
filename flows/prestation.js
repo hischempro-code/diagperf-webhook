@@ -30,7 +30,10 @@ const {
   addUpsellOptionsToDevis,
 } = require("../lib/devis-service");
 // Source unique des options de diagnostic + durées d'intervention (évite la divergence).
-const { DIAG_OPTIONS, PRESTATION_DURATIONS } = require("../config");
+const {
+  DIAG_OPTIONS, PRESTATION_DURATIONS, E85_ESTIMATE_NOTICE,
+  PRESTATION_INTENTS, MANUAL_QUOTE_INTENTS, QUOTE_ON_REQUEST_INTENTS, QUOTE_ON_REQUEST_INFO,
+} = require("../config");
 
 // ====== Universal info accumulator ======
 // Extracts name/email/plate/stage from any message and merges into state data silently.
@@ -115,8 +118,7 @@ function resolveContactFromState(stateData, text) {
 }
 
 // ====== Constants ======
-const PRESTATION_INTENTS = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "DIAG", "AUTRES"]);
-const MANUAL_QUOTE_INTENTS = new Set(["AUTRES"]);
+// PRESTATION_INTENTS / MANUAL_QUOTE_INTENTS / QUOTE_ON_REQUEST_INTENTS : source unique config/.
 
 const STAGE1_PRICE_LABEL = `${STAGE1_FIXED_PRICE_CENTS / 100}€`;
 const STAGE1_PRICE_LABEL_TTC = `${STAGE1_FIXED_PRICE_CENTS / 100}€ TTC`;
@@ -320,7 +322,9 @@ function createPrestationFlow(ctx) {
       ...(initContact2.name ? { _known_name: initContact2.name } : {}),
     };
     await setConversationState(fromWa, "WAITING_PLATE", detected, initData2);
-    await sendWhatsAppInteractiveButtons(fromWa, `${label} ✅\nVeuillez envoyer votre plaque d'immatriculation (ex: AA 123 BB).`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+    const platePrompt = QUOTE_ON_REQUEST_INFO[detected]?.platePrompt
+      || `${label} ✅\nVeuillez envoyer votre plaque d'immatriculation (ex: AA 123 BB).`;
+    await sendWhatsAppInteractiveButtons(fromWa, platePrompt, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
     log.info("Prestation flow started", { wa_id: fromWa, intent: detected });
     return true;
   }
@@ -341,7 +345,7 @@ function createPrestationFlow(ctx) {
     }
     // Sans véhicule connu → repli sur l'entrée normale du flow (redemande la plaque)
     await clearConversationState(fromWa);
-    const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7" };
+    const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", CARPLAY: "9" };
     return handlePrestationFlow(fromWa, menuMap[newIntent] || newIntent, rawMsg);
   }
 
@@ -366,13 +370,13 @@ function createPrestationFlow(ctx) {
     const detected = detectIntent(text);
     if (detected) {
       // Prestations passant par WAITING_VEHICLE_CONFIRM → garder le véhicule connu
-      const CONFIRM_FLOW = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE"]);
+      const CONFIRM_FLOW = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "CARPLAY"]);
       if (CONFIRM_FLOW.has(detected) && stateData.plate && stateData.vehicle) {
         log.info("Véhicule incompat → changement d'intent par texte (véhicule conservé)", { wa_id: fromWa, from: origIntent, to: detected });
         return switchIntentKeepingVehicle(fromWa, detected, stateData, rawMsg);
       }
       await clearConversationState(fromWa);
-      const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+      const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9" };
       return handlePrestationFlow(fromWa, menuMap[detected] || text, rawMsg);
     }
     const req = INTENT_VEHICLE_REQUIREMENTS[origIntent];
@@ -407,7 +411,7 @@ function createPrestationFlow(ctx) {
       if (newIntent && newIntent !== intent) {
         // Prestation à devis (même entrée WAITING_PLATE) → basculer en place en gardant
         // les infos déjà connues (nom/email/plaque), sans repartir de zéro.
-        const CONFIRM_FLOW = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE"]);
+        const CONFIRM_FLOW = new Set(["REPROG", "E85", "FAP", "EGR", "ADBLUE", "CARPLAY"]);
         if (CONFIRM_FLOW.has(newIntent)) {
           log.info("WAITING_PLATE → changement d'intent (infos conservées)", { wa_id: fromWa, from: intent, to: newIntent });
           await setConversationState(fromWa, "WAITING_PLATE", newIntent, pickKnown(convState.data));
@@ -416,7 +420,7 @@ function createPrestationFlow(ctx) {
         }
         await clearConversationState(fromWa);
         log.info("WAITING_PLATE → changement d'intent", { wa_id: fromWa, from: intent, to: newIntent });
-        const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+        const menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9" };
         return handlePrestationFlow(fromWa, menuMap[newIntent] || t, rawMsg);
       }
       // Question courte ("prix ?") OU message long → recours LLM. L'ancien seuil
@@ -429,7 +433,7 @@ function createPrestationFlow(ctx) {
             // reconnu la plaque" à un message pourtant compris par le LLM.
             if ((llmResult.type === "intent" || llmResult.type === "route") && llmResult.intent) {
               await clearConversationState(fromWa);
-              const menuMap2 = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+              const menuMap2 = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9" };
               const mapped = menuMap2[llmResult.intent];
               if (mapped) { log.info("WAITING_PLATE → LLM intent redirect", { wa_id: fromWa, intent: llmResult.intent, viaType: llmResult.type }); return handlePrestationFlow(fromWa, mapped, rawMsg); }
             }
@@ -459,7 +463,10 @@ function createPrestationFlow(ctx) {
       await new Promise(r => setTimeout(r, 700));
 
       // ── Fiche performance complète ──
-      const performanceCard = buildVehiclePerformanceCard(vehicle) || buildVehicleOnlyText(vehicle);
+      // CarPlay & co : la fiche « performance » (Stage 1, E85, FAP…) serait hors sujet
+      const performanceCard = QUOTE_ON_REQUEST_INTENTS.has(intent)
+        ? buildVehicleOnlyText(vehicle)
+        : (buildVehiclePerformanceCard(vehicle) || buildVehicleOnlyText(vehicle));
       await sendWhatsAppInteractiveButtons(fromWa, performanceCard, [
         { id: "confirm_vehicle_yes", title: "✅ Oui, c'est bon" },
         { id: "confirm_vehicle_no", title: "❌ Non" },
@@ -630,7 +637,8 @@ function createPrestationFlow(ctx) {
         }
 
         let priceCents;
-        if (intent === "REPROG") priceCents = computeReprogPrice(vehicle);
+        if (QUOTE_ON_REQUEST_INTENTS.has(intent)) priceCents = null; // chiffré par le garage (pièce + MO)
+        else if (intent === "REPROG") priceCents = computeReprogPrice(vehicle);
         else if (intent === "E85") priceCents = computeE85Price(vehicle);
         else if (intent === "ADBLUE") priceCents = computeAdbluePrice(vehicle);
         else if (intent === "FAP") priceCents = computeFapPrice(vehicle);
@@ -638,8 +646,9 @@ function createPrestationFlow(ctx) {
         else { const tarif = await getPrestationTarif(prestationCode); priceCents = tarif?.prix_base_centimes || null; }
 
         if (priceCents === null) {
-          await setConversationState(fromWa, "WAITING_COORDINATES", intent, { plate, vehicle });
-          await sendWhatsAppInteractiveButtons(fromWa, `Prestation : ${label}\nPrix : Sur devis personnalisé\n\nMerci d'envoyer vos coordonnées au format :\n*Nom Prénom Email*`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
+          await setConversationState(fromWa, "WAITING_COORDINATES", intent, { ...pickKnown(stateData), plate, vehicle });
+          const quoteReason = QUOTE_ON_REQUEST_INFO[intent]?.reason;
+          await sendWhatsAppInteractiveButtons(fromWa, `Prestation : ${label}\nPrix : Sur devis personnalisé${quoteReason ? `\n\n${quoteReason}` : ""}\n\nMerci d'envoyer vos coordonnées au format :\n*Nom Prénom Email*`, [{ id: "btn_back_menu", title: "🏠 Menu" }]);
           return true;
         }
 
@@ -652,14 +661,19 @@ function createPrestationFlow(ctx) {
           const displayLabel = intent === "REPROG" ? `${label} — STAGE 1` : label;
           const dureeTxt = PRESTATION_DURATIONS[intent] || null;
 
-          await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel, duration: dureeTxt });
+          await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, prestationLabel: displayLabel, duration: dureeTxt, isE85Quote: intent === "E85" });
 
           if (["E85", "FAP", "ADBLUE", "EGR"].includes(intent)) {
             const cardUrl = buildPrestationCardUrl({ vehicle, intent, prestationLabel: displayLabel, priceTtc: ttcTxt });
             if (cardUrl) sendWhatsAppImage(fromWa, cardUrl, `📋 Fiche technique — ${[vehicle.make, vehicle.model].filter(Boolean).join(" ")}`).catch(() => {});
           }
 
-          await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéf : DEV-${devisId}\nPrestation : ${displayLabel}\n${dureeTxt ? `Durée d'intervention : ${dureeTxt}\n` : ""}Total TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
+          // E85 : le prix n'est qu'une ESTIMATION tant que la compatibilité éthanol du
+          // moteur n'est pas confirmée par le garage (trop de demandes pour des véhicules
+          // non compatibles) — cf. E85_ESTIMATE_NOTICE dans config/.
+          const e85Notice = intent === "E85" ? `\n\n${E85_ESTIMATE_NOTICE}` : "";
+
+          await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéf : DEV-${devisId}\nPrestation : ${displayLabel}\n${dureeTxt ? `Durée d'intervention : ${dureeTxt}\n` : ""}Total TTC : ${ttcTxt}${e85Notice}\n\nEst-ce que ce devis vous convient ?`, [
             { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" }
           ]);
 
@@ -771,9 +785,12 @@ function createPrestationFlow(ctx) {
         // Source unique : E85 sélectionné dans la liste des stages = 1h30, sinon Stage reprog.
         const dureeStage = isE85Stage ? PRESTATION_DURATIONS.E85 : PRESTATION_DURATIONS.REPROG;
 
-        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort, duration: dureeStage });
+        await setConversationState(fromWa, "WAITING_QUOTE_CONFIRM", intent, { ...pickKnown(stateData), plate, vehicle, priceCents, devisId, htTxt, ttcTxt, stageLabel, prestationLabel: `Reprogrammation ${stageLabel}`, gainTxt: stageGainTxtShort, duration: dureeStage, isE85Quote: isE85Stage });
 
-        await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : ${dureeStage}\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}\n\nEst-ce que ce devis vous convient ?`, [
+        // Même réserve de compatibilité quand l'E85 est choisi depuis la liste des stages.
+        const e85Notice = isE85Stage ? `\n\n${E85_ESTIMATE_NOTICE}` : "";
+
+        await sendWhatsAppInteractiveButtons(fromWa, `✅ Devis généré\nRéférence : DEV-${devisId}\nPrestation : Reprogrammation ${stageLabel}${gainTxt}\nDurée d'intervention : ${dureeStage}\nTotal HT : ${htTxt}\nTotal TTC : ${ttcTxt}${e85Notice}\n\nEst-ce que ce devis vous convient ?`, [
           { id: "confirm_quote_yes", title: "✅ Oui" }, { id: "confirm_quote_no", title: "❌ Non" }, { id: "btn_back_menu", title: "🏠 Menu" },
         ]);
 
@@ -1000,12 +1017,12 @@ function createPrestationFlow(ctx) {
 
       let pdfBuffer = null;
       if (stateData.devisId) {
-        try { pdfBuffer = await sendQuotePdf(fromWa, { devisId: stateData.devisId, plate: stateData.plate, vehicle: stateData.vehicle, prestationLabel: stateData.prestationLabel || intentToLabel(intent), stageLabel: stateData.stageLabel, gainTxt: stateData.gainTxt, duration: stateData.duration, devisRow, customerName, customerEmail, customerPhone: fromWa }); }
+        try { pdfBuffer = await sendQuotePdf(fromWa, { devisId: stateData.devisId, plate: stateData.plate, vehicle: stateData.vehicle, prestationLabel: stateData.prestationLabel || intentToLabel(intent), stageLabel: stateData.stageLabel, gainTxt: stateData.gainTxt, duration: stateData.duration, devisRow, customerName, customerEmail, customerPhone: fromWa, isE85: !!stateData.isE85Quote }); }
         catch (err) { log.error("sendQuotePdf error (non-blocking)", { wa_id: fromWa, error: String(err?.message || err) }); }
       }
 
       const [clientEmailRes] = await Promise.allSettled([
-        sendRdvClientEmail({ to: customerEmail, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis", pdfBuffer }),
+        sendRdvClientEmail({ to: customerEmail, firstName, lastName, vehicleDesc, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis", pdfBuffer, isE85: !!stateData.isE85Quote }),
         sendRdvDiagperfEmail({ firstName, lastName, clientEmail: customerEmail, waId: fromWa, vehicleDesc, engineCode, plate, prestationLabel: emailPrestationLabel, devisRef, htTxt, ttcTxt, contactReason: "devis" }),
       ]);
       const clientEmailSent = clientEmailRes.status === "fulfilled" && clientEmailRes.value === true;
@@ -1232,7 +1249,7 @@ function createPrestationFlow(ctx) {
             }
             // Le client change de prestation \u2192 rediriger proprement
             await clearConversationState(fromWa);
-            const _menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8" };
+            const _menuMap = { REPROG: "1", E85: "2", FAP: "3", EGR: "4", ADBLUE: "5", DIAG: "6", AUTRES: "7", SAV: "8", CARPLAY: "9" };
             const _mapped = _menuMap[llmResult.intent];
             if (_mapped) {
               const _handled = await handlePrestationFlow(fromWa, _mapped, rawMsg);

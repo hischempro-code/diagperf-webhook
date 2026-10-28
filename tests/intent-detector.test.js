@@ -103,6 +103,16 @@ console.log("\n🏷️ Marque");
 expectIntent("bonjour DiagPerf", null, "'bonjour DiagPerf' ne matche pas le mot-clé 'diag'");
 expectIntent("merci diagperf", null);
 
+// ====== CarPlay : nouvelle prestation sur devis personnalisé ======
+console.log("\n📱 CarPlay");
+expectIntent("je voudrais installer un carplay", "CARPLAY");
+expectIntent("installation Apple CarPlay sur ma 308", "CARPLAY");
+expectIntent("je veux le car play sans fil", "CARPLAY");
+expectIntent("9", "CARPLAY", "numéro de menu 9 → CARPLAY");
+expectIntent("c'est combien le carplay ?", null, "question prix CarPlay → null (le LLM répond)");
+expectIntent("7", "AUTRES", "le 7 reste « Autres prestations »");
+expectIntent("8", "SAV", "le 8 reste le SAV");
+
 // ====== Résumé ======
 console.log(`\n${"═".repeat(40)}`);
 console.log(`Résultat : ${passed} ✅ / ${failed} ❌`);
