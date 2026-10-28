@@ -1,0 +1,24 @@
+{
+  "name": "diagperf-promo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vidéo promo motion design du bot WhatsApp DiagPerf (9:16, 30 s, voix off + musique) — prévisualisation live + export MP4",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173 --open",
+    "render": "node scripts/render.mjs",
+    "render:60": "node scripts/render.mjs --fps 60",
+    "audio": "python scripts/audio.py",
+    "final": "npm run render && npm run audio"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.1.0",
+    "@fontsource/jetbrains-mono": "^5.1.0",
+    "@fontsource/space-grotesk": "^5.1.0",
+    "gsap": "^3.13.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.48.0",
+    "vite": "^6.0.0"
+  }
+}

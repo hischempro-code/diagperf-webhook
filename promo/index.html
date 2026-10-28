@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DiagPerf — Promo bot WhatsApp</title>
+</head>
+<body>
+  <div id="stageBox">
+    <!-- Scène 1080×1920 (9:16). Tout est positionné en px absolus dans ce repère. -->
+    <div id="stage">
+      <canvas id="bg"></canvas>
+
+      <!-- ── SCÈNE 1 : ACCROCHE ─────────────────────────────── -->
+      <section id="hook">
+        <div class="clock"><span class="d">2</span><span class="d">3</span><span class="d colon"><i>:</i></span><span class="d">4</span><span class="d">7</span></div>
+        <div class="hook-line mask"><span class="w">Le</span> <span class="w">garage</span> <span class="w">est</span> <span class="w">fermé.</span></div>
+        <div class="hook-punch">Pas votre devis.</div>
+      </section>
+
+      <!-- ── CAPTIONS (au-dessus du téléphone) ──────────────── -->
+      <section id="captions">
+        <div class="kicker"><span class="kdot"></span>DIAGPERF · ASSISTANT WHATSAPP</div>
+        <div class="cap-stack">
+          <div class="cap mask"><span>Vous écrivez.</span></div>
+          <div class="cap mask"><span>Il reconnaît votre véhicule.</span></div>
+          <div class="cap mask"><span>Votre devis, <em>en direct.</em></span></div>
+        </div>
+      </section>
+
+      <!-- ── TÉLÉPHONE / WHATSAPP ──────────────────────────── -->
+      <div id="phoneWrap">
+        <div id="phone">
+          <div class="screen">
+            <div class="statusbar"><span>23:48</span><span class="sb-icons">▂▄▆█ ◔ ▮</span></div>
+            <div class="wa-header">
+              <span class="back">‹</span>
+              <div class="avatar"><img src="/logo.png" alt="" /></div>
+              <div class="who">
+                <div class="name">DiagPerf <span class="verified">✓</span></div>
+                <div class="status">en ligne</div>
+              </div>
+              <span class="hdr-icons">⋮</span>
+            </div>
+
+            <div class="chat">
+              <div class="chat-list" id="chatList">
+                <div class="daychip">AUJOURD'HUI</div>
+
+                <div class="msg out" data-at="5.2">
+                  <div class="bubble">Bonjour ! Je voudrais une reprog Stage 1 💨<span class="meta">23:48 <b>✓✓</b></span></div>
+                </div>
+
+                <div class="msg in" data-at="6.7" data-typing="6.0">
+                  <div class="typing"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+                  <div class="bubble">Avec plaisir ! 🚗 Envoyez-moi votre <b>plaque d'immatriculation</b>.<span class="meta">23:48</span></div>
+                </div>
+
+                <div class="msg out" data-at="7.6">
+                  <div class="bubble plate-bubble">
+                    <div class="plate">
+                      <div class="eu"><span class="stars">★</span><span>F</span></div>
+                      <div class="plate-txt">AB-123-CD</div>
+                      <div class="laser"></div>
+                    </div>
+                    <span class="meta">23:48 <b>✓✓</b></span>
+                  </div>
+                </div>
+
+                <div class="msg in" data-at="8.2">
+                  <div class="bubble">🔍 <b>AB-123-CD</b> — identification véhicule en cours ⏳<span class="meta">23:48</span></div>
+                </div>
+
+                <div class="msg in" data-at="9.9" data-typing="9.3">
+                  <div class="typing"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+                  <div class="bubble card">
+                    <div class="c-title">🚗 <b>Peugeot 308</b> (2015)</div>
+                    <div class="c-sub">Essence | 1598cc | <b>156 ch</b></div>
+                    <div class="c-sec">🚀 <b>Stage 1 DiagPerf :</b></div>
+                    <div class="c-gain">156 ch → <b class="hp">~<span id="hpVal">156</span> ch</b> <i>(+40 ch)</i></div>
+                    <div class="bar"><div class="bar-base"></div><div class="bar-gain"></div></div>
+                    <div class="c-sec">📋 <b>Compatibilités :</b></div>
+                    <div class="c-row">✅ Stage 1 — <b>390€ TTC</b> • ⏱ 1h30</div>
+                    <div class="c-row dim">❌ FAP / EGR / AdBlue <i>(moteur essence)</i></div>
+                    <div class="c-ask">Est-ce bien votre véhicule ?</div>
+                    <span class="meta">23:49</span>
+                  </div>
+                </div>
+
+                <div class="msg out" data-at="12.6">
+                  <div class="bubble">Oui, c'est bien elle 👍<span class="meta">23:49 <b>✓✓</b></span></div>
+                </div>
+
+                <div class="msg in" data-at="13.8" data-typing="13.2">
+                  <div class="typing"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+                  <div class="bubble devis">
+                    <div class="d-head">✅ <b>Devis généré</b></div>
+                    <div>Réf : DEV-1042</div>
+                    <div>Prestation : Reprogrammation moteur — STAGE 1</div>
+                    <div>Durée d'intervention : 1h30 à 2h</div>
+                    <div class="d-total">Total TTC : <b id="priceVal">0.00€</b></div>
+                    <div class="d-ask">Est-ce que ce devis vous convient ?</div>
+                    <span class="meta">23:49</span>
+                  </div>
+                  <div class="wa-buttons">
+                    <div class="wa-btn">✅ Oui</div>
+                    <div class="wa-btn">❌ Non</div>
+                  </div>
+                </div>
+
+                <div class="msg in" data-at="15.3">
+                  <div class="bubble pdf">
+                    <div class="pdf-ico">PDF</div>
+                    <div class="pdf-meta"><b>DEV-1042.pdf</b><span>1 page · Devis DiagPerf</span></div>
+                    <span class="meta">23:49</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="inputbar">
+              <div class="field">😊 <span>Message</span> 📎</div>
+              <div class="mic">🎤</div>
+            </div>
+            <div class="sweep"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SCÈNE 4 : BÉNÉFICES ───────────────────────────── -->
+      <section id="chips">
+        <div class="chip"><div class="ico">⚡</div><div><b>Devis instantané</b><span>Prix TTC affiché en quelques secondes</span></div></div>
+        <div class="chip"><div class="ico">🌙</div><div><b>24h/24 · 7j/7</b><span>Même quand le garage est fermé</span></div></div>
+        <div class="chip"><div class="ico">🔎</div><div><b>Plaque reconnue</b><span>Votre véhicule identifié automatiquement</span></div></div>
+        <div class="chip"><div class="ico">📄</div><div><b>Devis PDF &amp; RDV</b><span>Tout se passe sur WhatsApp</span></div></div>
+      </section>
+      <section id="headline">
+        <div class="mask"><span>Le devis auto,</span></div>
+        <div class="mask"><span class="red">sans attendre.</span></div>
+      </section>
+
+      <!-- ── TRANSITION + OUTRO ────────────────────────────── -->
+      <div id="wipe"></div>
+      <section id="outro">
+        <img class="o-car" src="/logo-car-light.png" alt="" />
+        <div class="o-word"><span>D</span><span>I</span><span>A</span><span>G</span><span>P</span><span>E</span><span>R</span><span>F</span></div>
+        <div class="o-line"></div>
+        <div class="o-tag">Reprogrammation · Diagnostic · Conversion E85</div>
+        <div class="o-loc">📍 Villenoy (77)</div>
+        <div class="o-cta">
+          <i class="ring"></i><i class="ring"></i>
+          <div class="cta-pill"><span class="wa">✆</span> Écrivez-nous sur WhatsApp</div>
+        </div>
+        <div class="o-phone">06 75 54 70 85</div>
+        <div class="o-free">Devis gratuit · sans engagement</div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ── CONTRÔLES DE PRÉVISUALISATION (masqués en mode rendu) ── -->
+  <div id="controls">
+    <button id="play" title="Lecture / pause (Espace)">▶</button>
+    <button id="sound" title="Son (M)">🔊</button>
+    <span id="time">0.00 / 30.00</span>
+    <div class="scrub-wrap">
+      <input id="scrub" type="range" min="0" max="30" step="0.001" value="0" />
+      <div id="markers"></div>
+    </div>
+    <select id="speed" title="Vitesse">
+      <option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option>
+    </select>
+    <label><input id="loop" type="checkbox" checked /> boucle</label>
+    <span id="fps"></span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

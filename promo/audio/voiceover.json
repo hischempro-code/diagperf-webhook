@@ -1,0 +1,18 @@
+{
+  "_doc": "Script de la voix off. 'at' = départ (s), 'end' = fin max du créneau (s). 'rate' optionnel par réplique (débit natif de la voix, plus naturel qu'une accélération). Si une réplique déborde encore, elle est accélérée (max 1.15x) ; au-delà, le script échoue en demandant de la raccourcir. Les timecodes suivent src/scenes.js, src/timeline.js et les data-at des bulles dans index.html. Astuce : un point crée une longue pause, préférer « : » ou « , ». Voix : fr-FR-HenriNeural (homme) ; alternatives : fr-FR-DeniseNeural, fr-FR-EloiseNeural (femme), fr-FR-RemyMultilingualNeural.",
+  "voice": "fr-FR-HenriNeural",
+  "rate": "+6%",
+  "pitch": "-2Hz",
+  "lines": [
+    { "at": 0.25, "end": 1.5,  "text": "Vingt-trois heures quarante-sept." },
+    { "at": 1.5,  "end": 2.45, "text": "Le garage est fermé." },
+    { "at": 2.55, "end": 3.4,  "text": "Pas votre devis." },
+    { "at": 4.6,  "end": 7.5,  "text": "Écrivez à Diag Perf sur WhatsApp." },
+    { "at": 7.65, "end": 10.3, "text": "Envoyez votre plaque : il reconnaît votre véhicule," },
+    { "at": 10.4, "end": 12.6, "text": "et calcule le gain de puissance." },
+    { "at": 12.75, "end": 16.2, "text": "Votre devis s'affiche en direct, avec le PDF." },
+    { "at": 16.8, "end": 22.3, "text": "Prix immédiat, disponible jour et nuit. Devis et rendez-vous : tout se passe sur WhatsApp." },
+    { "at": 23.0, "end": 25.4,  "text": "Diag Perf : le devis auto, sans attendre." },
+    { "at": 25.5, "end": 29.85, "rate": "+18%", "text": "Écrivez-nous au zéro six, soixante-quinze, cinquante-quatre, soixante-dix, quatre-vingt-cinq." }
+  ]
+}
